@@ -20,7 +20,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NotNull
-    private String accountName;
+    @Column(unique = true)
+    private String username;
     @NotNull
     private String password;
     @NotNull
