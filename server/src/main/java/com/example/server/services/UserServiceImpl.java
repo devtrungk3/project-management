@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -38,12 +39,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public String verify(User user) {
+    public List<String> verify(User user) {
         Authentication authentication =
                 authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        if (authentication.isAuthenticated())
-            return jwtService.generateToken(user.getUsername());
-        return "Failed";
+        if (authentication.isAuthenticated()) {
+            String accessToken = jwtService.generateAccessToken(user.getUsername());
+            String refreshToken = jwtService.generateRefreshToken(user.getUsername());
+            jwtService.saveRefreshToken(user.getUsername(), refreshToken);
+            return Arrays.asList(accessToken, refreshToken);
+        }
+        return null;
     }
 
     @Override
@@ -56,7 +61,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteUser(int id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User id " + id + " not found"));
+        userRepository.findById(id).orElseThrow(() -> new RuntimeException("User id " + id + " not found"));
         userRepository.deleteById(id);
     }
 
