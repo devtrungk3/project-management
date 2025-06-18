@@ -4,6 +4,7 @@ import com.example.server.models.User;
 import com.example.server.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,16 +38,21 @@ public class UserServiceImpl implements UserService{
         user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
-
+    
     @Override
     public List<String> verify(User user) {
-        Authentication authentication =
-                authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        if (authentication.isAuthenticated()) {
-            String accessToken = jwtService.generateAccessToken(user.getUsername());
-            String refreshToken = jwtService.generateRefreshToken(user.getUsername());
-            jwtService.saveRefreshToken(user.getUsername(), refreshToken);
-            return Arrays.asList(accessToken, refreshToken);
+        try {
+            Authentication authentication =
+                    authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+            if (authentication.isAuthenticated()) {
+                User userInfo = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new RuntimeException("Username  " + user.getUsername() + " not found"));
+                String accessToken = jwtService.generateAccessToken(user.getUsername(), userInfo.getRole().getName());
+                String refreshToken = jwtService.generateRefreshToken(user.getUsername(), userInfo.getRole().getName());
+                jwtService.saveRefreshToken(user.getUsername(), refreshToken);
+                return Arrays.asList(accessToken, refreshToken);
+            }
+        } catch (BadCredentialsException e) {
+            System.out.println(e.getMessage());
         }
         return null;
     }
