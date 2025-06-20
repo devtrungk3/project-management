@@ -27,6 +27,7 @@ public class Resource {
     @JoinColumn(name = "projectId")
     private Project project;
     @Enumerated(EnumType.STRING)
+    @NotNull
     private ResourceType type;
 
     @Min(0)

@@ -27,6 +27,7 @@ public class User {
     @NotNull
     private String fullname;
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "roleId")
     private Role role;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

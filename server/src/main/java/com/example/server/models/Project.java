@@ -25,6 +25,7 @@ public class Project {
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "ownerId")
     private User owner;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
