@@ -1,5 +1,7 @@
 package com.example.server.services;
 
+import com.example.server.exception.IdNotFoundException;
+import com.example.server.exception.UsernameExistsException;
 import com.example.server.models.User;
 import com.example.server.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,31 +30,30 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUserById(int id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User id " + id + " not found"));
+        return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("User id " + id + " not found"));
     }
 
     @Override
-    public User register(User user) {
+    public boolean register(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent())
-            throw new RuntimeException("Username " + user.getUsername() + " already exists");
-        user.setPassword(encoder.encode(user.getPassword()));
-        return userRepository.save(user);
+            throw new UsernameExistsException("Username " + user.getUsername() + " already exists");
+        if (user.getPassword() != null)
+            user.setPassword(encoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return true;
     }
     
     @Override
     public List<String> verify(User user) {
-        try {
-            Authentication authentication =
-                    authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-            if (authentication.isAuthenticated()) {
-                User userInfo = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new RuntimeException("Username  " + user.getUsername() + " not found"));
-                String accessToken = jwtService.generateAccessToken(user.getUsername(), userInfo.getRole().getName());
-                String refreshToken = jwtService.generateRefreshToken(user.getUsername(), userInfo.getRole().getName());
-                jwtService.saveRefreshToken(user.getUsername(), refreshToken);
-                return Arrays.asList(accessToken, refreshToken);
-            }
-        } catch (BadCredentialsException e) {
-            System.out.println(e.getMessage());
+        Authentication authentication =
+                authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        if (authentication.isAuthenticated()) {
+            User userInfo = userRepository.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new BadCredentialsException("User: Username  " + user.getUsername() + " not found"));
+            String accessToken = jwtService.generateAccessToken(user.getUsername(), userInfo.getRole().getName());
+            String refreshToken = jwtService.generateRefreshToken(user.getUsername(), userInfo.getRole().getName());
+            jwtService.saveRefreshToken(user.getUsername(), refreshToken);
+            return Arrays.asList(accessToken, refreshToken);
         }
         return null;
     }
