@@ -2,6 +2,7 @@ package com.example.server.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NotNull
+    @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]{2,254}$",
+            message = "must be 3-255 alphanumeric characters")
     @Column(unique = true)
     private String username;
     @NotNull

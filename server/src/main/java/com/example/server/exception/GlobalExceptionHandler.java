@@ -42,7 +42,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException e) {
         System.out.println("ConstraintViolationException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "Invalid account information"), HttpStatus.BAD_REQUEST);
+        String errorMessage = e.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
+                .orElse("invalid account information");
+        return new ResponseEntity<>(Map.of("error", errorMessage), HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(IdNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleIdNotFound(IdNotFoundException e) {
