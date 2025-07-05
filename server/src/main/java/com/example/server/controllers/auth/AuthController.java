@@ -24,7 +24,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
         if (userService.register(user))
-            return ResponseEntity.ok(Map.of("message", "Create new account successfully"));
+            return new ResponseEntity<>(Map.of("message", "Create new account successfully"), HttpStatus.CREATED);
         return new ResponseEntity<>(Map.of("error", "Register failed"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
