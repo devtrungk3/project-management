@@ -15,14 +15,14 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(ServerErrorException.class)
-    public ResponseEntity<Map<String, String>> handleServerError(ServerErrorException e) {
+    public ResponseEntity<Void> handleServerError(ServerErrorException e) {
         System.out.println("ServerErrorException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "Oops! Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     @ExceptionHandler(ConnectException.class)
-    public ResponseEntity<Map<String, String>> handleConnect(ConnectException e) {
+    public ResponseEntity<Void> handleConnect(ConnectException e) {
         System.out.println("ConnectException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "Oops! Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException e) {
@@ -39,6 +39,11 @@ public class GlobalExceptionHandler {
         System.out.println("UsernameExistsException - " + e.getMessage());
         return new ResponseEntity<>(Map.of("error", "Username already exists"), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<Void> handleRoleNotFound(RoleNotFoundException e) {
+        System.out.println("RoleNotFoundException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException e) {
         System.out.println("ConstraintViolationException - " + e.getMessage());
@@ -50,9 +55,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(Map.of("error", errorMessage), HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(IdNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleIdNotFound(IdNotFoundException e) {
+    public ResponseEntity<Void> handleIdNotFound(IdNotFoundException e) {
         System.out.println("IdNotFoundException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "ID not found"), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<Void> handleProjectNotFound(ProjectNotFoundException e) {
+        System.out.println("ProjectNotFoundException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }
