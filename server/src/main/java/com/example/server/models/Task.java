@@ -24,6 +24,8 @@ public class Task {
     @NotNull
     private String name;
     @Min(1)
+    private int arrangement;
+    @Min(1)
     private int level;
     private String description;
     @ManyToOne
