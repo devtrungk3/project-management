@@ -1,8 +1,11 @@
 package com.example.server.services;
 
 import com.example.server.exception.IdNotFoundException;
+import com.example.server.exception.RoleNotFoundException;
 import com.example.server.exception.UsernameExistsException;
+import com.example.server.models.Role;
 import com.example.server.models.User;
+import com.example.server.repositories.RoleRepository;
 import com.example.server.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final AuthenticationManager authManager;
     private final JWTService jwtService;
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
@@ -34,13 +38,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public boolean register(User user) {
+    public void register(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent())
             throw new UsernameExistsException("Username " + user.getUsername() + " already exists");
+        Role role = roleRepository.findByName("USER").orElse(null);
+        if (role == null)
+            throw new RoleNotFoundException("Role USER does not exists");
+        user.setRole(role);
         if (user.getPassword() != null)
             user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
-        return true;
     }
     
     @Override
@@ -49,10 +56,10 @@ public class UserServiceImpl implements UserService{
                 authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         if (authentication.isAuthenticated()) {
             User userInfo = userRepository.findByUsername(user.getUsername())
-                    .orElseThrow(() -> new BadCredentialsException("User: Username  " + user.getUsername() + " not found"));
-            String accessToken = jwtService.generateAccessToken(user.getUsername(), userInfo.getRole().getName());
-            String refreshToken = jwtService.generateRefreshToken(user.getUsername(), userInfo.getRole().getName());
-            jwtService.saveRefreshToken(user.getUsername(), refreshToken);
+                    .orElseThrow(() -> new BadCredentialsException("Username  " + user.getUsername() + " not found"));
+            String accessToken = jwtService.generateAccessToken(userInfo.getId(), userInfo.getUsername(), userInfo.getRole().getName());
+            String refreshToken = jwtService.generateRefreshToken(userInfo.getId(), userInfo.getUsername(), userInfo.getRole().getName());
+            jwtService.saveRefreshToken(userInfo.getId(), refreshToken);
             return Arrays.asList(accessToken, refreshToken);
         }
         return null;

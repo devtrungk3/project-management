@@ -18,17 +18,18 @@ import java.util.function.Function;
 public class JWTService {
     @Value("${jwt.secret}")
     private String secretKey;
-    private final Map<String, String> refreshTokenStore = new HashMap<>();  // In-memory (RAM) store
+    private final Map<Integer, String> refreshTokenStore = new HashMap<>();  // In-memory (RAM) store
 
-    public String generateAccessToken(String username, String role) {
+    public String generateAccessToken(int id, String username, String role) {
         int minutes = 15;
         Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
         claims.put("role", role);
 
         return Jwts.builder()
                 .claims()
                 .add(claims)
-                .subject(username)
+                .subject(String.valueOf(id))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * minutes))
                 .and()
@@ -36,36 +37,40 @@ public class JWTService {
                 .compact();
     }
 
-    public String generateRefreshToken(String username, String role) {
+    public String generateRefreshToken(int id, String username, String role) {
 
         int hours = 24;
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "refresh");
+        claims.put("username", username);
         claims.put("role", role);
 
         return Jwts.builder()
                 .claims()
                 .add(claims)
-                .subject(username)
+                .subject(String.valueOf(id))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * hours))
                 .and()
                 .signWith(getKey())
                 .compact();
     }
-    public void saveRefreshToken(String username, String refreshToken) {
-        refreshTokenStore.put(username, refreshToken);
+    public void saveRefreshToken(int id, String refreshToken) {
+        refreshTokenStore.put(id, refreshToken);
     }
-    public void revokeRefreshToken(String username) {
-        refreshTokenStore.remove(username);
+    public void revokeRefreshToken(int id) {
+        refreshTokenStore.remove(id);
     }
     private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public int extractUserId(String token) {
+        return Integer.parseInt(extractClaim(token, Claims::getSubject));
+    }
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, claims -> claims.get("username", String.class));
     }
     public String extractTokenType(String token) {
         return extractClaim(token, claims -> claims.get("type", String.class));
@@ -74,7 +79,7 @@ public class JWTService {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
+        Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
     }
     private Claims extractAllClaims(String token) {
@@ -86,12 +91,12 @@ public class JWTService {
     }
 
     public boolean isValidAccessToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
+        String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()));
     }
     public boolean isValidRefreshToken(String token) {
-        final String username = extractUsername(token);
-        final String type = extractTokenType(token);
-        return refreshTokenStore.get(username) != null && refreshTokenStore.get(username).equals(token) && type.equals("refresh");
+        int id = extractUserId(token);
+        String type = extractTokenType(token);
+        return refreshTokenStore.get(id) != null && refreshTokenStore.get(id).equals(token) && type.equals("refresh");
     }
 }

@@ -1,4 +1,4 @@
-package com.example.server.controllers;
+package com.example.server.controllers.auth;
 
 import com.example.server.models.User;
 import com.example.server.services.JWTService;
@@ -22,14 +22,13 @@ public class AuthController {
     private final JWTService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
-        if (userService.register(user))
-            return new ResponseEntity<>(Map.of("message", "Create new account successfully"), HttpStatus.CREATED);
-        return new ResponseEntity<>(Map.of("error", "Register failed"), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Void> register(@RequestBody User user) {
+        userService.register(user);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody User user, HttpServletResponse response) {
+    public ResponseEntity<String> login(@RequestBody User user, HttpServletResponse response) {
         List<String> tokens = userService.verify(user);
         if (tokens == null || tokens.size() != 2) throw new BadCredentialsException("Login failed: cannot create tokens");
 
@@ -39,24 +38,25 @@ public class AuthController {
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(Map.of("accessToken", tokens.get(0)));
+        return ResponseEntity.ok(tokens.get(0));
     }
     @PostMapping("/refresh-token")
-    public ResponseEntity<Map<String, String>> refreshToken(@CookieValue(name = "refreshToken") String refreshToken) {
+    public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken") String refreshToken) {
         if (jwtService.isValidRefreshToken(refreshToken)) {
+            int id = jwtService.extractUserId(refreshToken);
             String username = jwtService.extractUsername(refreshToken);
             String role = jwtService.extractTokenRole(refreshToken);
-            return ResponseEntity.ok(Map.of("accessToken", jwtService.generateAccessToken(username, role)));
+            return ResponseEntity.ok(jwtService.generateAccessToken(id, username, role));
         }
-        return new ResponseEntity<>(Map.of("error", "Refresh token failed"), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(Map.of("error", "Refresh token failed"), HttpStatus.UNAUTHORIZED);
     }
     @PostMapping("revoke-refresh-token")
-    public ResponseEntity<Map<String, String>> revokeRefreshToken(@CookieValue(name = "refreshToken") String refreshToken) {
+    public ResponseEntity<?> revokeRefreshToken(@CookieValue(name = "refreshToken") String refreshToken) {
         if (jwtService.isValidRefreshToken(refreshToken)) {
-            String username = jwtService.extractUsername(refreshToken);
-            jwtService.revokeRefreshToken(username);
-            return ResponseEntity.ok(Map.of("message", "Revoke successfully"));
+            int id = jwtService.extractUserId(refreshToken);
+            jwtService.revokeRefreshToken(id);
+            return ResponseEntity.ok().build();
         }
-        return new ResponseEntity<>(Map.of("error", "Revoke token failed"), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(Map.of("error", "Revoke token failed"), HttpStatus.UNAUTHORIZED);
     }
 }

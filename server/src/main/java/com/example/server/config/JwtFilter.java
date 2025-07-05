@@ -25,13 +25,15 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
+        int id = -1;
         String username = null;
         try {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
+                id = jwtService.extractUserId(token);
                 username = jwtService.extractUsername(token);
             }
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (id != -1 && username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 if (jwtService.isValidAccessToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -39,6 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
+            request.setAttribute("userId", id);
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
             System.out.println(e.getMessage());
