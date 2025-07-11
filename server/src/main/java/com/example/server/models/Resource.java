@@ -18,20 +18,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Resource {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "userId")
     private User user;
     @ManyToOne
     @NotNull
     @JoinColumn(name = "projectId")
     private Project project;
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private ResourceType type;
-
-    @Min(0)
-    private float hourlyRate;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
     @UpdateTimestamp
