@@ -4,6 +4,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,17 +28,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException e) {
         System.out.println("BadCredentialsException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "Incorrect username or password"), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Incorrect username or password"));
     }
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<Map<String, String>> handleExpiredJwt(ExpiredJwtException e) {
         System.out.println("ExpiredJwtException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "Expired token"), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Expired token"));
     }
     @ExceptionHandler(UsernameExistsException.class)
     public ResponseEntity<Map<String, String>> handleUsernameExists(UsernameExistsException e) {
         System.out.println("UsernameExistsException - " + e.getMessage());
-        return new ResponseEntity<>(Map.of("error", "Username already exists"), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Username already exists"));
     }
     @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<Void> handleRoleNotFound(RoleNotFoundException e) {
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
                 .orElse("invalid account information");
-        return new ResponseEntity<>(Map.of("error", errorMessage), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", errorMessage));
     }
     @ExceptionHandler(IdNotFoundException.class)
     public ResponseEntity<Void> handleIdNotFound(IdNotFoundException e) {
@@ -62,6 +63,36 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProjectNotFoundException.class)
     public ResponseEntity<Void> handleProjectNotFound(ProjectNotFoundException e) {
         System.out.println("ProjectNotFoundException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    @ExceptionHandler(JoinRequestExistsException.class)
+    public ResponseEntity<Map<String, String>> handleJoinRequestExists(JoinRequestExistsException e) {
+        System.out.println("JoinRequestExistsException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "This join request already exists"));
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Void> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        System.out.println("HttpMessageNotReadableException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    @ExceptionHandler(SelfJoinRequestNotAllowException.class)
+    public ResponseEntity<Map<String, String>> handleSelfJoinRequestNotAllow(SelfJoinRequestNotAllowException e) {
+        System.out.println("SelfJoinRequestNotAllowException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Cannot send join request to yourself"));
+    }
+    @ExceptionHandler(ResourceExistsException.class)
+    public ResponseEntity<Map<String, String>> handleResourceExists(ResourceExistsException e) {
+        System.out.println("ResourceExistsException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Already join in this project"));
+    }
+    @ExceptionHandler(InvalidJoinRequestException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidJoinRequest(InvalidJoinRequestException e) {
+        System.out.println("InvalidJoinRequestException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    @ExceptionHandler(JoinRequestNotFoundException.class)
+    public ResponseEntity<Void> handleJoinRequestNotFound(JoinRequestNotFoundException e) {
+        System.out.println("JoinRequestNotFoundException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
