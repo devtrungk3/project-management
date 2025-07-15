@@ -1,7 +1,6 @@
 package com.example.server.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,6 +15,9 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"userId", "projectId"})
+})
 public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
