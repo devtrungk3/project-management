@@ -20,16 +20,16 @@ public class JWTService {
     private String secretKey;
     private final Map<Integer, String> refreshTokenStore = new HashMap<>();  // In-memory (RAM) store
 
-    public String generateAccessToken(int id, String username, String role) {
+    public String generateAccessToken(int userId, String username, String userRole) {
         int minutes = 15;
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", username);
-        claims.put("role", role);
+        claims.put("role", userRole);
 
         return Jwts.builder()
                 .claims()
                 .add(claims)
-                .subject(String.valueOf(id))
+                .subject(String.valueOf(userId))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * minutes))
                 .and()
@@ -37,29 +37,28 @@ public class JWTService {
                 .compact();
     }
 
-    public String generateRefreshToken(int id, String username, String role) {
-
+    public String generateRefreshToken(int userId, String username, String userRole) {
         int hours = 24;
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "refresh");
         claims.put("username", username);
-        claims.put("role", role);
+        claims.put("role", userRole);
 
         return Jwts.builder()
                 .claims()
                 .add(claims)
-                .subject(String.valueOf(id))
+                .subject(String.valueOf(userId))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * hours))
                 .and()
                 .signWith(getKey())
                 .compact();
     }
-    public void saveRefreshToken(int id, String refreshToken) {
-        refreshTokenStore.put(id, refreshToken);
+    public void saveRefreshToken(int userId, String refreshToken) {
+        refreshTokenStore.put(userId, refreshToken);
     }
-    public void revokeRefreshToken(int id) {
-        refreshTokenStore.remove(id);
+    public void revokeRefreshToken(int userId) {
+        refreshTokenStore.remove(userId);
     }
     private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -75,7 +74,7 @@ public class JWTService {
     public String extractTokenType(String token) {
         return extractClaim(token, claims -> claims.get("type", String.class));
     }
-    public String extractTokenRole(String token) {
+    public String extractUserRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
@@ -95,8 +94,8 @@ public class JWTService {
         return (username.equals(userDetails.getUsername()));
     }
     public boolean isValidRefreshToken(String token) {
-        int id = extractUserId(token);
-        String type = extractTokenType(token);
-        return refreshTokenStore.get(id) != null && refreshTokenStore.get(id).equals(token) && type.equals("refresh");
+        int userId = extractUserId(token);
+        String tokenType = extractTokenType(token);
+        return refreshTokenStore.get(userId) != null && refreshTokenStore.get(userId).equals(token) && tokenType.equals("refresh");
     }
 }
