@@ -14,23 +14,29 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(JoinRequestPK.class)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"userId", "projectId"})
+})
 public class JoinRequest {
     @Id
-    private int userId;
-    @Id
-    private int projectId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
     @ManyToOne
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    @JoinColumn(name = "userId")
     private User user;
-
     @ManyToOne
-    @JoinColumn(name = "projectId", insertable = false, updatable = false)
+    @JoinColumn(name = "projectId")
     private Project project;
-
+    private Boolean acceptFlag;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
     @UpdateTimestamp
     @Column(insertable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
+    public JoinRequest(int userId, int projectId) {
+        this.user = new User();
+        this.user.setId(userId);
+        this.project = new Project();
+        this.project.setId(projectId);
+    }
 }
