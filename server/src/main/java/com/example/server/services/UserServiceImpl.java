@@ -34,49 +34,46 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUserById(int id) {
-        return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("User id " + id + " not found"));
+        return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("UserId " + id + " not found"));
     }
 
     @Override
-    public void register(User user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent())
-            throw new UsernameExistsException("Username " + user.getUsername() + " already exists");
-        Role role = roleRepository.findByName("USER").orElse(null);
-        if (role == null)
-            throw new RoleNotFoundException("Role USER does not exists");
-        user.setRole(role);
-        if (user.getPassword() != null)
-            user.setPassword(encoder.encode(user.getPassword()));
-        userRepository.save(user);
+    public User register(User newUser) {
+        if (userRepository.existsByUsername(newUser.getUsername())) {
+            throw new UsernameExistsException("Username " + newUser.getUsername() + " already exists");
+        }
+        Role role = roleRepository.findByName("USER")
+                .orElseThrow(() -> new RoleNotFoundException("Role USER does not exists"));
+        newUser.setId(0);
+        newUser.setRole(role);
+        if (newUser.getPassword() != null) {
+            newUser.setPassword(encoder.encode(newUser.getPassword()));
+        }
+        return userRepository.save(newUser);
     }
     
     @Override
-    public List<String> verify(User user) {
+    public List<String> verify(User userCredentialRequest) {
         Authentication authentication =
-                authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        if (authentication.isAuthenticated()) {
-            User userInfo = userRepository.findByUsername(user.getUsername())
-                    .orElseThrow(() -> new BadCredentialsException("Username  " + user.getUsername() + " not found"));
-            String accessToken = jwtService.generateAccessToken(userInfo.getId(), userInfo.getUsername(), userInfo.getRole().getName());
-            String refreshToken = jwtService.generateRefreshToken(userInfo.getId(), userInfo.getUsername(), userInfo.getRole().getName());
-            jwtService.saveRefreshToken(userInfo.getId(), refreshToken);
-            return Arrays.asList(accessToken, refreshToken);
-        }
+                authManager.authenticate(new UsernamePasswordAuthenticationToken(userCredentialRequest.getUsername(), userCredentialRequest.getPassword()));
+        if (!authentication.isAuthenticated()) return null;
+
+        User userInDB = userRepository.findByUsername(userCredentialRequest.getUsername())
+                .orElseThrow(() -> new BadCredentialsException("Username  " + userCredentialRequest.getUsername() + " not found"));
+        String newAccessToken = jwtService.generateAccessToken(userInDB.getId(), userInDB.getUsername(), userInDB.getRole().getName());
+        String newRefreshToken = jwtService.generateRefreshToken(userInDB.getId(), userInDB.getUsername(), userInDB.getRole().getName());
+        jwtService.saveRefreshToken(userInDB.getId(), newRefreshToken);
+        return Arrays.asList(newAccessToken, newRefreshToken);
+    }
+
+    @Override
+    public User updateUserById(int id, User updatedUser) {
         return null;
     }
 
     @Override
-    public User updateUser(int id, User newUser) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User id " + id + " not found"));
-        user.setFullname(newUser.getFullname());
-        user.setRole(newUser.getRole());
-        return userRepository.save(user);
+    public void deleteUserById(int id) {
+        if (userRepository.existsById(id)) userRepository.deleteById(id);
+        else throw new IdNotFoundException("UserId " + id + " not found");
     }
-
-    @Override
-    public void deleteUser(int id) {
-        userRepository.findById(id).orElseThrow(() -> new RuntimeException("User id " + id + " not found"));
-        userRepository.deleteById(id);
-    }
-
 }
