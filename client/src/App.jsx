@@ -1,6 +1,6 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import './App.css'
-import RouteHandler from './components/RouteHandler'
+import RouteHandler from './pages/RouteHandler'
 
 function App() {
   return (
