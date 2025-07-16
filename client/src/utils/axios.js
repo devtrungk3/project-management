@@ -13,7 +13,7 @@ export const setAuthHandlers = ({ logout, updateAccessToken, updateUserRole }) =
   setUserRole = updateUserRole;
 };
 
-const api = axios.create({
+const customApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
@@ -23,7 +23,7 @@ const plainApi = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
+customApi.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -31,7 +31,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-api.interceptors.response.use(
+customApi.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
@@ -41,14 +41,14 @@ api.interceptors.response.use(
     if (isUnauthorized && isTokenExpired && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const res = await plainApi.post('auth/refresh-token');
-        const { accessToken } = res.data;
-        const decoded = jwtDecode(accessToken);
+        const refreshTokenResponse = await plainApi.post('auth/refresh-token');
+        const newAccessToken = refreshTokenResponse.data;
+        const decoded = jwtDecode(newAccessToken);
 
-        setAccessToken(accessToken);
+        setAccessToken(newAccessToken);
         setUserRole(decoded?.role);
 
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return plainApi(originalRequest);
       } catch (refreshErr) {
         logoutFn();
@@ -60,4 +60,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default customApi;

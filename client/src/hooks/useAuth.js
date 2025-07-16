@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
+import { loginApi } from '../services/AuthService';
 
 export default function useAuth() {
   const {
@@ -21,19 +22,18 @@ export default function useAuth() {
 
   const login = async (formData) => {
     try {
-      const response = await api.post('auth/login', formData);
-      const { accessToken } = response.data;
+      const accessToken  = await loginApi(formData);
 
       if (accessToken) {
         const decodedToken = jwtDecode(accessToken);
-        const role = decodedToken?.role;
+        const decodedUserRole = decodedToken?.role;
 
         setAccessToken(accessToken);
-        setUserRole(role);
+        setUserRole(decodedUserRole);
 
-        if (role === 'ADMIN') {
+        if (decodedUserRole === 'ADMIN') {
           navigate('/dashboard');
-        } else if (role === 'USER') {
+        } else if (decodedUserRole === 'USER') {
           navigate('/user');
         }
       }
@@ -52,7 +52,7 @@ export default function useAuth() {
     try {
         await api.post('auth/revoke-refresh-token');
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Logout error:', error);
         throw error;
     }
 
