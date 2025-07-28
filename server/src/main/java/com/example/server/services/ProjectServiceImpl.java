@@ -41,25 +41,25 @@ public class ProjectServiceImpl implements ProjectService{
         return null;
     }
     @Override
-    public ProjectDTO getOwnProjectByIdAndOwnerId(int projectId, int ownerId) {
-        return projectRepository.findByIdAndOwnerId(projectId, ownerId)
+    public ProjectDTO getProjectForOwner(int projectId, int ownerId) {
+        return projectRepository.findDTOByIdAndOwnerId(projectId, ownerId)
                 .orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
     }
 
     @Override
-    public ProjectDTO getJoinedProjectByIdAndResourceUserId(int projectId, int userId) {
+    public ProjectDTO getJoinedProjectForUser(int projectId, int userId) {
         return resourceRepository.findByIdAndResourceUserId(projectId, userId)
                 .orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and resource user id " + userId));
     }
 
     @Override
-    public ProjectStatisticsDTO getProjectStatisticsByProjectOwnerId(int ownerId) {
+    public ProjectStatisticsDTO getProjectStatisticsForOwner(int ownerId) {
         List<StatusCountDTO> statusCounts = projectRepository.countByStatusForOwner(ownerId);
         return new ProjectStatisticsDTO(statusCounts);
     }
 
     @Override
-    public ProjectStatisticsDTO getProjectStatisticsByResourceUserId(int userId) {
+    public ProjectStatisticsDTO getJoinedProjectStatisticsForUser(int userId) {
         List<StatusCountDTO> statusCounts = resourceRepository.countByStatusForUser(userId);
         return new ProjectStatisticsDTO(statusCounts);
     }
@@ -85,7 +85,7 @@ public class ProjectServiceImpl implements ProjectService{
             throw new IdNotFoundException("ProjectId " + id + " not found");
     }
     @Override
-    public void deleteProjectByIdAndOwnerId(int projectId, int ownerId) {
+    public void deleteProjectByOwner(int projectId, int ownerId) {
         if (projectRepository.existsByIdAndOwnerId(projectId, ownerId))
             projectRepository.deleteById(projectId);
         else

@@ -42,31 +42,31 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDTO> getOwnProjectById(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        ProjectDTO project = projectService.getOwnProjectByIdAndOwnerId(projectId, userIdExtractedFromJWT);
+        ProjectDTO project = projectService.getProjectForOwner(projectId, userIdExtractedFromJWT);
         return ResponseEntity.ok(project);
     }
     @GetMapping("/joined/{id}")
     public ResponseEntity<ProjectDTO> getJoinedProjectById(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        ProjectDTO project = projectService.getJoinedProjectByIdAndResourceUserId(projectId, userIdExtractedFromJWT);
+        ProjectDTO project = projectService.getJoinedProjectForUser(projectId, userIdExtractedFromJWT);
         return ResponseEntity.ok(project);
     }
     @GetMapping("/my-projects-statistics")
     public ResponseEntity<?> getMyProjectsStatistics(HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        ProjectStatisticsDTO statistics = projectService.getProjectStatisticsByProjectOwnerId(userIdExtractedFromJWT);
+        ProjectStatisticsDTO statistics = projectService.getProjectStatisticsForOwner(userIdExtractedFromJWT);
         return ResponseEntity.ok(statistics);
     }
     @GetMapping("/joined-projects-statistics")
     public ResponseEntity<?> getJoinedProjectsStatistics(HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        ProjectStatisticsDTO statistics = projectService.getProjectStatisticsByResourceUserId(userIdExtractedFromJWT);
+        ProjectStatisticsDTO statistics = projectService.getJoinedProjectStatisticsForUser(userIdExtractedFromJWT);
         return ResponseEntity.ok(statistics);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProject(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        projectService.deleteProjectByIdAndOwnerId(projectId, userIdExtractedFromJWT);
+        projectService.deleteProjectByOwner(projectId, userIdExtractedFromJWT);
         return ResponseEntity.noContent().build();
     }
 }

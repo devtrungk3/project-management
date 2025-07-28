@@ -20,11 +20,12 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             """)
     Page<ProjectDTO> findByOwnerIdOrderByUpdatedAtDescAndCreatedAtDesc(int ownerId, Pageable pageable);
     @Query("""
-            SELECT new com.example.server.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.createdAt, p.updatedAt)
+            SELECT new com.example.server.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.owner.username, p.createdAt, p.updatedAt)
             FROM Project p
             WHERE p.id = :projectId AND p.owner.id = :ownerId
             """)
-    Optional<ProjectDTO> findByIdAndOwnerId(int projectId, int ownerId);
+    Optional<ProjectDTO> findDTOByIdAndOwnerId(int projectId, int ownerId);
+    Optional<Project> findByIdAndOwnerId(int projectId, int ownerId);
     @Query("""
             SELECT new com.example.server.dto.StatusCountDTO(p.status, COUNT(p))
             FROM Project p

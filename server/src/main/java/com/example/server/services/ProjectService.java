@@ -10,12 +10,12 @@ public interface ProjectService {
     Page<ProjectDTO> getAllOwnProjects(int ownerId, int pageNumber, int pageSize);
     Page<ProjectDTO> getAllJoinedProjects(int userId, int pageNumber, int pageSize);
     Project getProjectById(int id);
-    ProjectDTO getOwnProjectByIdAndOwnerId(int projectId, int ownerId);
-    ProjectDTO getJoinedProjectByIdAndResourceUserId(int projectId, int userId);
-    ProjectStatisticsDTO getProjectStatisticsByProjectOwnerId(int ownerId);
-    ProjectStatisticsDTO getProjectStatisticsByResourceUserId(int userId);
+    ProjectDTO getProjectForOwner(int projectId, int ownerId);
+    ProjectDTO getJoinedProjectForUser(int projectId, int userId);
+    ProjectStatisticsDTO getProjectStatisticsForOwner(int ownerId);
+    ProjectStatisticsDTO getJoinedProjectStatisticsForUser(int userId);
     Project addProject(Project newProject);
     Project updateProject(int id, Project updatedProject);
     void deleteProjectById(int id);
-    void deleteProjectByIdAndOwnerId(int projectId, int ownerId);
+    void deleteProjectByOwner(int projectId, int ownerId);
 }

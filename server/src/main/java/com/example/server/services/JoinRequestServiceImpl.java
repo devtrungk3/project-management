@@ -8,11 +8,11 @@ import com.example.server.repositories.JoinRequestRepository;
 import com.example.server.repositories.ProjectRepository;
 import com.example.server.repositories.ResourceRepository;
 import com.example.server.repositories.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class JoinRequestServiceImpl implements JoinRequestService {
@@ -68,7 +68,7 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     }
 
     @Override
-    public Page<JoinRequestDTO> getAllJoinRequestsByProjectOwnerId(int ownerId, int pageNumber, int pageSize) {
+    public Page<JoinRequestDTO> getAllJoinRequestsForProjectOwner(int ownerId, int pageNumber, int pageSize) {
         return joinRequestRepository.findByProjectOwnerIdOrderByCreatedAtDesc(ownerId, PageRequest.of(pageNumber, pageSize));
     }
 

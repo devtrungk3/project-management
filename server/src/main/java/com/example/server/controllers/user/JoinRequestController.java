@@ -25,7 +25,7 @@ public class JoinRequestController {
     @GetMapping("/incoming")
     public ResponseEntity<Page<JoinRequestDTO>> getAllIncomingJoinRequests(@RequestParam int page, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        Page<JoinRequestDTO> joinRequestResult = joinRequestService.getAllJoinRequestsByProjectOwnerId(userIdExtractedFromJWT, page, 5);
+        Page<JoinRequestDTO> joinRequestResult = joinRequestService.getAllJoinRequestsForProjectOwner(userIdExtractedFromJWT, page, 5);
         return ResponseEntity.ok(joinRequestResult);
     }
     @GetMapping("/outgoing")
