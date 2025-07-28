@@ -11,7 +11,7 @@ const addJoinRequest = async (api, projectId) => {
             case 400:
                 throw new Error(error.response.data.error);
             default:
-                throw new Error('Oops! Something went wrong');
+                throw new Error('Cannot make join request');
         }
     }
 }
@@ -21,7 +21,7 @@ const getAllIncomingJoinRequests = async (api, pageNumber) => {
         return response.data;
     } catch (error) {
         console.log("Failed to fetch incoming join requests: ", error);
-        throw new Error('Oops! Something went wrong');
+        throw new Error('Cannot load incoming join request table');
     }
 }
 const getAllOutgoingJoinRequests = async (api, pageNumber) => {
@@ -30,7 +30,7 @@ const getAllOutgoingJoinRequests = async (api, pageNumber) => {
         return response.data;
     } catch (error) {
         console.log("Failed to fetch outgoing join requests: ", error);
-        throw new Error('Oops! Something went wrong');
+        throw new Error('Cannot load outgoing join request table');
     }
 }
 const updateJoinRequest = async (api, joinRequestId, isAccepted) => {

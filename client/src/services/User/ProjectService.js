@@ -4,7 +4,7 @@ const getAllMyProjects = async (api, pageNumber) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch my projects: ', error);
-        throw new Error('Oops! Something went wrong');
+        throw new Error('Cannot load project table');
     }
 }
 const getAllJoinedProjects = async (api, pageNumber) => {
@@ -13,7 +13,7 @@ const getAllJoinedProjects = async (api, pageNumber) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch joined projects: ', error);
-        throw new Error('Oops! Something went wrong');
+        throw new Error('Cannot load project table');
     }
 }
 const addProject = async (api, formData) => {
@@ -22,7 +22,7 @@ const addProject = async (api, formData) => {
         return response.headers.location.split("/")[4];
     } catch (error) {
         console.error('Failed to insert a new project: ', error);
-        throw error;
+        throw new Error('Cannot add new project');
     }
 }
 const getProjectById = async (api, id, isMyProject) => {
@@ -43,7 +43,7 @@ const getProjectById = async (api, id, isMyProject) => {
             case 404:
                 throw new Error('Resource not found');
             default:
-                throw new Error('Oops! Something went wrong');
+                throw new Error('Cannot access this project');
         }
     }
 }
@@ -53,7 +53,7 @@ const getMyProjectStatistics = async (api) => {
         return response.data;
     } catch (error) {
         console.log('Failed to get statistic: ', error);
-        throw new Error('Oops! Something went wrong');
+        throw new Error('Cannot load project statistics');
     }
 }
 const getJoinedProjectStatistics = async (api) => {
@@ -62,7 +62,7 @@ const getJoinedProjectStatistics = async (api) => {
         return response.data;
     } catch (error) {
         console.log('Failed to get statistic: ', error);
-        throw new Error('Oops! Something went wrong');
+        throw new Error('Cannot load project statistics');
     }
 }
 const deleteProjectById = async (api, id) => {
@@ -74,7 +74,7 @@ const deleteProjectById = async (api, id) => {
             case 404:
                 throw new Error('Resource not found');
             default:
-                throw new Error('Oops! Something went wrong');
+                throw new Error('Cannot delete the project');
         }
     }
 }

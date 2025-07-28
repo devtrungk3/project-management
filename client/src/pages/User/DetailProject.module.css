@@ -1,0 +1,32 @@
+.sidebar {
+  height: 60vh;
+  padding-top: 20px;
+}
+.cell {
+  border: 1px solid #ccc;
+  padding: 8px;
+  max-width: 250px;
+  overflow: visible;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.cell-header {
+  background-color: #eee;
+}
+.table {
+  width: 100%;
+}
+.resource-item {
+  background-color: #edeccd;
+}
+table {
+  user-select: none;
+}
+.toolbar-item {
+  cursor: pointer;
+}
+.project-info-cell {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
