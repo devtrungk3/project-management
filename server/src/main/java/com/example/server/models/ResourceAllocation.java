@@ -5,32 +5,23 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(ResourceAllocationPK.class)
 public class ResourceAllocation {
-    @Id
-    private int resourceId;
-    @Id
-    private int taskId;
+    @EmbeddedId
+    private ResourceAllocationPK id;
     @ManyToOne
-    @JoinColumn(name = "resourceId", insertable = false, updatable = false)
+    @MapsId("resourceId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Resource resource;
-
     @ManyToOne
-    @JoinColumn(name = "taskId", insertable = false, updatable = false)
+    @MapsId("taskId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Task task;
-
-    @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
-    @UpdateTimestamp
-    @Column(insertable = false, columnDefinition = "TIMESTAMP")
-    private LocalDateTime updatedAt;
 }

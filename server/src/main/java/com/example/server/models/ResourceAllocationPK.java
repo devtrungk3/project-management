@@ -1,13 +1,19 @@
 package com.example.server.models;
 
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Embeddable
+@Setter
+@Getter
 public class ResourceAllocationPK implements Serializable {
     private int resourceId;
     private int taskId;

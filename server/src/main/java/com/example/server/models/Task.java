@@ -1,5 +1,6 @@
 package com.example.server.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -8,8 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Entity
@@ -29,16 +33,20 @@ public class Task {
     private int level;
     private String description;
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     @JoinColumn(name = "projectId")
+    @NotNull
     private Project project;
     @Min(0)
-    private float effort;
+    private Float effort;
     @Min(0)
-    private float duration;
+    private Float duration;
     private LocalDate start;
     private LocalDate finish;
     @Max(100)
     @Min(0)
     private int complete;
-    private int precesscor;
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    private List<ResourceAllocation> resourceAllocations;
 }
