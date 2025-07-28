@@ -48,7 +48,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public ProjectDTO getJoinedProjectForUser(int projectId, int userId) {
-        return resourceRepository.findByIdAndResourceUserId(projectId, userId)
+        return resourceRepository.findProjectIdByProjectIdAndResourceUserId(projectId, userId)
                 .orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and resource user id " + userId));
     }
 

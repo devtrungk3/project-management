@@ -1,6 +1,7 @@
 package com.example.server.repositories;
 
 import com.example.server.dto.ProjectDTO;
+import com.example.server.dto.ResourceDTO;
 import com.example.server.dto.StatusCountDTO;
 import com.example.server.models.Resource;
 import org.springframework.data.domain.Page;
@@ -31,5 +32,12 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             FROM Resource r
             WHERE r.project.id = :projectId AND r.user.id = :userId
             """)
-    Optional<ProjectDTO> findByIdAndResourceUserId(int projectId, int userId);
+    Optional<ProjectDTO> findProjectIdByProjectIdAndResourceUserId(int projectId, int userId);
+    @Query("""
+            SELECT new com.example.server.dto.ResourceDTO(r.id, r.user.username, r.createdAt)
+            FROM Resource r
+            WHERE r.project.id = :projectId AND r.project.owner.id = :ownerId
+            ORDER BY r.createdAt DESC
+            """)
+    List<ResourceDTO> findByProjectIdAndProjectOwnerId(int projectId, int ownerId);
 }

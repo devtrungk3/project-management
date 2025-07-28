@@ -17,15 +17,6 @@ public class ProjectDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ProjectDTO(int id, String name, String description, ProjectStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
     public ProjectDTO(int id, String name, ProjectStatus status, String ownerUsername, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;

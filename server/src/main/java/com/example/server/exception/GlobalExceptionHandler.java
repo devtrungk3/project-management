@@ -95,4 +95,9 @@ public class GlobalExceptionHandler {
         System.out.println("JoinRequestNotFoundException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Void> handleIllegalArgument(IllegalArgumentException e) {
+        System.out.println("IllegalArgumentException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
 }

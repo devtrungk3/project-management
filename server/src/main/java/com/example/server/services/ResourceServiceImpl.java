@@ -1,5 +1,6 @@
 package com.example.server.services;
 
+import com.example.server.dto.ResourceDTO;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.exception.ResourceExistsException;
 import com.example.server.models.Resource;
@@ -8,6 +9,8 @@ import com.example.server.repositories.ResourceRepository;
 import com.example.server.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,5 +31,9 @@ public class ResourceServiceImpl implements ResourceService{
         }
         newResource.setId(0);
         return resourceRepository.save(newResource);
+    }
+    @Override
+    public List<ResourceDTO> getAllResourcesForProjectOwner(int projectId, int ownerId) {
+        return resourceRepository.findByProjectIdAndProjectOwnerId(projectId, ownerId);
     }
 }
