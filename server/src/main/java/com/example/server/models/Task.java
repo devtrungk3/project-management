@@ -31,6 +31,7 @@ public class Task {
     private int arrangement;
     @Min(1)
     private int level;
+    @Column(columnDefinition = "TEXT")
     private String description;
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

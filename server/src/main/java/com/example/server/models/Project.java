@@ -24,6 +24,7 @@ public class Project {
     private int id;
     @NotNull
     private String name;
+    @Column(columnDefinition = "TEXT")
     private String description;
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
