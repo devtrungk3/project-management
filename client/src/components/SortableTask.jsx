@@ -29,7 +29,7 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected }) => {
     <tr ref={setNodeRef} style={trStyle} className={isSelected ? 'bg-light' : ''} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
       <td className={`${style.cell} text-center`} {...attributes} {...listeners} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
       <td className={`${style.cell} text-center`}>{index + 1}</td>
-      <td className={`${style.cell}`} style={{ paddingLeft:`${(task.level)*10}px` }}>{task.name}</td>
+      <td className={`${style.cell}`}>{task.name}</td>
       <td className={`${style.cell}`}>{task.effort ? task.effort : 0} hours</td>
       <td className={`${style.cell}`}>
         <div className='d-flex flex-wrap gap-2'>

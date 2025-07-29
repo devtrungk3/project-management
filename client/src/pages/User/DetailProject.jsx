@@ -25,7 +25,6 @@ import { FaAngleLeft, FaPlus, FaTrash } from "react-icons/fa";
 import { MdChecklist, MdOutlineViewTimeline, MdPeople } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
 import { TextField } from "@mui/material";
-import { BsTextIndentLeft, BsTextIndentRight } from "react-icons/bs";
 import TaskDialog from "../../components/TaskDialog";
 
 const DetailProject = ({isMyProject}) => {
@@ -117,7 +116,6 @@ const DetailProject = ({isMyProject}) => {
                 id: -Date.now(),
                 start: currentDate,
                 finish: currentDate,
-                level: 1,
                 resourceAllocations: []
             });
         } else {
@@ -268,12 +266,6 @@ const DetailProject = ({isMyProject}) => {
                                     <div className="d-flex align-items-center gap-2">
                                         <FaPlus />
                                         <span className="fw-semibold">New task</span>
-                                    </div>
-                                </div>
-                                <div className="d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-light">
-                                    <div className="d-flex align-items-center gap-2">
-                                    <BsTextIndentLeft className='fs-4' />
-                                    <BsTextIndentRight className='fs-4' />
                                     </div>
                                 </div>
                                 <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-danger text-white`} onClick={deleteTaskInfo}>
