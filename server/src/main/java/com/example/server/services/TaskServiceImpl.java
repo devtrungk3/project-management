@@ -73,7 +73,6 @@ public class TaskServiceImpl implements TaskService {
                 newTask.setId(0);
             }
             newTask.setName(taskDTO.getName());
-            newTask.setLevel(taskDTO.getLevel());
             newTask.setArrangement(taskDTO.getArrangement());
             newTask.setDescription(taskDTO.getDescription());
             newTask.setProject(project);
@@ -134,7 +133,6 @@ public class TaskServiceImpl implements TaskService {
                 .map(task -> new TaskDTO(
                         task.getId(),
                         task.getName(),
-                        task.getLevel(),
                         task.getDescription(),
                         task.getEffort(),
                         task.getDuration(),

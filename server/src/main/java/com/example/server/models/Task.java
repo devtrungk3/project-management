@@ -29,8 +29,6 @@ public class Task {
     private String name;
     @Min(1)
     private int arrangement;
-    @Min(1)
-    private int level;
     @Column(columnDefinition = "TEXT")
     private String description;
     @ManyToOne
