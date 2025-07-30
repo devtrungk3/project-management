@@ -73,8 +73,18 @@ public class ProjectServiceImpl implements ProjectService{
         return projectRepository.save(newProject);
     }
     @Override
-    public Project updateProject(int id, Project updatedProject) {
-        return null;
+    public Project updateProject(int projectId, int ownerId, Project updatedProject) {
+        Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
+        if (updatedProject.getName() != null && !updatedProject.getName().isEmpty()) {
+            oldProject.setName(updatedProject.getName());
+        }
+        if (updatedProject.getDescription() != null) {
+            oldProject.setDescription(updatedProject.getDescription());
+        }
+        if (updatedProject.getStatus() != null) {
+            oldProject.setStatus(updatedProject.getStatus());
+        }
+        return projectRepository.save(oldProject);
     }
 
     @Override

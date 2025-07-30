@@ -15,7 +15,7 @@ public interface ProjectService {
     ProjectStatisticsDTO getProjectStatisticsForOwner(int ownerId);
     ProjectStatisticsDTO getJoinedProjectStatisticsForUser(int userId);
     Project addProject(Project newProject);
-    Project updateProject(int id, Project updatedProject);
+    Project updateProject(int projectId, int ownerId, Project updatedProject);
     void deleteProjectById(int id);
     void deleteProjectByOwner(int projectId, int ownerId);
 }

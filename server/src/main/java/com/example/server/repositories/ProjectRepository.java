@@ -5,6 +5,7 @@ import com.example.server.dto.StatusCountDTO;
 import com.example.server.models.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -25,6 +26,7 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             WHERE p.id = :projectId AND p.owner.id = :ownerId
             """)
     Optional<ProjectDTO> findDTOByIdAndOwnerId(int projectId, int ownerId);
+    @EntityGraph(attributePaths = "owner")
     Optional<Project> findByIdAndOwnerId(int projectId, int ownerId);
     @Query("""
             SELECT new com.example.server.dto.StatusCountDTO(p.status, COUNT(p))

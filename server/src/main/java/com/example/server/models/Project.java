@@ -1,6 +1,5 @@
 package com.example.server.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,11 +27,10 @@ public class Project {
     private String description;
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull
     @JoinColumn(name = "ownerId")
-    @JsonIgnore
     private User owner;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;

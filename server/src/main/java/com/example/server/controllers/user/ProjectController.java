@@ -39,6 +39,21 @@ public class ProjectController {
         int savedProjectId = projectService.addProject(newProject).getId();
         return ResponseEntity.created(URI.create("api/v1/user/projects/" + savedProjectId)).build();
     }
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProjectDTO> updateProject(@PathVariable(name = "id") int projectId, @RequestBody Project updatedProject, HttpServletRequest request) {
+        int userIdExtractedFromJWT = (int) request.getAttribute("userId");
+        Project projectAfterUpdate = projectService.updateProject(projectId, userIdExtractedFromJWT, updatedProject);
+        ProjectDTO projectDTO = new ProjectDTO(
+                projectAfterUpdate.getId(),
+                projectAfterUpdate.getName(),
+                projectAfterUpdate.getDescription(),
+                projectAfterUpdate.getStatus(),
+                projectAfterUpdate.getOwner().getUsername(),
+                projectAfterUpdate.getCreatedAt(),
+                projectAfterUpdate.getUpdatedAt()
+        );
+        return ResponseEntity.ok(projectDTO);
+    }
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDTO> getOwnProjectById(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
