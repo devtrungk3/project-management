@@ -25,6 +25,15 @@ const addProject = async (api, formData) => {
         throw new Error('Cannot add new project');
     }
 }
+const updateProject = async (api, projectId, projectInfo) => {
+    try {
+        const response = await api.patch(`user/projects/${projectId}`, projectInfo);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to update project: ', error);
+        throw new Error('Cannot update project information');
+    }
+}
 const getProjectById = async (api, id, isMyProject) => {
     if (!/^[1-9]\d*$/.test(id)) {
         throw new Error("Invalid parameters");
@@ -83,6 +92,7 @@ export default {
     getAllMyProjects,
     getAllJoinedProjects,
     addProject,
+    updateProject,
     getProjectById,
     getMyProjectStatistics,
     getJoinedProjectStatistics,

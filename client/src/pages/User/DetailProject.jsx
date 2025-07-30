@@ -159,6 +159,30 @@ const DetailProject = ({isMyProject}) => {
         }
     }
 
+    const updateProjectInfo = async () => {
+        try {   
+            const data = await projectService.updateProject(api, projectId, projectInfo);
+            const updatedAt = data.updatedAt;
+            setProjectInfo({...projectInfo, updatedAt: updatedAt})
+        } catch (error) {
+            toast.error(error.message);
+        }
+    }
+    const formatDateTime = (isoString) => {
+        if (!isoString) {
+            return "None";
+        }
+        return new Date(isoString).toLocaleString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        })
+    }
+
     return(
         <Container fluid className='px-5 py-3'>
             <Row>
@@ -202,7 +226,7 @@ const DetailProject = ({isMyProject}) => {
                         aria-labelledby="userDropdown"
                         onClick={(e) => {e.stopPropagation()}}
                         >
-                            {isMyProject === true && 
+                            {isMyProject === true &&
                             <li>
                                 <TextField
                                 fullWidth
@@ -210,7 +234,8 @@ const DetailProject = ({isMyProject}) => {
                                 id="name"
                                 name="name"
                                 label="Name"
-                                defaultValue={projectInfo?.name || ''}
+                                value={projectInfo?.name || ''}
+                                onChange={(e) => setProjectInfo({...projectInfo, name: e.target.value})}
                                 />
                             </li>}
                             {isMyProject === true && 
@@ -223,7 +248,8 @@ const DetailProject = ({isMyProject}) => {
                                 label="Description"
                                 multiline
                                 rows={4}
-                                defaultValue={projectInfo?.description || ''}
+                                value={projectInfo?.description || ''}
+                                onChange={(e) => setProjectInfo({...projectInfo, description: e.target.value})}
                                 />
                             </li>}
                             <li>
@@ -239,21 +265,28 @@ const DetailProject = ({isMyProject}) => {
                                         </tr>
                                         <tr>
                                             <td className='pe-4 py-2'>Created&nbsp;at:</td>
-                                            <td>{projectInfo?.createdAt.split("T")[0]} {projectInfo?.createdAt.split("T")[1]}</td>
+                                            <td>{formatDateTime(projectInfo?.createdAt)}</td>
                                         </tr>
                                         <tr>
                                             <td className='pe-4 py-2'>Updated&nbsp;at:</td>
-                                            <td>{projectInfo?.updatedAt || 'None'}</td>
+                                            <td>{formatDateTime(projectInfo?.updatedAt)}</td>
                                         </tr>
                                         <tr>
                                             <td className='pe-4 py-2'>Status:</td>
-                                            <td>{projectInfo?.status}</td>
+                                            <td>
+                                                <select id="options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})}>
+                                                    <option value="PLANNING">PLANNING</option>
+                                                    <option value="IN_PROGRESS">IN PROGRESS</option>
+                                                    <option value="DONE">DONE</option>
+                                                    <option value="CANCELLED">CANCELLED</option>
+                                                </select>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </li>
                             {isMyProject === true && <li className='d-flex justify-content-end'>
-                                <Button>Save</Button>
+                                <Button onClick={updateProjectInfo}>Save</Button>
                             </li>}
                         </ul>
                     </div>
