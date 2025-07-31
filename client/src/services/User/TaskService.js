@@ -31,8 +31,21 @@ const syncTasks = async (api, projectId, tasks) => {
         throw Error('Cannot save tasks');
     }
 }
+const updateTaskComplete = async (api, projectId, tasks) => {
+    const copiedTasks = tasks.map(task => JSON.parse(JSON.stringify({
+        id: task.id,
+        complete: task.complete,
+    })));
+    try {
+        await api.patch(`user/tasks/complete?projectId=${projectId}`, copiedTasks);
+    } catch (error) {
+        console.log('Cannot save tasks: ', error);
+        throw Error('Cannot save tasks');
+    }
+}
 export default {
     getAllTasksForOwner,
     getAllAssignedTasksForUser,
-    syncTasks
+    syncTasks,
+    updateTaskComplete
 }

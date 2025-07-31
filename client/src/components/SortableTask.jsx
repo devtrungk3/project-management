@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import style from '../pages/User/DetailProject.module.css'
 
-const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected }) => {
+const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyProject }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: task.id
   });
@@ -27,7 +27,7 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected }) => {
 
   return (
     <tr ref={setNodeRef} style={trStyle} className={isSelected ? 'bg-light' : ''} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
-      <td className={`${style.cell} text-center`} {...attributes} {...listeners} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
+      <td className={`${style.cell} text-center`} {...attributes} {...(isMyProject ? listeners : {})} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
       <td className={`${style.cell} text-center`}>{index + 1}</td>
       <td className={`${style.cell}`}>{task.name}</td>
       <td className={`${style.cell}`}>{task.effort ? task.effort : 0} hours</td>

@@ -24,7 +24,7 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import { FaAngleLeft, FaPlus, FaTrash } from "react-icons/fa";
 import { MdChecklist, MdOutlineViewTimeline, MdPeople } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
-import { TextField } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, TextField } from "@mui/material";
 import TaskDialog from "../../components/TaskDialog";
 
 const DetailProject = ({isMyProject}) => {
@@ -146,16 +146,16 @@ const DetailProject = ({isMyProject}) => {
         }
     }
     const saveAllTasks = async () => {
-        if (isMyProject) {
-            try {
+        try {
+            if (isMyProject) {
                 await taskService.syncTasks(api, projectId, tasks);
-                toast.success("Save successfully")
                 loadTaskTable()
-            } catch (error) {
-                toast.error(error.message);
+            } else {
+                await taskService.updateTaskComplete(api, projectId, tasks);
             }
-        } else {
-            //TODO
+            toast.success("Save successfully")
+        } catch (error) {
+            toast.error(error.message);
         }
     }
 
@@ -273,6 +273,7 @@ const DetailProject = ({isMyProject}) => {
                                         </tr>
                                         <tr>
                                             <td className='pe-4 py-2'>Status:</td>
+                                            {isMyProject ?
                                             <td>
                                                 <select id="options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})}>
                                                     <option value="PLANNING">PLANNING</option>
@@ -281,6 +282,9 @@ const DetailProject = ({isMyProject}) => {
                                                     <option value="CANCELLED">CANCELLED</option>
                                                 </select>
                                             </td>
+                                            :
+                                            <td>{projectInfo?.status}</td>
+                                            }
                                         </tr>
                                     </tbody>
                                 </table>
@@ -334,7 +338,7 @@ const DetailProject = ({isMyProject}) => {
                                     </thead>
                                     <tbody>
                                         {tasks.map((task, index) => (
-                                            <SortableTask key={task.id} task={task} index={index} onSelect={handleTaskSelect} isSelected={taskIdSelected === task.id} onDoubleClick={handleOpenTaskDialog}/>
+                                            <SortableTask key={task.id} task={task} index={index} onSelect={handleTaskSelect} isSelected={taskIdSelected === task.id} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
                                         ))}
                                     </tbody>
                                 </table>
@@ -343,7 +347,44 @@ const DetailProject = ({isMyProject}) => {
                     </div>
                 </Col>
             </Row>
+            {isMyProject ?
             <TaskDialog openTaskDialog={openTaskDialog} handleCloseTaskDialog={handleCloseTaskDialog} tempTaskInfo={tempTaskInfo} setTempTaskInfo={setTempTaskInfo} resources={resources} onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
+            :
+            <Dialog
+                sx={{
+                    '& .MuiDialog-paper': {
+                        width: '1000px',
+                        maxWidth: 'none'
+                    }
+                }}
+                open={openTaskDialog != 0}
+                onClose={handleCloseTaskDialog}
+                slotProps={{
+                    paper: {
+                        component: 'form',
+                        onSubmit: changeTaskInfo
+                    },
+                }}
+            >
+                <DialogContent>
+                        <TextField
+                        fullWidth
+                        margin="dense"
+                        id="complete"
+                        name="complete"
+                        label="Complete %"
+                        type="number"
+                        inputProps={{ min: 0, max: 100 }}
+                        value={tempTaskInfo?.complete || ''}
+                        onChange={(e) => setTempTaskInfo({...tempTaskInfo, complete: e.target.value})}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseTaskDialog}>Cancel</Button>
+                    <Button type="submit">Save</Button>
+                </DialogActions>
+            </Dialog>
+            }
         </Container>
     );
 }
