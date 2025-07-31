@@ -1,6 +1,5 @@
 package com.example.server.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -31,9 +30,8 @@ public class Task {
     private int arrangement;
     @Column(columnDefinition = "TEXT")
     private String description;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
     @JoinColumn(name = "projectId")
     @NotNull
     private Project project;
@@ -46,6 +44,6 @@ public class Task {
     @Max(100)
     @Min(0)
     private int complete;
-    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "task")
     private List<ResourceAllocation> resourceAllocations;
 }

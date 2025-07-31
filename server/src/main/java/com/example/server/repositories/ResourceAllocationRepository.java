@@ -19,9 +19,9 @@ public interface ResourceAllocationRepository extends JpaRepository<ResourceAllo
     @Query("""
             SELECT new com.example.server.dto.ResourceAllocationDTO(ra.task.id, ra.resource.id, ra.resource.user.username)
             FROM ResourceAllocation ra
-            WHERE ra.task.project.id = :projectId AND ra.resource.user.id = :userId
+            WHERE ra.task.project.id = :projectId AND ra.task.id IN :taskIds
             """)
-    List<ResourceAllocationDTO> findAllResourceAllocationsByProjectIdAndResourceUserId(int projectId, int userId);
+    List<ResourceAllocationDTO> findAllResourceAllocationsByProjectIdAndTaskIdIn(int projectId, List<Integer> taskIds);
     @Modifying
     @Query("""
             DELETE FROM ResourceAllocation ra

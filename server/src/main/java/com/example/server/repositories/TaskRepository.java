@@ -19,6 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             JOIN t.resourceAllocations ra
             JOIN ra.resource r
             WHERE t.project.id = :projectId AND r.user.id = :userId
+            ORDER BY t.arrangement ASC
             """)
     List<Task> findTasksByProjectIdAndResourceAllocationUserId(int projectId, int userId);
 

@@ -31,4 +31,10 @@ public class TaskController {
         taskService.syncTasks(newTaskDTOs, projectId, userIdExtractedFromJWT);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+    @PatchMapping("/complete")
+    public ResponseEntity<?> updateTaskCompleteForUser(@RequestBody List<TaskDTO> newTaskDTOs, @RequestParam("projectId") int projectId, HttpServletRequest request) {
+        int userIdExtractedFromJWT = (int) request.getAttribute("userId");
+        taskService.updateTaskCompleteForUser(newTaskDTOs, projectId, userIdExtractedFromJWT);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

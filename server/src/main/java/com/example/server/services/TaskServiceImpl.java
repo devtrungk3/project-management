@@ -46,10 +46,27 @@ public class TaskServiceImpl implements TaskService {
         }
         // get all resource allocations for user
         List<ResourceAllocationDTO> resourceAllocations =
-                resourceAllocationRepository.findAllResourceAllocationsByProjectIdAndResourceUserId(projectId, userId);
+                resourceAllocationRepository.findAllResourceAllocationsByProjectIdAndTaskIdIn(projectId, tasks.stream().map(Task::getId).toList());
         return combineTasksAndResourceAllocations(tasks, resourceAllocations);
     }
-
+    private List<TaskDTO> combineTasksAndResourceAllocations(List<Task> tasks, List<ResourceAllocationDTO> resourceAllocations) {
+        // group resource allocations by taskId
+        Map<Integer, List<ResourceAllocationDTO>> allocationMap = resourceAllocations.stream()
+                .collect(Collectors.groupingBy(ResourceAllocationDTO::getTaskId));
+        return tasks.stream()
+                .map(task -> new TaskDTO(
+                        task.getId(),
+                        task.getName(),
+                        task.getDescription(),
+                        task.getEffort(),
+                        task.getDuration(),
+                        task.getStart(),
+                        task.getFinish(),
+                        task.getComplete(),
+                        allocationMap.getOrDefault(task.getId(), List.of())
+                ))
+                .toList();
+    }
     @Override
     @Transactional
     public void syncTasks(List<TaskDTO> newTaskDTOs, int projectId, int ownerId) {
@@ -125,22 +142,17 @@ public class TaskServiceImpl implements TaskService {
         resourceAllocationRepository.saveAll(savedResourceAllocations);
     }
 
-    private List<TaskDTO> combineTasksAndResourceAllocations(List<Task> tasks, List<ResourceAllocationDTO> resourceAllocations) {
-        // group resource allocations by taskId
-        Map<Integer, List<ResourceAllocationDTO>> allocationMap = resourceAllocations.stream()
-                .collect(Collectors.groupingBy(ResourceAllocationDTO::getTaskId));
-        return tasks.stream()
-                .map(task -> new TaskDTO(
-                        task.getId(),
-                        task.getName(),
-                        task.getDescription(),
-                        task.getEffort(),
-                        task.getDuration(),
-                        task.getStart(),
-                        task.getFinish(),
-                        task.getComplete(),
-                        allocationMap.getOrDefault(task.getId(), List.of())
-                ))
-                .toList();
+    @Override
+    public void updateTaskCompleteForUser(List<TaskDTO> newTaskDTOs, int projectId, int userId) {
+        List<Task> oldTasks = taskRepository.findTasksByProjectIdAndResourceAllocationUserId(projectId, userId);
+        Map<Integer, Integer> newTaskDTOMap = newTaskDTOs.stream()
+                .collect(Collectors.toMap(TaskDTO::getId, TaskDTO::getComplete));
+        oldTasks.forEach(oldTask -> {
+            Integer newTaskComplete = newTaskDTOMap.get(oldTask.getId());
+            if (newTaskComplete != null) {
+                oldTask.setComplete(newTaskComplete);
+            }
+        });
+        taskRepository.saveAll(oldTasks);
     }
 }
