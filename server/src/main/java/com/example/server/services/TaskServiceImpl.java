@@ -3,6 +3,7 @@ package com.example.server.services;
 import com.example.server.dto.ResourceAllocationDTO;
 import com.example.server.dto.TaskDTO;
 import com.example.server.exception.ProjectNotFoundException;
+import com.example.server.exception.ProjectNotInProgressException;
 import com.example.server.models.*;
 import com.example.server.repositories.ProjectRepository;
 import com.example.server.repositories.ResourceAllocationRepository;
@@ -144,7 +145,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void updateTaskCompleteForUser(List<TaskDTO> newTaskDTOs, int projectId, int userId) {
+        if (newTaskDTOs.size() == 0) {
+            return;
+        }
         List<Task> oldTasks = taskRepository.findTasksByProjectIdAndResourceAllocationUserId(projectId, userId);
+        if (oldTasks.size() == 0) {
+            return;
+        }
+        if (!projectRepository.existsByIdAndStatus(projectId, ProjectStatus.IN_PROGRESS)) {
+            throw new ProjectNotInProgressException("UserId " + userId + " cannot update task complete because project with id " + projectId + " is not in progress");
+        }
         Map<Integer, Integer> newTaskDTOMap = newTaskDTOs.stream()
                 .collect(Collectors.toMap(TaskDTO::getId, TaskDTO::getComplete));
         oldTasks.forEach(oldTask -> {

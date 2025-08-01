@@ -100,4 +100,9 @@ public class GlobalExceptionHandler {
         System.out.println("IllegalArgumentException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
+    @ExceptionHandler(ProjectNotInProgressException.class)
+    public ResponseEntity<Map<String, String>> handleProjectNotInProgress(ProjectNotInProgressException e) {
+        System.out.println("ProjectNotInProgressException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("Error", "Cannot update task completion when project is not in progress"));
+    }
 }

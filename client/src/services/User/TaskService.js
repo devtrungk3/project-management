@@ -40,7 +40,12 @@ const updateTaskComplete = async (api, projectId, tasks) => {
         await api.patch(`user/tasks/complete?projectId=${projectId}`, copiedTasks);
     } catch (error) {
         console.log('Cannot save tasks: ', error);
-        throw Error('Cannot save tasks');
+        switch (error.status) {
+            case 409:
+                throw new Error('Cannot update task because project is not in progress');
+            default:
+                throw Error('Cannot save tasks');
+        }
     }
 }
 export default {
