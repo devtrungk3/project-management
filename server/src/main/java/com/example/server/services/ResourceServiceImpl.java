@@ -3,6 +3,7 @@ package com.example.server.services;
 import com.example.server.dto.ResourceDTO;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.exception.ResourceExistsException;
+import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.models.Resource;
 import com.example.server.repositories.ProjectRepository;
 import com.example.server.repositories.ResourceRepository;
@@ -35,5 +36,14 @@ public class ResourceServiceImpl implements ResourceService{
     @Override
     public List<ResourceDTO> getAllResourcesForProjectOwner(int projectId, int ownerId) {
         return resourceRepository.findByProjectIdAndProjectOwnerId(projectId, ownerId);
+    }
+
+    @Override
+    public void deleteResourceByOwner(int resourceId, int ownerId) {
+        if (resourceRepository.existsByIdAndOwner(resourceId, ownerId)) {
+            resourceRepository.deleteById(resourceId);
+        } else {
+            throw new ResourceNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId);
+        }
     }
 }

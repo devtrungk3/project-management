@@ -105,4 +105,9 @@ public class GlobalExceptionHandler {
         System.out.println("ProjectNotInProgressException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("Error", "Cannot update task completion when project is not in progress"));
     }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Void> handleResourceNotFound(ResourceNotFoundException e) {
+        System.out.println("ResourceNotFoundException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }
