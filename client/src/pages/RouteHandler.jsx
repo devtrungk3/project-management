@@ -34,8 +34,8 @@ function RouteHandler() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       {/* specific */}
-      <Route path="/user/my-projects/:projectId" element={<DetailProject isMyProject={true} />} />
-      <Route path="/user/joined-projects/:projectId" element={<DetailProject isMyProject={false} />} />
+      <Route path="/user/my-projects/:projectId/*" element={<DetailProject isMyProject={true} />} />
+      <Route path="/user/joined-projects/:projectId/*" element={<DetailProject isMyProject={false} />} />
       {/* general */}
       <Route path="/dashboard/*" element={<Dashboard />} />
       <Route path="/user/*" element={<UserHome />} />

@@ -1,52 +1,36 @@
-import { useEffect, useState, useMemo } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import projectService from "../../services/User/ProjectService";
-import taskService from "../../services/User/TaskService";
-import resourceService from "../../services/User/ResourceService";
 import useAuth from "../../hooks/useAuth";
 import api, { setAuthHandlers } from '../../utils/axios';
 import { toast } from 'react-toastify';
 import style from './DetailProject.module.css';
-import SortableTask from "../../components/SortableTask";
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy
-} from '@dnd-kit/sortable';
+import TaskList from "./TaskList";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { FaAngleLeft, FaPlus, FaTrash } from "react-icons/fa";
+import { FaAngleLeft } from "react-icons/fa";
 import { MdChecklist, MdOutlineViewTimeline, MdPeople } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
-import { Dialog, DialogActions, DialogContent, TextField } from "@mui/material";
-import TaskDialog from "../../components/TaskDialog";
+import { TextField } from "@mui/material";
+import Resources from "./Resources";
+import { formatDateTime } from '../../utils/format';
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [projectInfo, setProjectInfo] = useState(null);
-    const [tasks, setTasks] = useState([]);
-    const [resources, setResources] = useState(null);
     const { setAccessToken, setUserRole } = useAuth();
-    const [taskIdSelected, setTaskIdSelected] = useState(0);
-    const [openTaskDialog, setOpenTaskDialog] = useState(0);
-    const [tempTaskInfo, setTempTaskInfo] = useState(null);
-    const [isAddDialog, setIsAddDialog] = useState(null);
     useEffect(() => {
         setAuthHandlers({
             updateAccessToken: setAccessToken,
             updateUserRole: setUserRole
         });
         loadProjectInformation();
-        loadTaskTable();
-        loadResourceList();
     }, [])
+    const isActive = (path) => {
+        if (path === 'tasks' && (location.pathname === `/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}` || location.pathname === `/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/`)) return true;
+        return location.pathname.startsWith(`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/${path}`);
+    }
     const loadProjectInformation = () => {
         (async () => {
             try {
@@ -58,107 +42,6 @@ const DetailProject = ({isMyProject}) => {
             }
         })();
     }
-    const loadTaskTable = () => {
-        (async () => {
-            try {
-                let data = null;
-                if (isMyProject) {
-                    data = await taskService.getAllTasksForOwner(api, projectId);
-                } else {
-                    data = await taskService.getAllAssignedTasksForUser(api, projectId);
-                }
-                if (data != null) {
-                    setTasks(data);
-                }
-            } catch(error) {
-                toast.error(error.message);
-            }
-        })();
-    }
-    const loadResourceList = () => {
-        (async () => {
-            try {
-                const data = await resourceService.getAllResources(api, projectId);
-                setResources(data);
-            } catch(error) {
-                toast.error(error.message);
-                navigate('/user/my-projects')
-            }
-        })();
-    }
-    const sensors = useSensors(
-        useSensor(PointerSensor)
-    );
-    const sortableItems = useMemo(() => tasks.map(item => item.id), [tasks]);
-    
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
-        
-        if (active.id !== over?.id) {
-            setTasks((items) => {
-                const oldIndex = items.findIndex((item) => item.id === active.id);
-                const newIndex = items.findIndex((item) => item.id === over?.id);
-                return arrayMove(items, oldIndex, newIndex);
-            });
-        }
-    };
-    const handleTaskSelect = (currentTaskIdSelected) => {
-        if (currentTaskIdSelected == taskIdSelected) {
-            setTaskIdSelected(0);
-        } else {
-            setTaskIdSelected(currentTaskIdSelected);
-        }
-    }
-    const handleOpenTaskDialog = (taskId, addDialogFlag) => {
-        if (addDialogFlag) {
-            const currentDate = (new Date()).toISOString().split('T')[0];
-            setTempTaskInfo({
-                id: -Date.now(),
-                start: currentDate,
-                finish: currentDate,
-                resourceAllocations: []
-            });
-        } else {
-            setTempTaskInfo(tasks.find(task => task.id === taskId))
-        }
-        setIsAddDialog(addDialogFlag)
-        setOpenTaskDialog(taskId);
-    }
-    const handleCloseTaskDialog = () => {
-        setOpenTaskDialog(0);
-        setTempTaskInfo(null);
-    }
-    const changeTaskInfo = (e) => {
-        e.preventDefault();
-        setTasks(prev => prev.map(task => task.id === tempTaskInfo.id ? tempTaskInfo : task));
-        handleCloseTaskDialog();
-    }
-    const addNewTaskInfo = (e) => {
-        e.preventDefault();
-        setTasks(prev => [...prev, tempTaskInfo])
-        handleCloseTaskDialog();
-    }
-    const deleteTaskInfo = (e) => {
-        if (taskIdSelected != 0) {
-            if (confirm(`Are you sure?`)) {
-                setTasks(tasks.filter(task => task.id != taskIdSelected))
-            }
-        }
-    }
-    const saveAllTasks = async () => {
-        try {
-            if (isMyProject) {
-                await taskService.syncTasks(api, projectId, tasks);
-                loadTaskTable()
-            } else {
-                await taskService.updateTaskComplete(api, projectId, tasks);
-            }
-            toast.success("Save successfully")
-        } catch (error) {
-            toast.error(error.message);
-        }
-    }
-
     const updateProjectInfo = async () => {
         try {   
             const data = await projectService.updateProject(api, projectId, projectInfo);
@@ -167,20 +50,6 @@ const DetailProject = ({isMyProject}) => {
         } catch (error) {
             toast.error(error.message);
         }
-    }
-    const formatDateTime = (isoString) => {
-        if (!isoString) {
-            return "None";
-        }
-        return new Date(isoString).toLocaleString("vi-VN", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false
-        })
     }
 
     return(
@@ -191,22 +60,26 @@ const DetailProject = ({isMyProject}) => {
                         <FaAngleLeft/>
                         <span className='fw-medium'>Back to my projects</span>
                     </Link>
-                    <Link className='text-decoration-none ms-2 d-flex align-items-center gap-2 my-1'>
+                    <Link className={`text-decoration-none ms-2 d-flex align-items-center gap-2 my-1 ${style["sidebar-link"]} ${isActive('tasks') ? style.active : ''}`} to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/tasks`}>
                         <MdChecklist />
                         <span className='fw-medium'>Task list</span>
                     </Link>
-                    <Link className='text-decoration-none ms-2 d-flex align-items-center gap-2 my-1'>
-                        <MdPeople />
-                        <span className='fw-medium'>Resource</span>
-                    </Link>
-                    <Link className='text-decoration-none ms-2 d-flex align-items-center gap-2 my-1'>
+                    <Link className={`text-decoration-none ms-2 d-flex align-items-center gap-2 my-1 ${style["sidebar-link"]} ${isActive('gantt') ? style.active : ''}`} to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/gantt`}>
                         <MdOutlineViewTimeline />
                         <span className='fw-medium'>Gantt chart</span>
                     </Link>
-                    <Link className='text-decoration-none ms-2 d-flex align-items-center gap-2 my-1'>
+                    {isMyProject === true &&
+                    <Link className={`text-decoration-none ms-2 d-flex align-items-center gap-2 my-1 ${style["sidebar-link"]} ${isActive('resources') ? style.active : ''}`} to={`/user/my-projects/${projectId}/resources`}>
+                        <MdPeople />
+                        <span className='fw-medium'>Resources</span>
+                    </Link>
+                    }
+                    {isMyProject === true &&
+                    <Link className={`text-decoration-none ms-2 d-flex align-items-center gap-2 my-1 ${style["sidebar-link"]} ${isActive('report') ? style.active : ''}`} to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/report`}>
                         <HiOutlineChartBar />
                         <span className='fw-medium'>Report</span>
                     </Link>
+                    }
                 </Col>
                 <Col md={10}>
                     <div className="d-inline-flex dropdown pt-3">
@@ -294,97 +167,19 @@ const DetailProject = ({isMyProject}) => {
                             </li>}
                         </ul>
                     </div>
-                    <div className='pt-3'>
-                        <div className="d-flex justify-content-between">
-                            {isMyProject === true 
-                            ?
-                            <div className="d-flex gap-5">
-                                <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-white`} onClick={() => handleOpenTaskDialog(tasks.length+1, true)}>
-                                    <div className="d-flex align-items-center gap-2">
-                                        <FaPlus />
-                                        <span className="fw-semibold">New task</span>
-                                    </div>
-                                </div>
-                                <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-danger text-white`} onClick={deleteTaskInfo}>
-                                    <div className="d-flex align-items-center gap-2">
-                                        <FaTrash />
-                                        <span className="fw-semibold">Delete task</span>
-                                    </div>
-                                </div>
-                            </div>
-                            :
-                            <div></div>
+                    <div className="content pt-3">
+                        <Routes>
+                            <Route path="/" element={<TaskList api={api} isMyProject={isMyProject} projectId={projectId} />} />
+                            {isMyProject === true &&
+                            (<Route path="/resources" element={<Resources api={api} projectId={projectId} />} />)
                             }
-                            <Button onClick={saveAllTasks} className="border rounded-3 shadow-sm px-3 py-2">Save all tasks</Button>
-                        </div>
-
-                    </div>
-                    <div className="pt-4">
-                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                            <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
-                                <table className={`${style.table}`}>
-                                    <thead>
-                                        <tr>
-                                        <th className={`${style.cell} ${style['cell-header']}`}></th>
-                                        <th className={`${style.cell} ${style['cell-header']} text-center`}>#</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Name</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Effort</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Owners</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Duration</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Start</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Finish</th>
-                                        <th className={`${style.cell} ${style['cell-header']}`}>Complete</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {tasks.map((task, index) => (
-                                            <SortableTask key={task.id} task={task} index={index} onSelect={handleTaskSelect} isSelected={taskIdSelected === task.id} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </SortableContext>
-                        </DndContext>
+                            {/* <Route path="/gantt" element={}/>
+                            <Route path="/report" element={}/> */}
+                            <Route path="*" element={<Navigate to=".." replace />} />
+                        </Routes>
                     </div>
                 </Col>
             </Row>
-            {isMyProject ?
-            <TaskDialog openTaskDialog={openTaskDialog} handleCloseTaskDialog={handleCloseTaskDialog} tempTaskInfo={tempTaskInfo} setTempTaskInfo={setTempTaskInfo} resources={resources} onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
-            :
-            <Dialog
-                sx={{
-                    '& .MuiDialog-paper': {
-                        width: '1000px',
-                        maxWidth: 'none'
-                    }
-                }}
-                open={openTaskDialog != 0}
-                onClose={handleCloseTaskDialog}
-                slotProps={{
-                    paper: {
-                        component: 'form',
-                        onSubmit: changeTaskInfo
-                    },
-                }}
-            >
-                <DialogContent>
-                        <TextField
-                        fullWidth
-                        margin="dense"
-                        id="complete"
-                        name="complete"
-                        label="Complete %"
-                        type="number"
-                        inputProps={{ min: 0, max: 100 }}
-                        value={tempTaskInfo?.complete || ''}
-                        onChange={(e) => setTempTaskInfo({...tempTaskInfo, complete: e.target.value})}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseTaskDialog}>Cancel</Button>
-                    <Button type="submit">Save</Button>
-                </DialogActions>
-            </Dialog>
-            }
         </Container>
     );
 }

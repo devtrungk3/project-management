@@ -30,3 +30,6 @@ table {
   word-break: break-word;
   white-space: normal;
 }
+.sidebar-link.active {
+  background-color: #e9ecef;
+}

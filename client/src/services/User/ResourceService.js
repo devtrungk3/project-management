@@ -7,6 +7,15 @@ const getAllResources = async (api, projectId) => {
         throw new Error("Get resources failed");
     }
 }
+const deleteResource = async (api, resourceId) => {
+    try {
+        await api.delete(`/user/resources/${resourceId}`)
+    } catch (error) {
+        console.log("Delete resource failed: ", error);
+        throw new Error("Delete resource failed");
+    }
+}
 export default {
-    getAllResources
+    getAllResources,
+    deleteResource
 }
