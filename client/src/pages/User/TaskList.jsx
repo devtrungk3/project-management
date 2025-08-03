@@ -18,8 +18,9 @@ import { Dialog, DialogActions, DialogContent, TextField } from "@mui/material";
 import TaskDialog from "../../components/TaskDialog";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import style from './DetailProject.module.css';
-import { Button } from "react-bootstrap";
+import { Button, Col, Row } from "react-bootstrap";
 import { toast } from 'react-toastify';
+import GanttChart from "../../components/GanttChart";
 
 const TaskList = ({api, projectId, isMyProject}) => {
     const [tasks, setTasks] = useState([]);
@@ -137,7 +138,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 <div className="d-flex justify-content-between">
                     {isMyProject === true 
                     ?
-                    <div className="d-flex gap-5">
+                    <div className="d-flex gap-3">
                         <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-white`} onClick={() => handleOpenTaskDialog(tasks.length+1, true)}>
                             <div className="d-flex align-items-center gap-2">
                                 <FaPlus />
@@ -157,7 +158,8 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     <Button onClick={saveAllTasks} className="border rounded-3 shadow-sm px-3 py-2">Save all tasks</Button>
                 </div>
             </div>
-            <div className="pt-4">
+            <Row className="pt-4">
+                <Col md={7} className="overflow-auto">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
                         <table className={`${style.table}`}>
@@ -182,7 +184,11 @@ const TaskList = ({api, projectId, isMyProject}) => {
                         </table>
                     </SortableContext>
                 </DndContext>
-            </div>  
+                </Col>
+                <Col md={5} className="flex-grow overflow-hidden">
+                    <GanttChart tasks={tasks} />
+                </Col>
+            </Row>
             {isMyProject ?
             <TaskDialog openTaskDialog={openTaskDialog} handleCloseTaskDialog={handleCloseTaskDialog} tempTaskInfo={tempTaskInfo} setTempTaskInfo={setTempTaskInfo} resources={resources} onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
             :

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import style from '../pages/User/DetailProject.module.css'
+import { formatDate } from '../utils/format';
 
 const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyProject }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -38,9 +39,9 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
           )}
         </div>
       </td>
-      <td className={`${style.cell}`}>{task.duration ? task.duration : 0} hours</td>
-      <td className={`${style.cell}`}>{task.start}</td>
-      <td className={`${style.cell}`}>{task.finish}</td>
+      <td className={`${style.cell}`}>{task.duration ? task.duration : 0} days</td>
+      <td className={`${style.cell}`}>{formatDate(task.start)}</td>
+      <td className={`${style.cell}`}>{formatDate(task.finish)}</td>
       <td className={`${style.cell}`}>{task.complete ? task.complete : 0} %</td>
     </tr>
   );
