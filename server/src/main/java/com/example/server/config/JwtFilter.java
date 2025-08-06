@@ -1,7 +1,7 @@
 package com.example.server.config;
 
-import com.example.server.services.CustomUserDetailsService;
-import com.example.server.services.JWTService;
+import com.example.server.service.security.CustomUserDetailsService;
+import com.example.server.service.security.JWTService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
