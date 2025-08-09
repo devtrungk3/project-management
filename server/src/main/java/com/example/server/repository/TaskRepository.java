@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Integer> {
@@ -48,4 +49,18 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             WHERE t.project.status = 'IN_PROGRESS' AND ra.resource.user.id = :userId
             """)
     UserOverviewDTO findAllOverviewData(int userId);
+    @Query("""
+            SELECT
+                t.finish,
+                COUNT(*)
+            FROM Task t
+            JOIN t.resourceAllocations ra
+            WHERE t.project.status = 'IN_PROGRESS'
+                AND t.finish >= :from
+                AND t.finish <= :to
+                AND t.complete < 100
+                AND ra.resource.user.id = :userId
+            GROUP BY t.finish
+            """)
+    List<Object[]> findUpcomingTasksBetween(int userId, LocalDate from, LocalDate to);
 }

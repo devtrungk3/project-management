@@ -32,4 +32,10 @@ public interface JoinRequestRepository extends JpaRepository<JoinRequest, Intege
             ORDER BY jr.createdAt DESC
             """)
     Page<JoinRequestDTO> findByUserIdOrderByCreatedAtDesc(int userId, Pageable pageable);
+    @Query("""
+            SELECT COUNT(*)
+            FROM JoinRequest jr
+            WHERE jr.project.owner.id = :userId AND jr.acceptFlag IS NULL
+            """)
+    long countPendingIncomingJoinRequest(int userId);
 }
