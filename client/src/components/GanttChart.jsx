@@ -12,7 +12,7 @@ const GanttChart = ({tasks}) => {
             start: new Date(formatDate(task.start)),
             duration: parseInt(task.duration),
             progress: task.complete,
-            type: "task",
+            type: parseInt(task.duration) === 0 ? "milestone" : "task",
         })))
     } else {
         setTaskData([])

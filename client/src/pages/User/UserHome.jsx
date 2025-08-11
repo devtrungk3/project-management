@@ -94,8 +94,8 @@ function UserHome() {
       </nav>
       <div className={`${style.content}`}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<HomePage api={api} />} />
+          <Route path="/home" element={<HomePage api={api} />} />
           <Route path="/my-projects" element={<MyProjects api={api} />}/>
           <Route path="/join-requests" element={<JoinRequests api={api} />} />
           <Route path="*" element={<Navigate to="/" />} />

@@ -51,7 +51,7 @@ customApi.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return plainApi(originalRequest);
       } catch (refreshErr) {
-        logoutFn();
+        await logoutFn();
         return Promise.reject(refreshErr);
       }
     }

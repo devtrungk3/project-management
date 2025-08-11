@@ -6,7 +6,7 @@ import api, { setAuthHandlers } from '../../utils/axios';
 import { toast } from 'react-toastify';
 import style from './DetailProject.module.css';
 import TaskList from "./TaskList";
-import { Button, Card, Container, Row } from "react-bootstrap";
+import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaAngleLeft } from "react-icons/fa";
 import { MdOutlineViewTimeline, MdPeople } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
@@ -20,9 +20,10 @@ const DetailProject = ({isMyProject}) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [projectInfo, setProjectInfo] = useState(null);
-    const { setAccessToken, setUserRole } = useAuth();
+    const { logout, setAccessToken, setUserRole } = useAuth();
     useEffect(() => {
         setAuthHandlers({
+            logout,
             updateAccessToken: setAccessToken,
             updateUserRole: setUserRole
         });
@@ -56,10 +57,12 @@ const DetailProject = ({isMyProject}) => {
     return(
         <Container fluid className='px-5'>
             <Row>
+                <Col className="my-4">
                 <Link className='text-decoration-none py-3' to={"/user/my-projects"}>
                     <FaAngleLeft className="fs-3"/>
                     <span className='fw-medium'>Back to my projects</span>
                 </Link>
+                </Col>
                 <div className="d-inline-flex dropdown pt-2 gap-3">
                     <a
                     className="nav-link dropdown-toggle"

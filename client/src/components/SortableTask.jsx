@@ -31,7 +31,7 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
       <td className={`${style.cell} text-center`} {...attributes} {...(isMyProject ? listeners : {})} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
       <td className={`${style.cell} text-center`}>{index + 1}</td>
       <td className={`${style.cell}`}>{task.name}</td>
-      <td className={`${style.cell}`}>{task.effort ? task.effort : 0} hours</td>
+      <td className={`${style.cell}`}>{task.priority}</td>
       <td className={`${style.cell}`}>
         <div className='d-flex flex-wrap gap-2'>
           {task.resourceAllocations.map((resource) => 
@@ -43,6 +43,7 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
       <td className={`${style.cell}`}>{formatDate(task.start)}</td>
       <td className={`${style.cell}`}>{formatDate(task.finish)}</td>
       <td className={`${style.cell}`}>{task.complete ? task.complete : 0} %</td>
+      <td className={`${style.cell}`}>{task.effort ? task.effort : 0} hours</td>
     </tr>
   );
 }

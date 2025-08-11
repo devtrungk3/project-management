@@ -14,13 +14,13 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import SortableTask from "../../components/SortableTask";
-import { Dialog, DialogActions, DialogContent, TextField } from "@mui/material";
 import TaskDialog from "../../components/TaskDialog";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import style from './DetailProject.module.css';
 import { Button, Col, Row } from "react-bootstrap";
 import { toast } from 'react-toastify';
 import GanttChart from "../../components/GanttChart";
+import dayjs from "dayjs";
 
 const TaskList = ({api, projectId, isMyProject}) => {
     const [tasks, setTasks] = useState([]);
@@ -89,7 +89,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
             setTempTaskInfo({
                 id: -Date.now(),
                 start: currentDate,
-                finish: currentDate,
+                priority: "LOW",
                 resourceAllocations: []
             });
         } else {
@@ -104,12 +104,20 @@ const TaskList = ({api, projectId, isMyProject}) => {
     }
     const changeTaskInfo = (e) => {
         e.preventDefault();
-        setTasks(prev => prev.map(task => task.id === tempTaskInfo.id ? tempTaskInfo : task));
+        const taskInfo = {
+            ...tempTaskInfo,
+            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
+        }
+        setTasks(prev => prev.map(task => task.id === taskInfo.id ? taskInfo : task));
         handleCloseTaskDialog();
     }
     const addNewTaskInfo = (e) => {
         e.preventDefault();
-        setTasks(prev => [...prev, tempTaskInfo])
+        const taskInfo = {
+            ...tempTaskInfo,
+            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
+        }
+        setTasks(prev => [...prev, taskInfo])
         handleCloseTaskDialog();
     }
     const deleteTaskInfo = (e) => {
@@ -168,12 +176,13 @@ const TaskList = ({api, projectId, isMyProject}) => {
                                 <th className={`${style.cell} ${style['cell-header']}`}></th>
                                 <th className={`${style.cell} ${style['cell-header']} text-center`}>#</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Name</th>
-                                <th className={`${style.cell} ${style['cell-header']}`}>Effort</th>
+                                <th className={`${style.cell} ${style['cell-header']}`}>Priority</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Owners</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Duration</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Start</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Finish</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Complete</th>
+                                <th className={`${style.cell} ${style['cell-header']}`}>Effort</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,44 +198,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     <GanttChart tasks={tasks} />
                 </Col>
             </Row>
-            {isMyProject ?
-            <TaskDialog openTaskDialog={openTaskDialog} handleCloseTaskDialog={handleCloseTaskDialog} tempTaskInfo={tempTaskInfo} setTempTaskInfo={setTempTaskInfo} resources={resources} onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
-            :
-            <Dialog
-                sx={{
-                    '& .MuiDialog-paper': {
-                        width: '1000px',
-                        maxWidth: 'none'
-                    }
-                }}
-                open={openTaskDialog != 0}
-                onClose={handleCloseTaskDialog}
-                slotProps={{
-                    paper: {
-                        component: 'form',
-                        onSubmit: changeTaskInfo
-                    },
-                }}
-            >
-                <DialogContent>
-                        <TextField
-                        fullWidth
-                        margin="dense"
-                        id="complete"
-                        name="complete"
-                        label="Complete %"
-                        type="number"
-                        inputProps={{ min: 0, max: 100 }}
-                        value={tempTaskInfo?.complete || ''}
-                        onChange={(e) => setTempTaskInfo({...tempTaskInfo, complete: e.target.value})}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseTaskDialog}>Cancel</Button>
-                    <Button type="submit">Save</Button>
-                </DialogActions>
-            </Dialog>
-            }  
+            <TaskDialog isMyProject={isMyProject} openTaskDialog={openTaskDialog} handleCloseTaskDialog={handleCloseTaskDialog} tempTaskInfo={tempTaskInfo} setTempTaskInfo={setTempTaskInfo} resources={resources} onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
         </>
     )
 }
