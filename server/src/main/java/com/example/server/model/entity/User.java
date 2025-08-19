@@ -33,6 +33,9 @@ public class User {
     @NotNull
     @JoinColumn(name = "roleId")
     private Role role;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
     @UpdateTimestamp
