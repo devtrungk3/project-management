@@ -1,7 +1,10 @@
 package com.example.server.config;
 
+import com.example.server.exception.InactiveUserException;
+import com.example.server.model.entity.UserStatus;
 import com.example.server.service.security.CustomUserDetailsService;
 import com.example.server.service.security.JWTService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
@@ -47,7 +52,22 @@ public class JwtFilter extends OncePerRequestFilter {
             System.out.println(e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Expired token\"}");
+            Map<String, String> errorBody = Map.of(
+                    "error_code", "EXPIRED_TOKEN",
+                    "error", "This token has expired"
+            );
+            new ObjectMapper().writeValue(response.getWriter(), errorBody);
+        } catch (InactiveUserException e) {
+            System.out.println(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            String errorMessage = e.getUserStatus() == UserStatus.SUSPENDED
+                ? "Your account has been suspended. Please contact support for details"
+                : "Your account has been permanently banned due to violations of our terms of service";
+            Map<String, String> errorBody = Map.of(
+                    "error_code", "INACTIVE",
+                    "error", errorMessage
+            );
+            new ObjectMapper().writeValue(response.getWriter(), errorBody);
         }
     }
 }

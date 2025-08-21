@@ -1,6 +1,6 @@
 package com.example.server.exception;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import com.example.server.model.entity.UserStatus;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +30,13 @@ public class GlobalExceptionHandler {
         System.out.println("BadCredentialsException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Incorrect username or password"));
     }
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Map<String, String>> handleExpiredJwt(ExpiredJwtException e) {
-        System.out.println("ExpiredJwtException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Expired token"));
+    @ExceptionHandler(InactiveUserException.class)
+    public ResponseEntity<Map<String, String>> handleInactiveUser(InactiveUserException e) {
+        System.out.println("InactiveUserException - " + e.getMessage());
+        String errorMessage = e.getUserStatus() == UserStatus.SUSPENDED
+                ? "Your account has been suspended. Please contact support for details"
+                : "Your account has been permanently banned due to violations of our terms of service";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", errorMessage));
     }
     @ExceptionHandler(UsernameExistsException.class)
     public ResponseEntity<Map<String, String>> handleUsernameExists(UsernameExistsException e) {
@@ -41,9 +44,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Username already exists"));
     }
     @ExceptionHandler(RoleNotFoundException.class)
-    public ResponseEntity<Void> handleRoleNotFound(RoleNotFoundException e) {
+    public ResponseEntity<Map<String, String>> handleRoleNotFound(RoleNotFoundException e) {
         System.out.println("RoleNotFoundException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found"));
     }
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException e) {
@@ -56,14 +59,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", errorMessage));
     }
     @ExceptionHandler(IdNotFoundException.class)
-    public ResponseEntity<Void> handleIdNotFound(IdNotFoundException e) {
+    public ResponseEntity<Map<String, String>> handleIdNotFound(IdNotFoundException e) {
         System.out.println("IdNotFoundException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found"));
     }
     @ExceptionHandler(ProjectNotFoundException.class)
-    public ResponseEntity<Void> handleProjectNotFound(ProjectNotFoundException e) {
+    public ResponseEntity<Map<String, String>> handleProjectNotFound(ProjectNotFoundException e) {
         System.out.println("ProjectNotFoundException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found"));
     }
     @ExceptionHandler(JoinRequestExistsException.class)
     public ResponseEntity<Map<String, String>> handleJoinRequestExists(JoinRequestExistsException e) {
@@ -91,9 +94,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
     @ExceptionHandler(JoinRequestNotFoundException.class)
-    public ResponseEntity<Void> handleJoinRequestNotFound(JoinRequestNotFoundException e) {
+    public ResponseEntity<Map<String, String>> handleJoinRequestNotFound(JoinRequestNotFoundException e) {
         System.out.println("JoinRequestNotFoundException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found"));
     }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Void> handleIllegalArgument(IllegalArgumentException e) {
@@ -106,8 +109,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("Error", "Cannot update task completion when project is not in progress"));
     }
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Void> handleResourceNotFound(ResourceNotFoundException e) {
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException e) {
         System.out.println("ResourceNotFoundException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found"));
     }
 }
