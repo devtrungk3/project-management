@@ -4,7 +4,7 @@ const getOverview = async (api) => {
         return response.data;
     } catch (error) {
         console.log("Failed to fetch overview: ", error);
-        throw new Error('Cannot load overview');
+        throw new error;
     }
 }
 export default {

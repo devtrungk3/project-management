@@ -25,7 +25,7 @@ const MyProjects = ({api}) => {
     const [openJoinNewDialog, setOpenJoinNewDialog] = useState(false);
     const [projectData, setProjectData] = useState(null);
     const [myProjectPageNumber, setMyProjectPageNumber] = useState(0);
-    const [joinedProjectPageNumber, setjoinedProjectPageNumber] = useState(0);
+    const [joinedProjectPageNumber, setJoinedProjectPageNumber] = useState(0);
     const [statisticsOption , setStatisticsOption] = useState(0);
     const [statisticsData, setStatisticsData] = useState(null);
     const [goPrev, setGoPrev] = useState(false);
@@ -56,7 +56,6 @@ const MyProjects = ({api}) => {
             } catch(error) {
                 setMyProjectPageNumber(0);
                 setJoinedProjectPageNumber(0);
-                toast.error(error.message);
             }
         })();
     }
@@ -71,9 +70,7 @@ const MyProjects = ({api}) => {
                     statisticData = await projectService.getJoinedProjectStatistics(api);
                     setStatisticsData(statisticData);
                 }
-            } catch (error) {
-                toast.error(error.message);
-            }
+            } catch (error) {}
         })()
     }
 
@@ -130,9 +127,7 @@ const MyProjects = ({api}) => {
             try {
                 const id = await projectService.addProject(api, payload);
                 navigate(`/user/my-projects/${id}`);
-            } catch (error) {
-                toast.error(error.message);
-            }
+            } catch (error) {}
         })();
         handleCloseCreateDialog();
     }
@@ -148,9 +143,7 @@ const MyProjects = ({api}) => {
                 await joinRequestService.addJoinRequest(api, payload);
                 toast.success("Make join request successfully");
                 setJoinedProjectId(0);
-            } catch (error) {
-                toast.error(error.message);
-            }
+            } catch (error) {}
         })();
         handleCloseJoinNewDialog();
     }
@@ -165,9 +158,7 @@ const MyProjects = ({api}) => {
                     await projectService.deleteProjectById(api, id);
                     loadProjectTable();
                     loadProjectStatistics();
-                } catch (error) {
-                    toast.error(error.message);
-                }
+                } catch (error) {}
             })();
         }
     }

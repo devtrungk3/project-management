@@ -3,7 +3,6 @@ import resourceService from "../../services/User/ResourceService";
 import { FaTrash } from "react-icons/fa";
 import style from './DetailProject.module.css';
 import { formatDateTime } from '../../utils/format';
-import { toast } from "react-toastify";
 const Resources = ({api, projectId}) => {
     const [resources, setResources] = useState([]);
     const [resourceIdSelected, setResourceIdSelected] = useState(0);
@@ -16,7 +15,6 @@ const Resources = ({api, projectId}) => {
                 const data = await resourceService.getAllResources(api, projectId);
                 setResources(data);
             } catch(error) {
-                toast.error(error.message);
                 navigate('/user/my-projects')
             }
         })();
@@ -33,9 +31,7 @@ const Resources = ({api, projectId}) => {
                 if (confirm(`Are you sure?`)) {
                     try {
                         await resourceService.deleteResource(api, resourceIdSelected)
-                    } catch (error) {
-                        toast.error(error.message);
-                    }
+                    } catch (error) {}
                     setResources(resources.filter(resource => resource.id != resourceIdSelected))
                 }
         }

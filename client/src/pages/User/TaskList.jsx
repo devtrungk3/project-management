@@ -45,9 +45,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 if (data != null) {
                     setTasks(data);
                 }
-            } catch(error) {
-                toast.error(error.message);
-            }
+            } catch(error) {}
         })();
     }
     const loadResourceList = () => {
@@ -55,9 +53,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
             try {
                 const data = await resourceService.getAllResources(api, projectId);
                 setResources(data);
-            } catch(error) {
-                toast.error(error.message);
-            }
+            } catch(error) {}
         })();
     }
     const sensors = useSensors(
@@ -106,7 +102,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
         e.preventDefault();
         const taskInfo = {
             ...tempTaskInfo,
-            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
+            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration-1, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => prev.map(task => task.id === taskInfo.id ? taskInfo : task));
         handleCloseTaskDialog();
@@ -115,7 +111,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
         e.preventDefault();
         const taskInfo = {
             ...tempTaskInfo,
-            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
+            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration-1, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => [...prev, taskInfo])
         handleCloseTaskDialog();
@@ -136,9 +132,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 await taskService.updateTaskComplete(api, projectId, tasks);
             }
             toast.success("Save successfully")
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     }
     return (
         <>

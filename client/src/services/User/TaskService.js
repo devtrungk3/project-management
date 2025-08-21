@@ -4,7 +4,7 @@ const getAllTasksForOwner = async (api, projectId) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch tasks: ', error);
-        throw new Error('Cannot load task table');
+        throw error;
     }
 }
 const getAllAssignedTasksForUser = async (api, projectId) => {
@@ -13,7 +13,7 @@ const getAllAssignedTasksForUser = async (api, projectId) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch tasks: ', error);
-        throw new Error('Cannot load task table');
+        throw error;
     }
 }
 const syncTasks = async (api, projectId, tasks) => {
@@ -28,7 +28,7 @@ const syncTasks = async (api, projectId, tasks) => {
         await api.post(`user/tasks?projectId=${projectId}`, copiedTasks);
     } catch (error) {
         console.log('Cannot save tasks: ', error);
-        throw Error('Cannot save tasks');
+        throw error;
     }
 }
 const updateTaskComplete = async (api, projectId, tasks) => {
@@ -40,12 +40,7 @@ const updateTaskComplete = async (api, projectId, tasks) => {
         await api.patch(`user/tasks/complete?projectId=${projectId}`, copiedTasks);
     } catch (error) {
         console.log('Cannot save tasks: ', error);
-        switch (error.status) {
-            case 409:
-                throw new Error('Cannot update task because project is not in progress');
-            default:
-                throw Error('Cannot save tasks');
-        }
+        throw error;
     }
 }
 export default {

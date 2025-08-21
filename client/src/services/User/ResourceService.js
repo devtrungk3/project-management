@@ -4,7 +4,7 @@ const getAllResources = async (api, projectId) => {
         return response.data;
     } catch (error) {
         console.log("Fetch resources failed: ", error);
-        throw new Error("Get resources failed");
+        throw error;
     }
 }
 const deleteResource = async (api, resourceId) => {
@@ -12,7 +12,7 @@ const deleteResource = async (api, resourceId) => {
         await api.delete(`/user/resources/${resourceId}`)
     } catch (error) {
         console.log("Delete resource failed: ", error);
-        throw new Error("Delete resource failed");
+        throw error;
     }
 }
 export default {

@@ -3,7 +3,6 @@ import { FaArrowLeft, FaArrowRight, FaCheck, FaXmark } from "react-icons/fa6";
 import style from './JoinRequests.module.css';
 import { useCallback, useEffect, useState } from 'react';
 import joinRequestService from '../../services/User/JoinRequestService';
-import { toast } from 'react-toastify';
 
 const JoinRequests = ({api}) => {
     const [pageNumber, setPageNumber] = useState(0);
@@ -28,7 +27,6 @@ const JoinRequests = ({api}) => {
                 if (goNext !== !data.last) setGoNext(!data.last);
             } catch(error) {
                 setPageNumber(0);
-                toast.error(error.message);
             }
         })();
     }
@@ -44,9 +42,7 @@ const JoinRequests = ({api}) => {
             try {
                 await joinRequestService.updateJoinRequest(api, joinRequestId, isAccepted);
                 loadJoinRequestTable();
-            } catch(error) {
-                toast.error(error.message);
-            }
+            } catch(error) {}
         })();
     }
     return (

@@ -3,7 +3,6 @@ import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } fr
 import projectService from "../../services/User/ProjectService";
 import useAuth from "../../hooks/useAuth";
 import api, { setAuthHandlers } from '../../utils/axios';
-import { toast } from 'react-toastify';
 import style from './DetailProject.module.css';
 import TaskList from "./TaskList";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
@@ -39,7 +38,6 @@ const DetailProject = ({isMyProject}) => {
                 const data = await projectService.getProjectById(api, projectId, isMyProject);
                 setProjectInfo(data);
             } catch(error) {
-                toast.error(error.message);
                 navigate('/user/my-projects')
             }
         })();
@@ -49,9 +47,7 @@ const DetailProject = ({isMyProject}) => {
             const data = await projectService.updateProject(api, projectId, projectInfo);
             const updatedAt = data.updatedAt;
             setProjectInfo({...projectInfo, updatedAt: updatedAt})
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     }
 
     return(

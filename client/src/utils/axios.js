@@ -36,26 +36,38 @@ customApi.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const isUnauthorized = error.response?.status === 401;
-    const isTokenExpired = error.response?.data?.error === "Expired token";
+    if (isUnauthorized) {
+      switch (error.response?.data?.error_code) {
+        case "EXPIRED_TOKEN":
+          if (isUnauthorized && !originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+              const refreshTokenResponse = await plainApi.post('auth/refresh-token');
+              const newAccessToken = refreshTokenResponse.data;
+              const decoded = jwtDecode(newAccessToken);
 
-    if (isUnauthorized && isTokenExpired && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const refreshTokenResponse = await plainApi.post('auth/refresh-token');
-        const newAccessToken = refreshTokenResponse.data;
-        const decoded = jwtDecode(newAccessToken);
+              setAccessToken(newAccessToken);
+              setUserRole(decoded?.role);
 
-        setAccessToken(newAccessToken);
-        setUserRole(decoded?.role);
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return plainApi(originalRequest);
-      } catch (refreshErr) {
-        await logoutFn();
-        return Promise.reject(refreshErr);
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+              return plainApi(originalRequest);
+            } catch (refreshErr) {
+              await logoutFn();
+              toast.error("Session expired, please log in again.");
+              return Promise.reject(refreshErr);
+            }
+          }
+          break;
+        case "INACTIVE":
+            await logoutFn();
+            toast.error("Your account has been locked");
+        default:
+          break;
       }
+      return Promise.reject(error);
+    } else {
+      toast.error(error.response?.data?.error || "Something went wrong");
     }
-
     return Promise.reject(error);
   }
 );

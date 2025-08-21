@@ -4,7 +4,7 @@ const getAllMyProjects = async (api, pageNumber) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch my projects: ', error);
-        throw new Error('Cannot load project table');
+        throw error;
     }
 }
 const getAllJoinedProjects = async (api, pageNumber) => {
@@ -13,7 +13,7 @@ const getAllJoinedProjects = async (api, pageNumber) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch joined projects: ', error);
-        throw new Error('Cannot load project table');
+        throw error;
     }
 }
 const addProject = async (api, formData) => {
@@ -22,7 +22,7 @@ const addProject = async (api, formData) => {
         return response.headers.location.split("/")[4];
     } catch (error) {
         console.error('Failed to insert a new project: ', error);
-        throw new Error('Cannot add new project');
+        throw error;
     }
 }
 const updateProject = async (api, projectId, projectInfo) => {
@@ -31,7 +31,7 @@ const updateProject = async (api, projectId, projectInfo) => {
         return response.data;
     } catch (error) {
         console.error('Failed to update project: ', error);
-        throw new Error('Cannot update project information');
+        throw error;
     }
 }
 const getProjectById = async (api, id, isMyProject) => {
@@ -48,12 +48,7 @@ const getProjectById = async (api, id, isMyProject) => {
         return response.data
     } catch (error) {
         console.log('Failed to get a project: ', error);
-        switch (error.status) {
-            case 404:
-                throw new Error('Resource not found');
-            default:
-                throw new Error('Cannot access this project');
-        }
+        throw error;
     }
 }
 const getMyProjectStatistics = async (api) => {
@@ -62,7 +57,7 @@ const getMyProjectStatistics = async (api) => {
         return response.data;
     } catch (error) {
         console.log('Failed to get statistic: ', error);
-        throw new Error('Cannot load project statistics');
+        throw new error;
     }
 }
 const getJoinedProjectStatistics = async (api) => {
@@ -71,7 +66,7 @@ const getJoinedProjectStatistics = async (api) => {
         return response.data;
     } catch (error) {
         console.log('Failed to get statistic: ', error);
-        throw new Error('Cannot load project statistics');
+        throw error;
     }
 }
 const deleteProjectById = async (api, id) => {
@@ -79,12 +74,7 @@ const deleteProjectById = async (api, id) => {
         await api.delete(`/user/projects/${id}`)
     } catch (error) {
         console.log('Delete failed: ', error);
-        switch (error.status) {
-            case 404:
-                throw new Error('Resource not found');
-            default:
-                throw new Error('Cannot delete the project');
-        }
+        throw error;
     }
 }
 
