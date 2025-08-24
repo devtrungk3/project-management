@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class DashboardServiceImpl implements DashboardService {
+public class UserDashboardServiceImpl implements UserDashboardService {
     private final TaskRepository taskRepository;
     private final JoinRequestRepository joinRequestRepository;
     @Override
