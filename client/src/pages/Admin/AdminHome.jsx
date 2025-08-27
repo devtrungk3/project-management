@@ -1,57 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import api, { setAuthHandlers } from '../../utils/axios';
-import HomePage from './HomePage';
-import MyProjects from './MyProjects';
 import useAuth from '../../hooks/useAuth';
-import style from './UserHome.module.css';
+import style from './AdminHome.module.css';
 import { Link, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import JoinRequests from './JoinRequests';
-import { jwtDecode } from 'jwt-decode';
+import Dashboard from './Dashboard';
 
-function UserHome() {
+const AdminHome = () => {
 
   const location = useLocation();
   const isActive = (path) => location.pathname.endsWith(path);
-  const [username, setUsername] = useState('');
 
-  const { logout, setAccessToken, setUserRole, accessToken } = useAuth();
+  const { logout, setAccessToken, setUserRole } = useAuth();
   useEffect(() => {
     setAuthHandlers({
       logout,
       updateAccessToken: setAccessToken,
       updateUserRole: setUserRole
     });
-    setUsername(jwtDecode(accessToken)?.username || '')
   }, []);
   return (
     <>
-      <title>User home</title>
+      <title>Admin home</title>
       <div className={`sidebar ${style.sidebar}`}>
         <nav className="nav flex-column">
           <Link
             to="/user/home"
-            className={`nav-link ${style["nav-link"]} ${isActive('home') ? style.active : ''}`}
+            className={`nav-link ${style["nav-link"]} ${isActive('dashboard') ? style.active : ''}`}
           >
-            Home
-          </Link>
-          <Link
-            to="/user/my-projects"
-            className={`nav-link ${style["nav-link"]} ${isActive('my-projects') ? style.active : ''}`}
-          >
-            My projects
-          </Link>
-          <Link
-            to="/user/join-requests"
-            className={`nav-link ${style["nav-link"]} ${isActive('join-requests') ? style.active : ''}`}
-          >
-            Join requests
+            Dashboard
           </Link>
         </nav>
       </div>
       <nav className={`navbar ${style.navbar} navbar-light bg-light`}>
         <div className="container-fluid">
           <a className="navbar-brand" href="#">
-            Project management
+            Administrator
           </a>
           <div className="d-flex">
             <div className="dropdown ms-3">
@@ -63,7 +46,7 @@ function UserHome() {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                {username}
+                ADMIN
               </a>
               <ul
                 className="dropdown-menu dropdown-menu-end"
@@ -86,9 +69,7 @@ function UserHome() {
       </nav>
       <div className={`${style.content}`}>
         <Routes>
-          <Route path="/home" element={<HomePage api={api} />} />
-          <Route path="/my-projects" element={<MyProjects api={api} />}/>
-          <Route path="/join-requests" element={<JoinRequests api={api} />} />
+          <Route path="/dashboard" element={<Dashboard api={api} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
@@ -96,4 +77,4 @@ function UserHome() {
   );
 }
 
-export default UserHome;
+export default AdminHome;

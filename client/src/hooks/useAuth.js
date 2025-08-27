@@ -32,9 +32,9 @@ export default function useAuth() {
         setUserRole(decodedUserRole);
 
         if (decodedUserRole === 'ADMIN') {
-          navigate('/dashboard');
+          navigate('/admin/dashboard');
         } else if (decodedUserRole === 'USER') {
-          navigate('/user');
+          navigate('/user/home');
         }
       }
     } catch (error) {

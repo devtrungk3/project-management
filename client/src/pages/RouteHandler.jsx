@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Login from './Auth/Login'
 import Register from './Auth/Register'
-import Dashboard from './Admin/Dashboard'
+import AdminHome from './Admin/AdminHome'
 import UserHome from './User/UserHome'
 import DetailProject from './User/DetailProject'
 import useAuth from '../hooks/useAuth'
@@ -17,15 +17,14 @@ function RouteHandler() {
   }
   
   if (isAuthenticated && userRole === 'USER') {
-    if (['/', '/login', '/register'].includes(currentPath) || currentPath.startsWith('/dashboard')) {
-      return <Navigate to="/user" />
+    if (['/', '/login', '/register'].includes(currentPath) || currentPath.startsWith('/admin')) {
+      return <Navigate to="/user/home" />
     }
   }
 
   if (isAuthenticated && userRole === 'ADMIN') {
-    console.log(currentPath)
     if (['/', '/login', '/register'].includes(currentPath) || currentPath.startsWith('/user')) {
-      return <Navigate to="/dashboard" />
+      return <Navigate to="/admin/dashboard" />
     }
   }
 
@@ -37,10 +36,10 @@ function RouteHandler() {
       <Route path="/user/my-projects/:projectId/*" element={<DetailProject isMyProject={true} />} />
       <Route path="/user/joined-projects/:projectId/*" element={<DetailProject isMyProject={false} />} />
       {/* general */}
-      <Route path="/dashboard/*" element={<Dashboard />} />
+      <Route path="/admin/*" element={<AdminHome />} />
       <Route path="/user/*" element={<UserHome />} />
       {/* fallback */}
-      <Route path="*" element={<Navigate to={isAuthenticated ? (userRole === 'ADMIN' ? '/dashboard' : '/user') : '/login'} />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? (userRole === 'ADMIN' ? '/admin/dashboard' : '/user/home') : '/login'} />} />
     </Routes>
   )
 }
