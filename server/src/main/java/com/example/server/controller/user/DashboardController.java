@@ -1,7 +1,7 @@
 package com.example.server.controller.user;
 
-import com.example.server.model.dto.UserOverviewDTO;
-import com.example.server.service.application.DashboardService;
+import com.example.server.model.dto.user.OverviewDTO;
+import com.example.server.service.application.UserDashboardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("api/v1/user/dashboard")
 public class DashboardController {
-    private final DashboardService dashboardService;
+    private final UserDashboardService userDashboardService;
     @GetMapping("/overview")
     public ResponseEntity<?> getOverviewForUser(HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        UserOverviewDTO overviewDTO = dashboardService.getOverviewForUser(userIdExtractedFromJWT);
+        OverviewDTO overviewDTO = userDashboardService.getOverviewForUser(userIdExtractedFromJWT);
         return ResponseEntity.ok(overviewDTO);
     }
 }

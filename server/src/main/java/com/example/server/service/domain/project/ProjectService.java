@@ -1,7 +1,7 @@
 package com.example.server.service.domain.project;
 
 import com.example.server.model.dto.ProjectDTO;
-import com.example.server.model.dto.ProjectStatisticsDTO;
+import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.entity.Project;
 import org.springframework.data.domain.Page;
 

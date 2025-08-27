@@ -1,6 +1,6 @@
 package com.example.server.service.application;
 
-import com.example.server.model.dto.UserOverviewDTO;
+import com.example.server.model.dto.user.OverviewDTO;
 import com.example.server.repository.JoinRequestRepository;
 import com.example.server.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +18,10 @@ public class UserDashboardServiceImpl implements UserDashboardService {
     private final TaskRepository taskRepository;
     private final JoinRequestRepository joinRequestRepository;
     @Override
-    public UserOverviewDTO getOverviewForUser(int userId) {
-        UserOverviewDTO overviewDTO = new UserOverviewDTO();
+    public OverviewDTO getOverviewForUser(int userId) {
+        OverviewDTO overviewDTO = new OverviewDTO();
 
-        UserOverviewDTO taskOverviewDTO = taskRepository.findAllOverviewData(userId);
+        OverviewDTO taskOverviewDTO = taskRepository.findAllOverviewData(userId);
 
         List<Object[]> upComingTaskFromDB = taskRepository.findUpcomingTasksBetween(userId, LocalDate.now(), LocalDate.now().plusDays(10));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");

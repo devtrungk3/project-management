@@ -1,5 +1,6 @@
-package com.example.server.model.dto;
+package com.example.server.model.dto.user;
 
+import com.example.server.model.dto.StatusCountDTO;
 import lombok.Getter;
 import lombok.Setter;
 

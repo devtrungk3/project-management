@@ -1,6 +1,7 @@
 package com.example.server.repository;
 
-import com.example.server.model.dto.UserOverviewDTO;
+import com.example.server.model.dto.admin.TaskStatisticsDTO;
+import com.example.server.model.dto.user.OverviewDTO;
 import com.example.server.model.entity.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -34,7 +35,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     void deleteByProjectIdAndIdNotIn(int projectId, List<Integer> taskIds);
     void deleteByProjectId(int projectId);
     @Query("""
-            SELECT new com.example.server.model.dto.UserOverviewDTO(
+            SELECT new com.example.server.model.dto.user.OverviewDTO(
                 SUM(CASE WHEN t.start <= CURRENT_DATE AND t.finish >= CURRENT_DATE AND t.complete < 100 THEN 1 ELSE 0 END) AS active_task,
                 SUM(CASE WHEN t.finish < CURRENT_DATE AND t.complete < 100 THEN 1 ELSE 0 END) AS overdue_task,
                 SUM(CASE WHEN t.start <= CURRENT_DATE AND t.finish >= CURRENT_DATE AND t.complete = 0 THEN 1 ELSE 0 END) as todo_task,
@@ -48,7 +49,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             JOIN t.resourceAllocations ra
             WHERE t.project.status = 'IN_PROGRESS' AND ra.resource.user.id = :userId
             """)
-    UserOverviewDTO findAllOverviewData(int userId);
+    OverviewDTO findAllOverviewData(int userId);
     @Query("""
             SELECT
                 t.finish,
@@ -63,4 +64,13 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             GROUP BY t.finish
             """)
     List<Object[]> findUpcomingTasksBetween(int userId, LocalDate from, LocalDate to);
+    @Query("""
+            SELECT new com.example.server.model.dto.admin.TaskStatisticsDTO(
+                COUNT(*),
+                SUM(CASE WHEN t.complete = 100 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN t.finish < CURRENT_DATE AND t.complete < 100 THEN 1 ELSE 0 END)
+            )
+            FROM Task t
+            """)
+    TaskStatisticsDTO getTaskSummary();
 }

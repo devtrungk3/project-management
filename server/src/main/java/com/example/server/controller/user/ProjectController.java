@@ -1,7 +1,7 @@
 package com.example.server.controller.user;
 
 import com.example.server.model.dto.ProjectDTO;
-import com.example.server.model.dto.ProjectStatisticsDTO;
+import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.entity.Project;
 import com.example.server.model.entity.User;
 import com.example.server.service.domain.project.ProjectService;

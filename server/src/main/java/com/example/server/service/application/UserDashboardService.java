@@ -1,7 +1,7 @@
 package com.example.server.service.application;
 
-import com.example.server.model.dto.UserOverviewDTO;
+import com.example.server.model.dto.user.OverviewDTO;
 
 public interface UserDashboardService {
-    UserOverviewDTO getOverviewForUser(int userId);
+    OverviewDTO getOverviewForUser(int userId);
 }

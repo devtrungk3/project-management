@@ -1,4 +1,4 @@
-package com.example.server.model.dto;
+package com.example.server.model.dto.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @ToString
-public class UserOverviewDTO {
+public class OverviewDTO {
     private long myActiveTasks;
     private long myOverdueTasks;
     private long pendingIncomingJoinRequests;
@@ -20,14 +20,14 @@ public class UserOverviewDTO {
     private Map<String, Long> assignedTaskPriorities;
     private Map<String, Long> upcomingTasksIn10Days;
 
-    public UserOverviewDTO(Long myActiveTasks,
-                           Long myOverdueTasks,
-                           Long todoTasks,
-                           Long inProgressTasks,
-                           Long doneTasks,
-                           Long lowPriorityTasks,
-                           Long mediumPriorityTasks,
-                           Long highPriorityTasks) {
+    public OverviewDTO(Long myActiveTasks,
+                       Long myOverdueTasks,
+                       Long todoTasks,
+                       Long inProgressTasks,
+                       Long doneTasks,
+                       Long lowPriorityTasks,
+                       Long mediumPriorityTasks,
+                       Long highPriorityTasks) {
         this.myActiveTasks = myActiveTasks != null ? myActiveTasks : 0L;
         this.myOverdueTasks = myOverdueTasks != null ? myOverdueTasks : 0L;
         Map<String, Long> assignedTaskStatuses = new HashMap<>();
