@@ -2,11 +2,14 @@ package com.example.server.repository;
 
 import com.example.server.model.dto.admin.UserStatisticsDTO;
 import com.example.server.model.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -34,4 +37,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             FROM User u
             """)
     Double getUserGrowthRateComparedTo(LocalDateTime date);
+    @EntityGraph(attributePaths = "role")
+    Page<User> findByRole_NameNot(String roleName, Pageable pageable);
 }

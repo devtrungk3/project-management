@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@RestController
+@RestController("UserControllerForUser")
 @RequiredArgsConstructor
 @RequestMapping("api/v1/user")
 public class UserController {

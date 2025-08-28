@@ -3,12 +3,17 @@ package com.example.server.service.domain.user;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.exception.RoleNotFoundException;
 import com.example.server.exception.UsernameExistsException;
+import com.example.server.model.dto.RoleDTO;
+import com.example.server.model.dto.UserDTO;
 import com.example.server.model.entity.Role;
 import com.example.server.model.entity.User;
+import com.example.server.model.entity.UserStatus;
 import com.example.server.repository.RoleRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.service.security.JWTService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,8 +34,17 @@ public class UserServiceImpl implements UserService{
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<UserDTO> getAllUsers(int pageNumber, int pageSize) {
+        Page<User> users = userRepository.findByRole_NameNot("ADMIN", PageRequest.of(pageNumber, pageSize));
+        return users.map(user -> new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getFullname(),
+                new RoleDTO(user.getRole().getId(), user.getRole().getName()),
+                user.getStatus(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        ));
     }
 
     @Override
@@ -76,5 +90,59 @@ public class UserServiceImpl implements UserService{
     public void deleteUserById(int id) {
         if (userRepository.existsById(id)) userRepository.deleteById(id);
         else throw new IdNotFoundException("UserId " + id + " not found");
+    }
+
+    @Override
+    public UserDTO activeUser(int userId) {
+        User oldUser = userRepository.findById(userId).orElse(null);
+        if (oldUser != null) {
+            oldUser.setStatus(UserStatus.ACTIVE);
+            userRepository.save(oldUser);
+            return new UserDTO(
+                    oldUser.getId(),
+                    oldUser.getUsername(),
+                    oldUser.getFullname(),
+                    new RoleDTO(oldUser.getRole().getId(), oldUser.getRole().getName()),
+                    oldUser.getStatus(),
+                    oldUser.getCreatedAt(),
+                    oldUser.getUpdatedAt()
+            );
+        } else throw new IdNotFoundException("UserId " + userId + " not found");
+    }
+
+    @Override
+    public UserDTO suspendUser(int userId) {
+        User oldUser = userRepository.findById(userId).orElse(null);
+        if (oldUser != null) {
+            oldUser.setStatus(UserStatus.SUSPENDED);
+            userRepository.save(oldUser);
+            return new UserDTO(
+                    oldUser.getId(),
+                    oldUser.getUsername(),
+                    oldUser.getFullname(),
+                    new RoleDTO(oldUser.getRole().getId(), oldUser.getRole().getName()),
+                    oldUser.getStatus(),
+                    oldUser.getCreatedAt(),
+                    oldUser.getUpdatedAt()
+            );
+        } else throw new IdNotFoundException("UserId " + userId + " not found");
+    }
+
+    @Override
+    public UserDTO banUser(int userId) {
+        User oldUser = userRepository.findById(userId).orElse(null);
+        if (oldUser != null) {
+            oldUser.setStatus(UserStatus.BANNED);
+            userRepository.save(oldUser);
+            return new UserDTO(
+                    oldUser.getId(),
+                    oldUser.getUsername(),
+                    oldUser.getFullname(),
+                    new RoleDTO(oldUser.getRole().getId(), oldUser.getRole().getName()),
+                    oldUser.getStatus(),
+                    oldUser.getCreatedAt(),
+                    oldUser.getUpdatedAt()
+            );
+        } else throw new IdNotFoundException("UserId " + userId + " not found");
     }
 }
