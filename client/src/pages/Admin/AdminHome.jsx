@@ -4,6 +4,7 @@ import useAuth from '../../hooks/useAuth';
 import style from './AdminHome.module.css';
 import { Link, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard';
+import UserManagement from './UserManagement';
 
 const AdminHome = () => {
 
@@ -24,10 +25,16 @@ const AdminHome = () => {
       <div className={`sidebar ${style.sidebar}`}>
         <nav className="nav flex-column">
           <Link
-            to="/user/home"
+            to="/admin/dashboard"
             className={`nav-link ${style["nav-link"]} ${isActive('dashboard') ? style.active : ''}`}
           >
             Dashboard
+          </Link>
+          <Link
+            to="/admin/users"
+            className={`nav-link ${style["nav-link"]} ${isActive('users') ? style.active : ''}`}
+          >
+            User management
           </Link>
         </nav>
       </div>
@@ -70,6 +77,7 @@ const AdminHome = () => {
       <div className={`${style.content}`}>
         <Routes>
           <Route path="/dashboard" element={<Dashboard api={api} />} />
+          <Route path="/users" element={<UserManagement api={api} />}/>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

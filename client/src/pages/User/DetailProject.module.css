@@ -21,9 +21,6 @@
 .resource-item {
   background-color: #edeccd;
 }
-table {
-  user-select: none;
-}
 .toolbar-item {
   cursor: pointer;
 }
