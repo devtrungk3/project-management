@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Page<UserDTO> getAllUsers(int pageNumber, int pageSize) {
-        Page<User> users = userRepository.findByRole_NameNot("ADMIN", PageRequest.of(pageNumber, pageSize));
+        Page<User> users = userRepository.findByRole_NameNotOrderByCreatedAtDesc("ADMIN", PageRequest.of(pageNumber, pageSize));
         return users.map(user -> new UserDTO(
                 user.getId(),
                 user.getUsername(),

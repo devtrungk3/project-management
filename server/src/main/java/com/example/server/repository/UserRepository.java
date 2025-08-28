@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -38,5 +37,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             """)
     Double getUserGrowthRateComparedTo(LocalDateTime date);
     @EntityGraph(attributePaths = "role")
-    Page<User> findByRole_NameNot(String roleName, Pageable pageable);
+    Page<User> findByRole_NameNotOrderByCreatedAtDesc(String roleName, Pageable pageable);
 }
