@@ -4,10 +4,14 @@ import userService from "../../services/Admin/UserService";
 import { formatDateTime } from '../../utils/format';
 import style from './UserManagement.module.css'
 import { FaPlus } from "react-icons/fa";
+import UserDialog from "../../components/UserDialog";
+import { toast } from 'react-toastify';
 
 const UserManagement = ({api}) => {
     const [users, setUsers] = useState(null);
     const [usersPageNumber, setUsersPageNumber] = useState(0);
+    const [openUserDialog, setOpenUserDialog] = useState(0);
+    const [userInfoTemp, setUserInfoTemp] = useState(null);
     useEffect(() => {
         fetchUserData();
     }, [usersPageNumber]);
@@ -65,11 +69,27 @@ const UserManagement = ({api}) => {
             }
         }
     }
+    const handleOpenUserDialog = () => {
+        setOpenUserDialog(1);
+    }
+    const handleCloseUserDialog = () => {
+        setOpenUserDialog(0);
+    }
+    const addNewUser = async () => {
+        try {
+            await userService.addNewUser(api, userInfoTemp);
+            await fetchUserData();
+            toast.success("Create new user successfully");
+        } catch (error) {
+        }
+        handleCloseUserDialog()
+        setUserInfoTemp(null);
+    }
     return (
         <>
             <Row className="mb-3">
                 <div className="d-flex gap-3">
-                    <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-black`} onClick={() => handleOpenTaskDialog(tasks.length+1, true)}>
+                    <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-black`} onClick={handleOpenUserDialog}>
                         <div className="d-flex align-items-center gap-2">
                             <FaPlus />
                             <span className="fw-semibold">New user</span>
@@ -118,6 +138,7 @@ const UserManagement = ({api}) => {
                     ))}
                 </tbody>
             </Table>
+            <UserDialog openUserDialog={openUserDialog} handleCloseUserDialog={handleCloseUserDialog} onSubmit={addNewUser} userInfo={userInfoTemp} setUserInfo={setUserInfoTemp} />
         </>
     );
 }

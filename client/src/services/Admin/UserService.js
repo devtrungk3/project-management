@@ -7,6 +7,14 @@ const getAllUsers = async (api, pageNumber) => {
         throw new error;
     }
 }
+const addNewUser = async (api, userInfo) => {
+    try {
+        await api.post("/admin/users", userInfo);
+    } catch (error) {
+        console.log("Failed to add user: ", error);
+        throw new error;
+    }
+}
 const deleteUser = async (api, userId) => {
     try {
         const response = await api.delete(`/admin/users/${userId}`);
@@ -44,6 +52,7 @@ const banUser = async (api, userId) => {
 }
 export default {
     getAllUsers,
+    addNewUser,
     deleteUser,
     activeUser,
     suspendUser,
