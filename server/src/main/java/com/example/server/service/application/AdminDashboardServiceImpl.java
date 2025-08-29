@@ -39,7 +39,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         ProjectStatisticsDTO projectStatistics = projectRepository.getProjectSummary().orElse(null);
         if (projectStatistics != null) {
             double successRate = projectStatistics.getTotalProjects() != 0 ?
-                    (double)projectStatistics.getCompletedProjects() / projectStatistics.getTotalProjects()
+                    (double)projectStatistics.getCompletedProjects()*100 / projectStatistics.getTotalProjects()
                     : 0;
             projectStatistics.setSuccessRate(successRate);
 
