@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { Row, Table } from "react-bootstrap";
+import { useCallback, useEffect, useState } from "react";
+import { Row, Table, Button } from "react-bootstrap";
 import userService from "../../services/Admin/UserService";
 import { formatDateTime } from '../../utils/format';
 import style from './UserManagement.module.css'
-import { FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaPlus } from "react-icons/fa";
 import UserDialog from "../../components/UserDialog";
 import { toast } from 'react-toastify';
 
@@ -12,6 +12,8 @@ const UserManagement = ({api}) => {
     const [usersPageNumber, setUsersPageNumber] = useState(0);
     const [openUserDialog, setOpenUserDialog] = useState(0);
     const [userInfoTemp, setUserInfoTemp] = useState(null);
+    const [goPrev, setGoPrev] = useState(false);
+    const [goNext, setGoNext] = useState(false);
     useEffect(() => {
         fetchUserData();
     }, [usersPageNumber]);
@@ -19,6 +21,8 @@ const UserManagement = ({api}) => {
         let data = null;
         try {
             data = await userService.getAllUsers(api, usersPageNumber);
+            if (goPrev !== !data.first) setGoPrev(!data.first);
+            if (goNext !== !data.last) setGoNext(!data.last);
         } catch (error) {
             setUsersPageNumber(0);
         }
@@ -85,6 +89,16 @@ const UserManagement = ({api}) => {
         handleCloseUserDialog()
         setUserInfoTemp(null);
     }
+    const goToPrevPage = useCallback(() => {
+        if (goPrev) {
+            setUsersPageNumber(usersPageNumber-1);
+        }
+    }, [goPrev]);
+    const goToNextPage = useCallback(() => {
+        if (goNext) {
+            setUsersPageNumber(usersPageNumber+1);
+        }
+    }, [goNext]);
     return (
         <>
             <Row className="mb-3">
@@ -138,6 +152,15 @@ const UserManagement = ({api}) => {
                     ))}
                 </tbody>
             </Table>
+            <div className="d-flex justify-content-center align-items-center gap-2">
+                <Button variant="" disabled={!goPrev} className={goPrev || `${style["unactive-arrow"]}`} onClick={goToPrevPage}>
+                    <FaArrowLeft />
+                </Button>
+                <Button disabled>{usersPageNumber+1}</Button>
+                <Button variant="" disabled={!goNext} className={goNext || `${style["unactive-arrow"]}`} onClick={goToNextPage}>
+                    <FaArrowRight />
+                </Button>
+            </div>
             <UserDialog openUserDialog={openUserDialog} handleCloseUserDialog={handleCloseUserDialog} onSubmit={addNewUser} userInfo={userInfoTemp} setUserInfo={setUserInfoTemp} />
         </>
     );
