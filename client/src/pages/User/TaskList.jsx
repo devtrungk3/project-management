@@ -102,7 +102,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
         e.preventDefault();
         const taskInfo = {
             ...tempTaskInfo,
-            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration-1, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
+            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => prev.map(task => task.id === taskInfo.id ? taskInfo : task));
         handleCloseTaskDialog();
@@ -111,7 +111,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
         e.preventDefault();
         const taskInfo = {
             ...tempTaskInfo,
-            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration-1, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
+            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => [...prev, taskInfo])
         handleCloseTaskDialog();

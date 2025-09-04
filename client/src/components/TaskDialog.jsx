@@ -77,6 +77,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                 <TextField
                                     fullWidth
                                     margin="dense"
+                                    required
                                     id="start"
                                     name="start"
                                     label="Start"
@@ -95,6 +96,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                 <TextField
                                     fullWidth
                                     margin="dense"
+                                    required
                                     id="duration"
                                     name="duration"
                                     label="Duration"
