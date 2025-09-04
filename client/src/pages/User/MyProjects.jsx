@@ -171,7 +171,7 @@ const MyProjects = ({api}) => {
                         <Col md={6}>
                             <Card className={`${style.card} ${statisticsOption || style.active}`} onClick={() => setStatisticsOption(0)}>
                                 <Card.Body>
-                                    <Card.Title className="fs-3 fw-bold">My projects</Card.Title>
+                                    <Card.Title className="fs-4 fw-bold">My projects</Card.Title>
                                     {!statisticsOption ? <Card.Text className="mt-3 fs-4">{projectData ? `Total: ${projectData.totalElements}`: '\u00A0'}</Card.Text> : <Card.Text className="mt-3 fs-4">&nbsp;</Card.Text>}
                                 </Card.Body>
                             </Card>
@@ -179,7 +179,7 @@ const MyProjects = ({api}) => {
                         <Col md={6}>
                             <Card className={`${style.card} ${statisticsOption && style.active}`} onClick={() => setStatisticsOption(1)}>
                                 <Card.Body>
-                                    <Card.Title className="fs-3 fw-bold">Joined projects</Card.Title>
+                                    <Card.Title className="fs-4 fw-bold">Joined projects</Card.Title>
                                     {statisticsOption ? <Card.Text className="mt-3 fs-4">{projectData ? `Total: ${projectData.totalElements}`: '\u00A0'}</Card.Text> : <Card.Text className="mt-3 fs-4">&nbsp;</Card.Text>}
                                 </Card.Body>
                             </Card>

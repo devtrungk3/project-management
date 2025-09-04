@@ -7,12 +7,20 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+const theme = createTheme({
+  typography: {
+    fontFamily: '"Fire Code", monospace',
+  },
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <App />
-      <ToastContainer />
-    </AuthProvider>
+    <ThemeProvider theme={theme}>
+      <AuthProvider>
+        <App />
+        <ToastContainer />
+      </AuthProvider>
+    </ThemeProvider>
   </StrictMode>,
 )
