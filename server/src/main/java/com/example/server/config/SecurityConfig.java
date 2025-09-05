@@ -33,10 +33,10 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("api/v1/auth/**", "api/v1/helloworld")
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/helloworld")
                         .permitAll()
-                        .requestMatchers("api/v1/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("api/v1/user/**").hasAuthority("USER")
+                        .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/v1/user/**").hasAuthority("USER")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

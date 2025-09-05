@@ -113,4 +113,9 @@ public class GlobalExceptionHandler {
         System.out.println("ResourceNotFoundException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found"));
     }
+    @ExceptionHandler(TooManyRequestException.class)
+    public ResponseEntity<Map<String, String>> handleTooManyRequest(TooManyRequestException e) {
+        System.out.println("TooManyRequestException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", "Too many request"));
+    }
 }

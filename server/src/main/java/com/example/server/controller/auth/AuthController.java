@@ -1,9 +1,13 @@
 package com.example.server.controller.auth;
 
+import com.example.server.exception.TooManyRequestException;
 import com.example.server.model.entity.User;
 import com.example.server.service.security.JWTService;
 import com.example.server.service.domain.user.UserService;
+import com.example.server.service.security.RateLimitService;
+import io.github.bucket4j.Bucket;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import java.util.Map;
 public class AuthController {
     private final UserService userService;
     private final JWTService jwtService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody User newUser) {
@@ -28,7 +33,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User userCredentialRequest, HttpServletResponse response) {
+    public ResponseEntity<String> login(@RequestBody User userCredentialRequest, HttpServletRequest request, HttpServletResponse response) {
+        String ipAddress = request.getRemoteAddr();
+        Bucket loginBucket = rateLimitService.getBucket(ipAddress, "LOGIN");
+        if (!loginBucket.tryConsume(1)) {
+            throw new TooManyRequestException("Too many login request from IP: " + ipAddress, ipAddress);
+        }
         List<String> newTokens = userService.verify(userCredentialRequest);
         if (newTokens == null || newTokens.size() != 2) throw new BadCredentialsException("Login failed: cannot create tokens");
         String newAccessToken = newTokens.get(0);
