@@ -38,4 +38,14 @@ public class TaskDTO {
         this.complete = complete;
         this.resourceAllocations = resourceAllocations;
     }
+
+    public TaskDTO(int id, String name, int arrangement, float duration, LocalDate finish, TaskPriority priority, int complete) {
+        this.id = id;
+        this.name = name;
+        this.arrangement = arrangement;
+        this.duration = duration;
+        this.finish = finish;
+        this.priority = priority;
+        this.complete = complete;
+    }
 }

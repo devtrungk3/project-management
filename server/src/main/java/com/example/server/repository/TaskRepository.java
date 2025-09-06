@@ -1,5 +1,7 @@
 package com.example.server.repository;
 
+import com.example.server.model.dto.MilestoneDTO;
+import com.example.server.model.dto.TaskDTO;
 import com.example.server.model.dto.admin.TaskStatisticsDTO;
 import com.example.server.model.dto.user.OverviewDTO;
 import com.example.server.model.entity.Task;
@@ -73,4 +75,16 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             FROM Task t
             """)
     TaskStatisticsDTO getTaskSummary();
+    @Query("""
+            SELECT new com.example.server.model.dto.MilestoneDTO(t.id, t.name, t.finish, t.complete)
+            FROM Task t
+            WHERE t.project.owner.id = :userId AND t.project.id = :projectId AND t.complete < 100 AND t.duration = 0
+            """)
+    List<MilestoneDTO> getUpcomingMilestones(int userId, int projectId);
+    @Query("""
+            SELECT new com.example.server.model.dto.TaskDTO(t.id, t.name, t.arrangement, t.duration, t.finish, t.priority, t.complete)
+            FROM Task t
+            WHERE t.project.owner.id = :userId AND t.project.id = :projectId AND t.complete < 100 AND t.finish < CURRENT_DATE
+            """)
+    List<TaskDTO> getOverdueTasks(int userId, int projectId);
 }

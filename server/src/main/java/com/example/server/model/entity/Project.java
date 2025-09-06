@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -37,4 +38,6 @@ public class Project {
     @UpdateTimestamp
     @Column(insertable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "project")
+    private List<Task> tasks ;
 }

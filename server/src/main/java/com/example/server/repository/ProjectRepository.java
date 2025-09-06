@@ -4,6 +4,7 @@ import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.StatusCountDTO;
 import com.example.server.model.dto.admin.ProjectStatisticsDTO;
 import com.example.server.model.dto.admin.TopProjectManagerDTO;
+import com.example.server.model.dto.user.ProjectOverviewReportDTO;
 import com.example.server.model.entity.Project;
 import com.example.server.model.entity.ProjectStatus;
 import org.springframework.data.domain.Page;
@@ -81,4 +82,18 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             GROUP BY p.owner.username
             """)
     List<TopProjectManagerDTO> findTopOwnerByProjectCount(Pageable pageable);
+    @Query("""
+            SELECT new com.example.server.model.dto.user.ProjectOverviewReportDTO(MIN(t.start), MAX(t.finish))
+            FROM Project p
+            JOIN p.tasks t
+            WHERE p.owner.id = :userId AND p.id = :projectId
+            """)
+    ProjectOverviewReportDTO getProjectStartAndFinish(int userId, int projectId);
+    @Query("""
+            SELECT SUM(t.duration * t.complete)*100/SUM(t.duration * 100)
+            FROM Project p
+            JOIN p.tasks t
+            WHERE p.owner.id = :userId AND p.id = :projectId
+            """)
+    Double getProjectComplete(int userId, int projectId);
 }
