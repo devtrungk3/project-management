@@ -1,4 +1,4 @@
-package com.example.server.service.application;
+package com.example.server.service.application.admin;
 
 import com.example.server.model.dto.admin.ProjectStatisticsDTO;
 import com.example.server.model.dto.admin.TaskStatisticsDTO;
@@ -16,9 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service("adminDashboardService")
 @RequiredArgsConstructor
-public class AdminDashboardServiceImpl implements AdminDashboardService {
+public class DashboardServiceImpl implements DashboardService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;

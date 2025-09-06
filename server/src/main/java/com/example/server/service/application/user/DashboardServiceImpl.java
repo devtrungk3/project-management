@@ -1,4 +1,4 @@
-package com.example.server.service.application;
+package com.example.server.service.application.user;
 
 import com.example.server.model.dto.user.OverviewDTO;
 import com.example.server.repository.JoinRequestRepository;
@@ -12,9 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service("userDashboardService")
 @RequiredArgsConstructor
-public class UserDashboardServiceImpl implements UserDashboardService {
+public class DashboardServiceImpl implements DashboardService {
     private final TaskRepository taskRepository;
     private final JoinRequestRepository joinRequestRepository;
     @Override
