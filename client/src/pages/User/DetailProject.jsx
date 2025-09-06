@@ -154,7 +154,7 @@ const DetailProject = ({isMyProject}) => {
                         </Link>
                     </Card>}
                     {isMyProject === true && <Card className={`justify-content-center p-2 border border-none ${style.nav} ${isActive('reports') === true && style.active}`}>
-                        <Link to={`/user/my-projects/${projectId}/reports`} className="text-dark">
+                        <Link to={`/user/my-projects/${projectId}/reports/project-overview`} className="text-dark">
                             <HiOutlineChartBar className="fs-2"/>
                         </Link>
                     </Card>}
@@ -166,7 +166,7 @@ const DetailProject = ({isMyProject}) => {
                         (<Route path="/resources" element={<Resources api={api} projectId={projectId} />} />)
                         }
                         {isMyProject === true &&
-                        (<Route path="/reports" element={<Reports api={api} projectId={projectId} />} />)
+                        (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} />} />)
                         }
                         <Route path="*" element={<Navigate to=".." replace />} />
                     </Routes>

@@ -3,7 +3,11 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import style from '../pages/User/DetailProject.module.css'
 import { formatDate } from '../utils/format';
-
+const TASK_PRIORITY_COLOR = {
+    "LOW": '#b1b8b1ff',
+    "MEDIUM": '#FFD54F',
+    "HIGH": '#E57373'
+}
 const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyProject }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: task.id
@@ -30,12 +34,12 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
     <tr ref={setNodeRef} style={trStyle} className={isSelected ? 'bg-light' : ''} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
       <td className={`${style.cell} text-center`} {...attributes} {...(isMyProject ? listeners : {})} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
       <td className={`${style.cell} text-center`}>{index + 1}</td>
-      <td className={`${style.cell}`}>{task.name}</td>
-      <td className={`${style.cell}`}>{task.priority}</td>
+      <td className={`${style.cell} ${task.duration == 0 && 'fw-bold'}`}>{task.name}</td>
+      <td className={`${style.cell}`} style={{ backgroundColor: TASK_PRIORITY_COLOR[task.priority]}}>{task.priority}</td>
       <td className={`${style.cell}`}>
-        <div className='d-flex flex-wrap gap-2'>
+        <div className='d-flex gap-2'>
           {task.resourceAllocations.map((resource) => 
-            <div key={resource.resourceId} className={`${style['resource-item']} px-2 rounded-3`}>{`${resource.username}`}</div>
+            <span key={resource.resourceId} className={`${style['resource-item']} px-2 rounded-3`}>{`${resource.username}`}</span>
           )}
         </div>
       </td>
