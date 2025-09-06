@@ -9,6 +9,7 @@ function Login() {
     password: ''
   });
   const [error, setError] = useState('');
+  const [waiting, setWaiting] = useState(false);
   const { login } = useAuth();
 
   const handleChange = (e) => {
@@ -21,12 +22,14 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setWaiting(true);
     try {
       await login(formData);
+      setError('');
     } catch (error) {
       setError(error.response?.data?.error || 'Login failed. Please try again.');
     }
+    setWaiting(false);
   };
 
   return (
@@ -83,7 +86,9 @@ function Login() {
                                     required/>
                               </Form.Group>
                               <div className="pt-1 mb-4">
-                                  <Button className="btn btn-dark btn-lg btn-block" type="submit">Login</Button>
+                                  <Button className="btn btn-dark btn-lg btn-block" type="submit">
+                                    {waiting ? <span><span className='spinner-border spinner-border-sm'/> Waiting</span> : 'Login'}
+                                  </Button>
                               </div>
                               <p className="mb-5 pb-lg-2" style={{ color: "#393f81" }}>
                                   Don't have an account?{" "}

@@ -13,7 +13,7 @@ function Register() {
         repassword:''
     });
     const [error, setError] = useState('');
-
+    const [waiting, setWaiting] = useState(false);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -28,14 +28,16 @@ function Register() {
           setError("Password and re-password do not match")
           return
         }
-        setError('');
+        setWaiting(true);
         try {
           await registerApi(formData);
+          setError('');
           toast.success("Register sucessfully");
           navigate('/login')
         } catch (err) {
           setError(err.response?.data?.error || 'Register failed. Please try again.');
         }
+        setWaiting(false);
     };
 
   return (
@@ -110,7 +112,9 @@ function Register() {
                                     required/>
                               </Form.Group>
                               <div className="pt-2 mb-3">
-                                  <Button className="btn btn-dark btn-lg btn-block" type="submit">Register</Button>
+                                  <Button className="btn btn-dark btn-lg btn-block" type="submit">
+                                    {waiting ? <span><span className='spinner-border spinner-border-sm'/> Waiting</span> : 'Register'}
+                                  </Button>
                               </div>
                               <p className="mb-1" style={{ color: "#393f81" }}>
                                   If you already have an account{" "}
