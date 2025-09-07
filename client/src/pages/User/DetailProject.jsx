@@ -61,7 +61,7 @@ const DetailProject = ({isMyProject}) => {
                 </Col>
                 <div className="d-inline-flex dropdown pt-2 gap-3">
                     <a
-                    className="nav-link dropdown-toggle"
+                    className={`nav-link dropdown-toggle ${style.project_name}`}
                     href="#"
                     id="userDropdown"
                     role="button"

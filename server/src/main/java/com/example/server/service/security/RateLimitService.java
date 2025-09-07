@@ -22,7 +22,7 @@ public class RateLimitService {
             case "LOGIN":
                 return Bucket.builder()
                         .addLimit(Bandwidth.classic(
-                                3, Refill.greedy(3, Duration.ofSeconds(15))))
+                                5, Refill.greedy(1, Duration.ofSeconds(30))))
                         .build();
             default:
                 return Bucket.builder()

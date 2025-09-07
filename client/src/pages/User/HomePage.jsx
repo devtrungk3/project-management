@@ -44,7 +44,7 @@ const HomePage = ({api}) => {
         <>
             <Row>
                 <Col lg={3}>
-                    <MDBCard shadow='sm' background='white' className="mb-4">
+                    <MDBCard shadow='sm' background='info' className="mb-4">
                         <MDBCardBody className='text-dark'>
                         <MDBCardTitle>My active tasks</MDBCardTitle>
                         <MDBCardText className="fs-3">{overviewData?.myActiveTasks || 0}</MDBCardText>
@@ -55,8 +55,8 @@ const HomePage = ({api}) => {
                     </MDBCard>
                 </Col>
                 <Col lg={3}>
-                    <MDBCard shadow='sm' background='white' className="mb-4">
-                        <MDBCardBody className='text-dark'>
+                    <MDBCard shadow='sm' background='danger' className="mb-4 text-white">
+                        <MDBCardBody className='text-white'>
                         <MDBCardTitle>My overdue tasks</MDBCardTitle>
                         <MDBCardText className="fs-3">{overviewData?.myOverdueTasks || 0}</MDBCardText>
                         </MDBCardBody>
@@ -66,7 +66,7 @@ const HomePage = ({api}) => {
                     </MDBCard>
                 </Col>
                 <Col lg={3}>
-                    <MDBCard shadow='sm' background='white' className="mb-4">
+                    <MDBCard shadow='sm' background='warning' className="mb-4">
                         <MDBCardBody className='text-dark'>
                         <MDBCardTitle>Pending requests</MDBCardTitle>
                         <MDBCardText className="fs-3">{overviewData?.pendingIncomingJoinRequests || 0}</MDBCardText>
@@ -79,8 +79,8 @@ const HomePage = ({api}) => {
             </Row>
             <Row>
                 <Col lg={4}>
-                    <MDBCard shadow='sm' background='white' className="mb-4">
-                        <MDBCardHeader background="white">Task status</MDBCardHeader>
+                    <MDBCard shadow='sm' background='light' className="mb-4">
+                        <MDBCardHeader>Task status</MDBCardHeader>
                         <MDBCardBody className='text-dark d-flex gap-4'>
                             {overviewData && 
                             <PieChart width={180} height={180}>
@@ -102,8 +102,8 @@ const HomePage = ({api}) => {
                             </div>   
                         </MDBCardBody>
                     </MDBCard>
-                    <MDBCard shadow='sm' background='white' className="mb-4">
-                        <MDBCardHeader background="white">Task priority distribution</MDBCardHeader>
+                    <MDBCard shadow='sm' background='light' className="mb-4">
+                        <MDBCardHeader>Task priority distribution</MDBCardHeader>
                         <MDBCardBody className='text-dark d-flex gap-4'>
                             {overviewData &&
                             <PieChart width={180} height={180}>
@@ -127,8 +127,8 @@ const HomePage = ({api}) => {
                     </MDBCard>
                 </Col>
                 <Col lg={8}>
-                    <MDBCard shadow='sm' background='white'>
-                        <MDBCardHeader background="white">Upcoming tasks in next 10 days</MDBCardHeader>
+                    <MDBCard shadow='sm' background='light'>
+                        <MDBCardHeader>Upcoming tasks in next 10 days</MDBCardHeader>
                         <MDBCardBody className='text-dark d-flex gap-4'>
                             <div style={{ width: '100%', height: 460 }}>
                             {overviewData &&

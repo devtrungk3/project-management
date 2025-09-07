@@ -8,7 +8,7 @@ const Reports = ({api, projectId}) => {
             <div className="mt-2">
                 <div className="dropdown btn btn-info m-0 p-0">
                 <a
-                    className="nav-link px-3 py-1 m-0"
+                    className="nav-link px-3 py-1 m-0 dropdown-toggle"
                     href="#"
                     id="userDropdown"
                     role="button"

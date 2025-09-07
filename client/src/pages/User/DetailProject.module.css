@@ -2,6 +2,11 @@
   height: 60vh;
   padding-top: 20px;
 }
+.project_name {
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .cell {
   border: 1px solid #ccc;
   padding-inline: 8px;
