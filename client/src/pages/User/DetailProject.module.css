@@ -17,12 +17,6 @@
   text-overflow: ellipsis;
   font-size: 13px;
 }
-.min_width_50 {
-  min-width: 50px;
-}
-.min_width_100 {
-  min-width: 100px;
-}
 .cell-header {
   background-color: #eee;
 }

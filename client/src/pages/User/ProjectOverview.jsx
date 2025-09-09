@@ -3,6 +3,11 @@ import style from './Reports.module.css';
 import { Col, Row } from "react-bootstrap";
 import reportService from '../../services/User/ReportService';
 import { formatDate } from '../../utils/format';
+const TASK_PRIORITY_COLOR = {
+    "LOW": '#b1b8b1ff',
+    "MEDIUM": '#FFD54F',
+    "HIGH": '#E57373'
+}
 const ProjectOverview = ({api, projectId}) => {
     const [overviewData, setOverviewData] = useState(null);
     useEffect(() => {
@@ -76,7 +81,7 @@ const ProjectOverview = ({api, projectId}) => {
                                     <td className={`${style.cell}`}>{t.duration} days</td>
                                     <td className={`${style.cell}`}>{t.finish}</td>
                                     <td className={`${style.cell}`}>{t.complete}%</td>
-                                    <td className={`${style.cell}`}>{t.priority}</td>
+                                    <td className={`${style.cell}`} style={{ backgroundColor: TASK_PRIORITY_COLOR[t.priority]}}>{t.priority}</td>
                                 </tr>
                             ))}
                         </tbody>

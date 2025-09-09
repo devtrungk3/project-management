@@ -12,13 +12,14 @@ import projectService from '../../services/User/ProjectService';
 import joinRequestService from '../../services/User/JoinRequestService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatDateTime } from '../../utils/format';
 
-const COLORS = [
-  '#bc9995', // Planning
-  '#ffafaf', // In progress
-  '#c8e0fa', // Done
-  '#547abb', // Cancelled
-];
+const PROJECT_STATUS_COLORS = {
+    "PLANNING": '#bc9995',
+    "IN_PROGRESS": '#ffafaf',
+    "DONE": '#c8e0fa',
+    "CANCELLED": '#547abb'
+}
 
 const MyProjects = ({api}) => {
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
@@ -212,29 +213,22 @@ const MyProjects = ({api}) => {
                                     <PieChart width={180} height={180}>
                                         <Pie data={statisticsData.statusCounts} cx={90} cy={90} outerRadius={80} dataKey="count" nameKey="status">
                                         {statisticsData.statusCounts.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                                            <Cell key={`cell-${index}`} fill={PROJECT_STATUS_COLORS[entry.status]} />
                                         ))}
                                         </Pie>
                                         <Tooltip />
                                     </PieChart>}
                                 </Col>
                                 <Col md={4} className="d-flex flex-column justify-content-center">
-                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                                        <span style={{ background: `${COLORS[0]}`, width: 22, height: 22, borderRadius: '50%', display: 'inline-block', marginRight: 7 }}></span>
-                                        <span style={{ color: '#181B20', fontWeight: 700, fontSize: 18 }}>PLANNING</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                                        <span style={{ background: `${COLORS[1]}`, width: 22, height: 22, borderRadius: '50%', display: 'inline-block', marginRight: 7 }}></span>
-                                        <span style={{ color: '#181B20', fontWeight: 700, fontSize: 18 }}>IN PROGRESS</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                                        <span style={{ background: `${COLORS[2]}`, width: 22, height: 22, borderRadius: '50%', display: 'inline-block', marginRight: 7 }}></span>
-                                        <span style={{ color: '#181B20', fontWeight: 700, fontSize: 18 }}>DONE</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 0 }}>
-                                        <span style={{ background: `${COLORS[3]}`, width: 22, height: 22, borderRadius: '50%', display: 'inline-block', marginRight: 7 }}></span>
-                                        <span style={{ color: '#181B20', fontWeight: 700, fontSize: 18 }}>CANCELLED</span>
-                                    </div>
+                                    {
+                                        Object.entries(PROJECT_STATUS_COLORS).map(([status, color]) => (
+                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }} key={status}>
+                                                <span style={{ background: `${color}`, width: 22, height: 22, borderRadius:
+                                                '50%', display: 'inline-block', marginRight: 7 }}></span>
+                                                <span style={{ color: '#181B20', fontWeight: 700, fontSize: 18 }}>{status.replace("_", " ")}</span>
+                                            </div>
+                                        ))
+                                    }
                                 </Col>
                             </Row>
                         </Card.Body>
@@ -262,8 +256,8 @@ const MyProjects = ({api}) => {
                                 <td style={{ fontSize: 18 }}><a href={statisticsOption == 0 ? `/user/my-projects/${project.id}` : `/user/joined-projects/${project.id}`}>{project.name}</a></td>
                                 <td style={{ fontSize: 18 }}>{project.ownerUsername}</td>
                                 <td style={{ fontSize: 18 }}>{project.status}</td>
-                                <td style={{ fontSize: 16 }}>{project.createdAt}</td>
-                                <td style={{ fontSize: 16 }}>{project.updatedAt || 'None'}</td>
+                                <td style={{ fontSize: 16 }}>{formatDateTime(project.createdAt)}</td>
+                                <td style={{ fontSize: 16 }}>{project?.updatedAt ? formatDateTime(project.updatedAt) : 'None'}</td>
                                 {statisticsOption == 0 && <td style={{ textAlign: 'center' }}>
                                 <Button variant="link" style={{ color: 'red', padding: 0 }} onClick={() => deleteProject(project.id)}>
                                     <FaTrash size={20} />

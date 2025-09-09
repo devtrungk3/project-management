@@ -167,16 +167,16 @@ const TaskList = ({api, projectId, isMyProject}) => {
                         <table className={`${style.table}`}>
                             <thead>
                                 <tr>
-                                <th className={`${style.cell} ${style.min_width_50} ${style['cell-header']}`}></th>
-                                <th className={`${style.cell} ${style.min_width_50} ${style['cell-header']} text-center`}>#</th>
+                                <th className={`${style.cell} min_width_50 ${style['cell-header']}`}></th>
+                                <th className={`${style.cell} min_width_50 ${style['cell-header']} text-center`}>#</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Name</th>
-                                <th className={`${style.cell} ${style.min_width_100} ${style['cell-header']}`}>Priority</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Priority</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Owners</th>
-                                <th className={`${style.cell} ${style.min_width_100} ${style['cell-header']}`}>Duration</th>
-                                <th className={`${style.cell} ${style.min_width_100} ${style['cell-header']}`}>Start</th>
-                                <th className={`${style.cell} ${style.min_width_100} ${style['cell-header']}`}>Finish</th>
-                                <th className={`${style.cell} ${style.min_width_100} ${style['cell-header']}`}>Complete</th>
-                                <th className={`${style.cell} ${style.min_width_100} ${style['cell-header']}`}>Effort</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Duration</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Start</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Finish</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Complete</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Effort</th>
                                 </tr>
                             </thead>
                             <tbody>

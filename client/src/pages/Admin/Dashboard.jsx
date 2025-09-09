@@ -124,7 +124,7 @@ const Dashboard = ({api}) => {
             <Col lg={8}>
                 <Row>
                     <Col lg={4}>
-                        <MDBCard shadow='sm' background='white' className="mb-4">
+                        <MDBCard shadow='sm' background='info' className="mb-4">
                             <MDBCardBody className='text-dark'>
                             <MDBCardTitle>TOTAL USERS: {userSummary?.totalUsers || 0}</MDBCardTitle>
                             <hr/>
@@ -136,7 +136,7 @@ const Dashboard = ({api}) => {
                         </MDBCard>
                     </Col>
                     <Col lg={4}>
-                        <MDBCard shadow='sm' background='white' className="mb-4">
+                        <MDBCard shadow='sm' className="mb-4" style={{ backgroundColor: '#c1db2c'}}>
                             <MDBCardBody className='text-dark'>
                             <MDBCardTitle>TOTAL PROJECTS: {projectSummary?.totalProjects || 0}</MDBCardTitle>
                             <hr/>
@@ -148,7 +148,7 @@ const Dashboard = ({api}) => {
                         </MDBCard>
                     </Col>                
                     <Col lg={4}>
-                        <MDBCard shadow='sm' background='white' className="mb-4">
+                        <MDBCard shadow='sm' className="mb-4" style={{ backgroundColor: '#f2ff66' }}>
                             <MDBCardBody className='text-dark'>
                             <MDBCardTitle>TOTAL TASKS: {taskSummary?.totalTasks || 0}</MDBCardTitle>
                             <hr/>
@@ -162,7 +162,7 @@ const Dashboard = ({api}) => {
                 </Row>
             </Col>
             <Col lg={4}>
-                <MDBCard shadow='sm' background='white' className="mb-4">
+                <MDBCard shadow='sm' className="mb-4" style={{ backgroundColor: '#b2a1d6' }}>
                     <MDBCardBody className='text-dark'>
                     <MDBCardTitle>RECENT TREND (vs 30 days ago)</MDBCardTitle>
                     <hr/>
@@ -177,32 +177,39 @@ const Dashboard = ({api}) => {
         <div>
             <div className="position-relative fs-4 fw-bold text-center">
                 <hr className="position-absolute w-100 z-0"/>
-                <span className="position-relative d-inline-block px-3 bg-white z-1 fs-4 fw-bold">PROJECT STATISTICS</span>
+                <span className="position-relative d-inline-block px-3 bg-white z-1 fs-4 fw-bold pb-4">PROJECT STATISTICS</span>
             </div>
             <Row>
                 <Col lg={8}>
-                    <div className="w-100 h-100 text-center">
-                        <div>NEW PROJECT TREND IN 2025</div>
+                    <div className="w-100 h-100 text-center shadow shadow-1 px-5 py-3 rounded-3 border border-1">
+                        <h5 className="text-primary">NEW PROJECT TREND IN 2025</h5>
                         <Line data={chartData} options={lineChartOptions} />
                     </div>
                 </Col>
                 <Col lg={4}>
-                    <div className="text-center">TOP PROJECT MANAGER</div>
-                    <div className="mt-4 d-flex flex-column gap-3">
-                        {projectSummary?.topProjectManager.map((pm, index) =>
-                            (<div className="d-flex" key={index}>
-                                <div className="w-25 text-center">{index+1}.</div>
-                                <div className="w-50 flex-fill text-break fw-medium">{pm.username}</div>
-                                <div className="w-25">{pm.projectCount} projects</div>
-                            </div>)
-                        )}
+                    <div className="w-100 h-100 shadow shadow-1 py-3 rounded-3 border border-1">
+                        <h5 className="text-center text-primary">TOP PROJECT MANAGER</h5>
+                        <div className="my-4 d-flex flex-column gap-3">
+                            <div className="d-flex border-bottom border-1 pb-2 border-secondary border-opacity-25">
+                                <div className="width_15 text-center fw-medium">#</div>
+                                <div className="width_55 flex-fill text-break fw-medium">Username</div>
+                                <div className="width_30 text-center fw-medium">Projects</div>
+                            </div>
+                            {projectSummary?.topProjectManager.map((pm, index) =>
+                                (<div className="d-flex" key={index}>
+                                    <div className="width_15 text-center text-success">{index+1}</div>
+                                    <div className="width_55 flex-fill text-break text-success">{pm.username}</div>
+                                    <div className="width_30 text-center text-success">{pm.projectCount}</div>
+                                </div>)
+                            )}
+                        </div>
                     </div>
                 </Col>
             </Row>
             <Row className="mt-4">
                 <Col lg={6}>
-                    <div className="text-center">
-                        <div>SUCCESS RATE</div>
+                    <div className="w-100 h-100 text-center shadow shadow-1 py-3 rounded-3 border border-1">
+                        <h5 className="text-primary">SUCCESS RATE</h5>
                         <div style={{ width: '250px', height: '150px', margin: '0 auto' }}>
                             <Doughnut data={success_rate_data} options={success_rate_options} />
                             <div style={{ textAlign: 'center', marginTop: '-50px', color: '#000' }}>
@@ -212,8 +219,8 @@ const Dashboard = ({api}) => {
                     </div>
                 </Col>
                 <Col lg={6}>
-                    <div className="text-center">
-                        <div>STATUS DISTRIBUTION</div>
+                    <div className="w-100 h-100 px-3 text-center shadow shadow-1 py-3 rounded-3 border border-1">
+                        <h5 className="text-primary">STATUS DISTRIBUTION</h5>
                         <Row>
                             <Col md={6}>
                                 <PieChart width={180} height={180}>

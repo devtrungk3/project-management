@@ -7,3 +7,18 @@ body {
 table {
   user-select: none;
 }
+.min_width_50 {
+  min-width: 50px;
+}
+.min_width_100 {
+  min-width: 100px;
+}
+.width_15 {
+  width: 15%;
+}
+.width_30 {
+  width: 30%;
+}
+.width_55 {
+  width: 55%;
+}
