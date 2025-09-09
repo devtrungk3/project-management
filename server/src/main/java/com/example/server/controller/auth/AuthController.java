@@ -6,15 +6,18 @@ import com.example.server.service.security.JWTService;
 import com.example.server.service.domain.user.UserService;
 import com.example.server.service.security.RateLimitService;
 import io.github.bucket4j.Bucket;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +35,16 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping("/csrf-token")
+    public ResponseEntity<?> getCsrfToken(HttpServletRequest request) {
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("headerName", csrfToken.getHeaderName());
+        tokenMap.put("token", csrfToken.getToken());
+        return ResponseEntity.ok(tokenMap);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User userCredentialRequest, HttpServletRequest request, HttpServletResponse response) {
         String ipAddress = request.getRemoteAddr();
@@ -43,11 +56,16 @@ public class AuthController {
         if (newTokens == null || newTokens.size() != 2) throw new BadCredentialsException("Login failed: cannot create tokens");
         String newAccessToken = newTokens.get(0);
         String newRefreshToken = newTokens.get(1);
-        Cookie cookie = new Cookie("refreshToken", newRefreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60);
-        response.addCookie(cookie);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofDays(1))
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+
         return ResponseEntity.ok(newAccessToken);
     }
     @PostMapping("/refresh-token")

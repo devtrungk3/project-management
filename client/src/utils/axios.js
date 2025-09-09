@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
+import { getCsrfToken } from '../services/AuthService';
 
 let getAccessToken = () => localStorage.getItem('accessToken');
 let setAccessToken = (token) => localStorage.setItem('accessToken', token);
@@ -24,7 +25,9 @@ const plainApi = axios.create({
   withCredentials: true,
 });
 
-customApi.interceptors.request.use((config) => {
+customApi.interceptors.request.use(async (config) => {
+  const csrf = await getCsrfToken();
+  config.headers["X-XSRF-TOKEN"] = csrf?.token || "";
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
