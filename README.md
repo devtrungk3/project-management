@@ -2,7 +2,7 @@
 
 ## Environment preparaion
 - **JDK** 17+ (check with ``java -version`` and ``javac -version``)
-- **NodeJs** 18+ (check with ``npm -version``)
+- **NodeJs** 18+ (check with ``node -version``)
 - Already installed **Docker engine** and **Docker Compose**
 - Running Docker engine before starting web server
 ## Setup
