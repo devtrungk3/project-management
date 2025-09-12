@@ -29,6 +29,7 @@ const GanttChart = ({tasks}) => {
   return (
     <Willow>
       <Gantt 
+        key={taskData.length}
         tasks={taskData} 
         links={links} 
         scales={scales}
