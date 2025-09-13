@@ -46,7 +46,16 @@ customApi.interceptors.response.use(
           if (isUnauthorized && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-              const refreshTokenResponse = await plainApi.post('auth/refresh-token');
+              let csrf = await getCsrfToken();
+              const refreshTokenResponse = await plainApi.post(
+                'auth/refresh-token',
+                {},
+                {
+                  headers: {
+                  "X-XSRF-TOKEN": csrf?.token || ""
+                  }
+                }
+              );
               const newAccessToken = refreshTokenResponse.data;
               const decoded = jwtDecode(newAccessToken);
 
@@ -54,6 +63,8 @@ customApi.interceptors.response.use(
               setUserRole(decoded?.role);
 
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+              csrf = await getCsrfToken();
+              originalRequest.headers['X-XSRF-TOKEN'] = csrf?.token || "";
               return plainApi(originalRequest);
             } catch (refreshErr) {
               await logoutFn();

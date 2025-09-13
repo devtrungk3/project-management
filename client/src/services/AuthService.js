@@ -41,6 +41,23 @@ export const registerApi = async (formData) => {
         throw error;
     }
 }
+export const logoutApi = async () => {
+    try {
+        const csrf = await getCsrfToken();
+        await api.post(
+            'auth/revoke-refresh-token',
+            {},
+            {
+                headers: {
+                "X-XSRF-TOKEN": csrf?.token || ""
+                }
+            }
+        );
+    } catch (error) {
+        console.error('Login error: ', error);
+        throw error;
+    }
+}
 export const getCsrfToken = async () => {
     try {
         const response = await api.get('auth/csrf-token');
