@@ -21,8 +21,18 @@ import { Button, Col, Row } from "react-bootstrap";
 import { toast } from 'react-toastify';
 import GanttChart from "../../components/GanttChart";
 import dayjs from "dayjs";
+import { useBlocker } from 'react-router-dom';
 
 const TaskList = ({api, projectId, isMyProject}) => {
+    useBlocker(() => {
+      if (isDirty) {
+        const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
+        return !leave;
+      }
+      return false;
+    }
+  );
+    const [isDirty, setIsDirty] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [resources, setResources] = useState(null);
     const [openTaskDialog, setOpenTaskDialog] = useState(0);
@@ -33,6 +43,21 @@ const TaskList = ({api, projectId, isMyProject}) => {
         loadTaskTable();
         loadResourceList();
     }, [])
+    useEffect(() => {
+        if (!isDirty) {
+            return;
+        }
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isDirty])
     const loadTaskTable = () => {
         (async () => {
             try {
@@ -70,6 +95,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 const newIndex = items.findIndex((item) => item.id === over?.id);
                 return arrayMove(items, oldIndex, newIndex);
             });
+            setIsDirty(true);
         }
     };
     const handleTaskSelect = (currentTaskIdSelected) => {
@@ -105,6 +131,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
             finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => prev.map(task => task.id === taskInfo.id ? taskInfo : task));
+        setIsDirty(true);
         handleCloseTaskDialog();
     }
     const addNewTaskInfo = (e) => {
@@ -114,12 +141,14 @@ const TaskList = ({api, projectId, isMyProject}) => {
             finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => [...prev, taskInfo])
+        setIsDirty(true);
         handleCloseTaskDialog();
     }
     const deleteTaskInfo = (e) => {
         if (taskIdSelected != 0) {
             if (confirm(`Are you sure?`)) {
                 setTasks(tasks.filter(task => task.id != taskIdSelected))
+                setIsDirty(true);
             }
         }
     }
@@ -131,7 +160,8 @@ const TaskList = ({api, projectId, isMyProject}) => {
             } else {
                 await taskService.updateTaskComplete(api, projectId, tasks);
             }
-            toast.success("Save successfully")
+            setIsDirty(false);
+            toast.success("Save successfully");
         } catch (error) {}
     }
     return (

@@ -1,14 +1,15 @@
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import {RouterProvider, createBrowserRouter} from 'react-router-dom'
 import './App.css'
 import RouteHandler from './pages/RouteHandler'
-
+const router = createBrowserRouter([
+  {
+    path: "/*",
+    element: <RouteHandler />,
+  }
+]);
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/*" element={<RouteHandler />} />
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router}/>
   )
 }
 

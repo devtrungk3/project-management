@@ -144,7 +144,7 @@ const DetailProject = ({isMyProject}) => {
                         </li>}
                     </ul>
                     <Card className={`justify-content-center p-2 border border-none ${style.nav} ${isActive('tasks') === true && style.active}`}>
-                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/tasks`} className="text-dark">
+                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}`} className="text-dark">
                             <MdOutlineViewTimeline className="fs-2"/>
                         </Link>
                     </Card>
