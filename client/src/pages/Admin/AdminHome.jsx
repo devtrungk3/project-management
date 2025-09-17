@@ -5,6 +5,7 @@ import style from './AdminHome.module.css';
 import { Link, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import UserManagement from './UserManagement';
+import Currency from './Currency';
 
 const AdminHome = () => {
 
@@ -35,6 +36,12 @@ const AdminHome = () => {
             className={`nav-link ${style["nav-link"]} ${isActive('users') ? style.active : ''}`}
           >
             User management
+          </Link>
+          <Link
+            to="/admin/currencies"
+            className={`nav-link ${style["nav-link"]} ${isActive('currencies') ? style.active : ''}`}
+          >
+            Currency management
           </Link>
         </nav>
       </div>
@@ -78,6 +85,7 @@ const AdminHome = () => {
         <Routes>
           <Route path="/dashboard" element={<Dashboard api={api} />} />
           <Route path="/users" element={<UserManagement api={api} />}/>
+          <Route path="/currencies" element={<Currency api={api} />}/>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

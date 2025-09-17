@@ -129,8 +129,8 @@ const Dashboard = ({api}) => {
                             <MDBCardTitle>TOTAL USERS: {userSummary?.totalUsers || 0}</MDBCardTitle>
                             <hr/>
                             <MDBCardText>
-                                Active: {userSummary?.activeUsers || 0} ({userSummary?.activeRate.toFixed(1) || 0}%)<br/>
-                                Inactive: {userSummary?.inactiveUsers || 0} ({userSummary?.inactiveRate.toFixed(1) || 0}%)
+                                Active: {userSummary?.activeUsers || 0} ({userSummary?.activeRate.toFixed(2) || 0}%)<br/>
+                                Inactive: {userSummary?.inactiveUsers || 0} ({userSummary?.inactiveRate.toFixed(2) || 0}%)
                             </MDBCardText>
                             </MDBCardBody>
                         </MDBCard>
@@ -141,8 +141,8 @@ const Dashboard = ({api}) => {
                             <MDBCardTitle>TOTAL PROJECTS: {projectSummary?.totalProjects || 0}</MDBCardTitle>
                             <hr/>
                             <MDBCardText>
-                                Completed: {projectSummary?.completedProjects || 0} ({projectSummary?.completedRate.toFixed(1) || 0}%)<br/>
-                                Cancelled: {projectSummary?.cancelledProjects || 0} ({projectSummary?.cancelledRate.toFixed(1) || 0}%)
+                                Completed: {projectSummary?.completedProjects || 0} ({projectSummary?.completedRate.toFixed(2) || 0}%)<br/>
+                                Cancelled: {projectSummary?.cancelledProjects || 0} ({projectSummary?.cancelledRate.toFixed(2) || 0}%)
                             </MDBCardText>
                             </MDBCardBody>
                         </MDBCard>
@@ -153,8 +153,8 @@ const Dashboard = ({api}) => {
                             <MDBCardTitle>TOTAL TASKS: {taskSummary?.totalTasks || 0}</MDBCardTitle>
                             <hr/>
                             <MDBCardText>
-                                Completed: {taskSummary?.completedTasks || 0} ({taskSummary?.completedRate.toFixed(1) || 0}%)<br/>
-                                Overdue: {taskSummary?.overdueTasks || 0} ({taskSummary?.overdueRate.toFixed(1) || 0}%)
+                                Completed: {taskSummary?.completedTasks || 0} ({taskSummary?.completedRate.toFixed(2) || 0}%)<br/>
+                                Overdue: {taskSummary?.overdueTasks || 0} ({taskSummary?.overdueRate.toFixed(2) || 0}%)
                             </MDBCardText>
                             </MDBCardBody>
                         </MDBCard>
@@ -167,8 +167,8 @@ const Dashboard = ({api}) => {
                     <MDBCardTitle>RECENT TREND (vs 30 days ago)</MDBCardTitle>
                     <hr/>
                     <MDBCardText>
-                        New users: {userSummary?.userGrowthCount || 0} (+{userSummary?.userGrowthRate.toFixed(1) || 0}%)<br/>
-                        New projects: {projectSummary?.projectGrowthCount || 0} (+{projectSummary?.projectGrowthRate.toFixed(1) || 0}%)<br/>
+                        New users: {userSummary?.userGrowthCount || 0} (+{userSummary?.userGrowthRate || 0}%)<br/>
+                        New projects: {projectSummary?.projectGrowthCount || 0} (+{projectSummary?.projectGrowthRate || 0}%)<br/>
                     </MDBCardText>
                     </MDBCardBody>
                 </MDBCard>

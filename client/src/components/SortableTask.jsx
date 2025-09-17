@@ -48,6 +48,7 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
       <td className={`${style.cell}`}>{formatDate(task.finish)}</td>
       <td className={`${style.cell}`}>{task.complete ? task.complete : 0} %</td>
       <td className={`${style.cell}`}>{task.effort ? task.effort : 0} hours</td>
+      <td className={`${style.cell}`}>{task.cost ? task.cost : 0}</td>
     </tr>
   );
 }

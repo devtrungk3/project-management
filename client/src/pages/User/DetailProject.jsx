@@ -13,12 +13,14 @@ import { TextField } from "@mui/material";
 import Resources from "./Resources";
 import { formatDateTime } from '../../utils/format';
 import Reports from "./Reports";
+import currencyService from '../../services/User/CurrencyService';
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
     const [projectInfo, setProjectInfo] = useState(null);
+    const [currencies, setCurrencies] = useState(null);
     const { logout, setAccessToken, setUserRole } = useAuth();
     useEffect(() => {
         setAuthHandlers({
@@ -27,7 +29,15 @@ const DetailProject = ({isMyProject}) => {
             updateUserRole: setUserRole
         });
         loadProjectInformation();
+        loadCurrencies();
     }, [])
+    const loadCurrencies = async () => {
+        let data = null;
+        try {
+            data = await currencyService.getAllCurrencies(api);
+        } catch (error) {}
+        setCurrencies(data);
+    }
     const isActive = (path) => {
         if (path === 'tasks' && (location.pathname === `/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}` || location.pathname === `/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/`)) return true;
         return location.pathname.startsWith(`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/${path}`);
@@ -125,7 +135,7 @@ const DetailProject = ({isMyProject}) => {
                                         <td className='pe-4 py-2'>Status:</td>
                                         {isMyProject ?
                                         <td>
-                                            <select id="options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})}>
+                                            <select id="status_options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})}>
                                                 <option value="PLANNING">PLANNING</option>
                                                 <option value="IN_PROGRESS">IN PROGRESS</option>
                                                 <option value="DONE">DONE</option>
@@ -134,6 +144,26 @@ const DetailProject = ({isMyProject}) => {
                                         </td>
                                         :
                                         <td>{projectInfo?.status}</td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <td className='pe-4 py-2'>Currency:</td>
+                                        {isMyProject ?
+                                        <td>
+                                            <select id="currency_options" value={projectInfo?.currency?.id} onChange={(e) => setProjectInfo(
+                                                {
+                                                    ...projectInfo, 
+                                                    currency: {id: e.target.value}
+                                                }
+                                            )}>
+                                                <option key={0} value={0}>None</option>
+                                                {currencies?.map(currency => 
+                                                    <option key={currency.id} value={currency.id}>{currency.name}</option>
+                                                )}
+                                            </select>
+                                        </td>
+                                        :
+                                        <td>{projectInfo?.currency?.name || 'None'}</td>
                                         }
                                     </tr>
                                 </tbody>

@@ -22,6 +22,8 @@ import { toast } from 'react-toastify';
 import GanttChart from "../../components/GanttChart";
 import dayjs from "dayjs";
 import { useBlocker } from 'react-router-dom';
+import tagRateService from "../../services/User/TagRateService";
+import { calculateTaskCost } from "../../utils/calculateTaskCost";
 
 const TaskList = ({api, projectId, isMyProject}) => {
     useBlocker(() => {
@@ -39,9 +41,11 @@ const TaskList = ({api, projectId, isMyProject}) => {
     const [tempTaskInfo, setTempTaskInfo] = useState(null);
     const [isAddDialog, setIsAddDialog] = useState(null);
     const [taskIdSelected, setTaskIdSelected] = useState(0);
+    const [tagRates, setTagRates] = useState(null);
     useEffect(() => {
         loadTaskTable();
         loadResourceList();
+        loadTagRates();
     }, [])
     useEffect(() => {
         if (!isDirty) {
@@ -80,6 +84,13 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 setResources(data);
             } catch(error) {}
         })();
+    }
+    const loadTagRates = async () => {
+        let data = null;
+        try {
+            data = await tagRateService.getAllTagRates(api, projectId);
+        } catch (error) {}
+        setTagRates(data);
     }
     const sensors = useSensors(
         useSensor(PointerSensor)
@@ -128,6 +139,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
         e.preventDefault();
         const taskInfo = {
             ...tempTaskInfo,
+            cost: calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
             finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => prev.map(task => task.id === taskInfo.id ? taskInfo : task));
@@ -138,6 +150,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
         e.preventDefault();
         const taskInfo = {
             ...tempTaskInfo,
+            cost: calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
             finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
         setTasks(prev => [...prev, taskInfo])
@@ -197,7 +210,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                         <table className={`${style.table}`}>
                             <thead>
                                 <tr>
-                                <th className={`${style.cell} min_width_50 ${style['cell-header']}`}></th>
+                                <th className={`${style.cell} min_width_25 ${style['cell-header']}`}></th>
                                 <th className={`${style.cell} min_width_50 ${style['cell-header']} text-center`}>#</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Name</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Priority</th>
@@ -207,6 +220,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Finish</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Complete</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Effort</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Total cost</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -222,7 +236,15 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     <GanttChart tasks={tasks} />
                 </Col>
             </Row>
-            <TaskDialog isMyProject={isMyProject} openTaskDialog={openTaskDialog} handleCloseTaskDialog={handleCloseTaskDialog} tempTaskInfo={tempTaskInfo} setTempTaskInfo={setTempTaskInfo} resources={resources} onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
+            <TaskDialog 
+                isMyProject={isMyProject} 
+                openTaskDialog={openTaskDialog} 
+                handleCloseTaskDialog={handleCloseTaskDialog} 
+                tempTaskInfo={tempTaskInfo} 
+                setTempTaskInfo={setTempTaskInfo} 
+                resources={resources}
+                tagRates={tagRates}
+                onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
         </>
     )
 }

@@ -32,7 +32,7 @@ function Register() {
         try {
           await registerApi(formData);
           setError('');
-          toast.success("Register sucessfully");
+          toast.success("Register successfully");
           navigate('/login')
         } catch (err) {
           setError(err.response?.data?.error || 'Register failed. Please try again.');

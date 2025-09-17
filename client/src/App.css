@@ -7,6 +7,9 @@ body {
 table {
   user-select: none;
 }
+.min_width_25 {
+  min-width: 25px;
+}
 .min_width_50 {
   min-width: 50px;
 }
@@ -21,4 +24,27 @@ table {
 }
 .width_55 {
   width: 55%;
+}
+.dialog_input {
+    border: 1px solid #77e6c1ff;
+    outline: none;
+}
+.dialog_input:focus {
+    border: 2px solid #5856d6 !important;
+}
+.dialog_input:hover {
+    border: 1px solid #000;
+}
+.dialog_input_label_container {
+    background-color: #fff;
+    position: absolute;
+    scale: 0.8;
+    top: -12px;
+    left: 0;
+    padding-left: 8px;
+    padding-right: 25px;
+}
+.dialog_input_label {
+    font-weight: 400;
+    opacity: 0.75;
 }
