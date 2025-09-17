@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -24,5 +27,8 @@ public class UserStatisticsDTO {
     public void setUserGrowthRate(Double userGrowthRate) {
         this.userGrowthRate = userGrowthRate != null ? userGrowthRate : 0.0;
     }
-
+    public double getUserGrowthRate() {
+        BigDecimal bigDecimal = new BigDecimal(String.valueOf(this.userGrowthRate)).setScale(2, RoundingMode.HALF_UP);
+        return bigDecimal.doubleValue();
+    }
 }

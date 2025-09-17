@@ -24,4 +24,7 @@ public class ResourceAllocation {
     @MapsId("taskId")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Task task;
+    @ManyToOne
+    @JoinColumn(name = "tagRateId")
+    private TagRate tagRate;
 }

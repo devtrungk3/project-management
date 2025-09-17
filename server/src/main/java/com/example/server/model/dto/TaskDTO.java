@@ -24,6 +24,7 @@ public class TaskDTO {
     private LocalDate finish;
     private TaskPriority priority;
     private int complete;
+    private float cost;
     private List<ResourceAllocationDTO> resourceAllocations;
 
     public TaskDTO(int id, String name, String description, float effort, float duration, LocalDate start, LocalDate finish, TaskPriority priority, int complete, List<ResourceAllocationDTO> resourceAllocations) {

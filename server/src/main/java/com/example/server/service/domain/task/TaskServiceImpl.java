@@ -1,8 +1,8 @@
 package com.example.server.service.domain.task;
 
+import com.example.server.exception.EntityNotFoundException;
 import com.example.server.model.dto.ResourceAllocationDTO;
 import com.example.server.model.dto.TaskDTO;
-import com.example.server.exception.ProjectNotFoundException;
 import com.example.server.exception.ProjectNotInProgressException;
 import com.example.server.model.entity.*;
 import com.example.server.repository.ProjectRepository;
@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,7 @@ public class TaskServiceImpl implements TaskService {
         // get all resource allocations for project owner
         List<ResourceAllocationDTO> resourceAllocations =
                 resourceAllocationRepository.findAllResourceAllocationsByProjectIdAndProjectOwnerId(projectId, ownerId);
-        return combineTasksAndResourceAllocations(tasks, resourceAllocations);
+        return combineTasksAndResourceAllocations(tasks, resourceAllocations, true);
     }
 
     @Override
@@ -48,14 +50,15 @@ public class TaskServiceImpl implements TaskService {
         // get all resource allocations for user
         List<ResourceAllocationDTO> resourceAllocations =
                 resourceAllocationRepository.findAllResourceAllocationsByProjectIdAndTaskIdIn(projectId, tasks.stream().map(Task::getId).toList());
-        return combineTasksAndResourceAllocations(tasks, resourceAllocations);
+        return combineTasksAndResourceAllocations(tasks, resourceAllocations, false);
     }
-    private List<TaskDTO> combineTasksAndResourceAllocations(List<Task> tasks, List<ResourceAllocationDTO> resourceAllocations) {
+    private List<TaskDTO> combineTasksAndResourceAllocations(List<Task> tasks, List<ResourceAllocationDTO> resourceAllocations, boolean forOwner) {
         // group resource allocations by taskId
         Map<Integer, List<ResourceAllocationDTO>> allocationMap = resourceAllocations.stream()
                 .collect(Collectors.groupingBy(ResourceAllocationDTO::getTaskId));
         return tasks.stream()
-                .map(task -> new TaskDTO(
+                .map(task -> {
+                    TaskDTO taskDTO = new TaskDTO(
                         task.getId(),
                         task.getName(),
                         task.getDescription(),
@@ -66,14 +69,29 @@ public class TaskServiceImpl implements TaskService {
                         task.getPriority(),
                         task.getComplete(),
                         allocationMap.getOrDefault(task.getId(), List.of())
-                ))
-                .toList();
+                    );
+                    if (forOwner && allocationMap.get(task.getId()) != null) {
+                        taskDTO.setCost(calculateCost(allocationMap.get(task.getId()), task.getEffort()));
+                    }
+                    return taskDTO;
+                }).toList();
+    }
+    private float calculateCost(List<ResourceAllocationDTO> dtos, float effort) {
+        if (effort == 0 || dtos.size() == 0) return 0;
+        float cost = 0;
+        float hourPerResource = effort / dtos.size();
+        for (ResourceAllocationDTO ra : dtos) {
+            cost += hourPerResource * ra.getRate();
+        }
+        BigDecimal bigDecimal = new BigDecimal(String.valueOf(cost)).setScale(2, RoundingMode.HALF_UP);
+        cost = bigDecimal.floatValue();
+        return cost;
     }
     @Override
     @Transactional
     public void syncTasks(List<TaskDTO> newTaskDTOs, int projectId, int ownerId) {
         // validate project owner
-        Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
+        Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
 
         List<Integer> preservedTaskIds = new ArrayList<>();
         List<ResourceAllocationPK> preservedResourceAllocationIds = new ArrayList<>();
@@ -130,6 +148,12 @@ public class TaskServiceImpl implements TaskService {
                 newResourceAllocation.setId(newResourceAllocationPK);
                 newResourceAllocation.setResource(resourceRef);
                 newResourceAllocation.setTask(savedTask);
+                // set tag rate
+                if (resourceAllocationDTO.getTagRateId() > 0) {
+                    TagRate tagRateRef = new TagRate();
+                    tagRateRef.setId(resourceAllocationDTO.getTagRateId());
+                    newResourceAllocation.setTagRate(tagRateRef);
+                }
 
                 savedResourceAllocations.add(newResourceAllocation);
                 preservedResourceAllocationIds.add(newResourceAllocationPK);

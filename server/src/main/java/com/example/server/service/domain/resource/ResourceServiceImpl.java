@@ -1,9 +1,9 @@
 package com.example.server.service.domain.resource;
 
+import com.example.server.exception.EntityNotFoundException;
 import com.example.server.model.dto.ResourceDTO;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.exception.ResourceExistsException;
-import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.model.entity.Resource;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
@@ -43,7 +43,7 @@ public class ResourceServiceImpl implements ResourceService{
         if (resourceRepository.existsByIdAndOwner(resourceId, ownerId)) {
             resourceRepository.deleteById(resourceId);
         } else {
-            throw new ResourceNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId);
+            throw new EntityNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId);
         }
     }
 }

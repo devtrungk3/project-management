@@ -54,7 +54,7 @@ public class JoinRequestServiceImpl implements JoinRequestService {
             throw new InvalidJoinRequestException("AcceptFlag in updatedJoinRequest cannot be null");
         }
         JoinRequest oldJoinRequest = joinRequestRepository.findByIdAndProjectOwnerId(updatedJoinRequest.getId(), projectOwnerId)
-                .orElseThrow(() -> new JoinRequestNotFoundException("JoinRequest with id " + updatedJoinRequest.getId() + " and project owner id " + projectOwnerId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("JoinRequest with id " + updatedJoinRequest.getId() + " and project owner id " + projectOwnerId + " not found"));
         if (oldJoinRequest.getAcceptFlag() != null) {
             throw new InvalidJoinRequestException("JoinRequest with not null accept flag cannot be change");
         }

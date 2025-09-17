@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +35,15 @@ public class ProjectStatisticsDTO {
     public void setProjectGrowthRate(Double projectGrowthRate) {
         this.projectGrowthRate = projectGrowthRate != null ? projectGrowthRate : 0.0;
     }
+    public double getProjectGrowRate() {
+        BigDecimal bigDecimal = new BigDecimal(String.valueOf(this.projectGrowthRate)).setScale(2, RoundingMode.HALF_UP);
+        return bigDecimal.doubleValue();
+    }
     public void setSuccessRate(Double successRate) {
         this.successRate = successRate != null ? successRate : 0.0;
+    }
+    public double getSuccessRate() {
+        BigDecimal bigDecimal = new BigDecimal(String.valueOf(this.successRate)).setScale(2, RoundingMode.HALF_UP);
+        return bigDecimal.doubleValue();
     }
 }

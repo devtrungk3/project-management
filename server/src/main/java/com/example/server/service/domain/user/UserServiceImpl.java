@@ -1,7 +1,7 @@
 package com.example.server.service.domain.user;
 
+import com.example.server.exception.EntityNotFoundException;
 import com.example.server.exception.IdNotFoundException;
-import com.example.server.exception.RoleNotFoundException;
 import com.example.server.exception.UsernameExistsException;
 import com.example.server.model.dto.RoleDTO;
 import com.example.server.model.dto.UserDTO;
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService{
             throw new UsernameExistsException("Username " + newUser.getUsername() + " already exists");
         }
         Role role = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RoleNotFoundException("Role USER does not exists"));
+                .orElseThrow(() -> new EntityNotFoundException("Role USER does not exists"));
         newUser.setId(0);
         newUser.setRole(role);
         if (newUser.getPassword() != null) {

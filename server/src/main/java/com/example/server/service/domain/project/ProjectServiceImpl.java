@@ -1,10 +1,10 @@
 package com.example.server.service.domain.project;
 
+import com.example.server.exception.EntityNotFoundException;
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.dto.StatusCountDTO;
 import com.example.server.exception.IdNotFoundException;
-import com.example.server.exception.ProjectNotFoundException;
 import com.example.server.model.entity.Project;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
@@ -46,13 +46,13 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public ProjectDTO getProjectForOwner(int projectId, int ownerId) {
         return projectRepository.findDTOByIdAndOwnerId(projectId, ownerId)
-                .orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
+                .orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
     }
 
     @Override
     public ProjectDTO getJoinedProjectForUser(int projectId, int userId) {
         return resourceRepository.findProjectIdByProjectIdAndResourceUserId(projectId, userId)
-                .orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and resource user id " + userId));
+                .orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and resource user id " + userId));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     @CacheEvict(value = "ownProjectsCache", allEntries = true)
     public Project updateProject(int projectId, int ownerId, Project updatedProject) {
-        Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new ProjectNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
+        Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
         if (updatedProject.getName() != null && !updatedProject.getName().isEmpty()) {
             oldProject.setName(updatedProject.getName());
         }
@@ -88,6 +88,9 @@ public class ProjectServiceImpl implements ProjectService{
         }
         if (updatedProject.getStatus() != null) {
             oldProject.setStatus(updatedProject.getStatus());
+        }
+        if (updatedProject.getCurrency() != null) {
+            oldProject.setCurrency(updatedProject.getCurrency());
         }
         return projectRepository.save(oldProject);
     }
@@ -105,6 +108,6 @@ public class ProjectServiceImpl implements ProjectService{
         if (projectRepository.existsByIdAndOwnerId(projectId, ownerId))
             projectRepository.deleteById(projectId);
         else
-            throw new ProjectNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId);
+            throw new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId);
     }
 }

@@ -40,4 +40,7 @@ public class Project {
     private LocalDateTime updatedAt;
     @OneToMany(mappedBy = "project")
     private List<Task> tasks ;
+    @ManyToOne
+    @JoinColumn(name = "currencyId")
+    private Currency currency;
 }

@@ -36,9 +36,9 @@ public class Task {
     @NotNull
     private Project project;
     @Min(0)
-    private Float effort;
+    private float effort;
     @Min(0)
-    private Float duration;
+    private float duration;
     private LocalDate start;
     private LocalDate finish;
     @Enumerated(EnumType.STRING)

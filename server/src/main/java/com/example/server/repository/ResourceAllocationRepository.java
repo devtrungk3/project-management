@@ -11,8 +11,16 @@ import java.util.List;
 
 public interface ResourceAllocationRepository extends JpaRepository<ResourceAllocation, ResourceAllocationPK> {
     @Query("""
-            SELECT new com.example.server.model.dto.ResourceAllocationDTO(ra.task.id, ra.resource.id, ra.resource.user.username)
+            SELECT new com.example.server.model.dto.ResourceAllocationDTO(
+                ra.task.id,
+                ra.resource.id,
+                ra.resource.user.username,
+                tr.id,
+                tr.tagName,
+                tr.rate
+            )
             FROM ResourceAllocation ra
+            LEFT JOIN ra.tagRate tr
             WHERE ra.task.project.id = :projectId AND ra.task.project.owner.id = :ownerId
             """)
     List<ResourceAllocationDTO> findAllResourceAllocationsByProjectIdAndProjectOwnerId(int projectId, int ownerId);

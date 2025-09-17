@@ -26,12 +26,13 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             """)
     Page<ProjectDTO> findByOwnerIdOrderByUpdatedAtDescAndCreatedAtDesc(int ownerId, Pageable pageable);
     @Query("""
-            SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.owner.username, p.createdAt, p.updatedAt)
+            SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.owner.username, c, p.createdAt, p.updatedAt)
             FROM Project p
+            LEFT JOIN p.currency c
             WHERE p.id = :projectId AND p.owner.id = :ownerId
             """)
     Optional<ProjectDTO> findDTOByIdAndOwnerId(int projectId, int ownerId);
-    @EntityGraph(attributePaths = "owner")
+    @EntityGraph(attributePaths = {"owner", "currency"})
     Optional<Project> findByIdAndOwnerId(int projectId, int ownerId);
     @Query("""
             SELECT new com.example.server.model.dto.StatusCountDTO(p.status, COUNT(p))
@@ -77,9 +78,10 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             """)
     List<Object[]> findMonthlyCreationCountByYear(int year);
     @Query("""
-            SELECT new com.example.server.model.dto.admin.TopProjectManagerDTO(p.owner.username, COUNT(*))
+            SELECT new com.example.server.model.dto.admin.TopProjectManagerDTO(p.owner.username, COUNT(*) as total)
             FROM Project p
             GROUP BY p.owner.username
+            ORDER BY total DESC
             """)
     List<TopProjectManagerDTO> findTopOwnerByProjectCount(Pageable pageable);
     @Query("""
