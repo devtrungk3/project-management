@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 const theme = createTheme({
   typography: {
-    fontFamily: '"Fire Code", monospace',
+    fontFamily: '"Google Sans Code", monospace',
   },
 });
 
