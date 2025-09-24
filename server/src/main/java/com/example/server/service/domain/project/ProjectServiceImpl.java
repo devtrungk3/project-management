@@ -89,6 +89,7 @@ public class ProjectServiceImpl implements ProjectService{
         if (updatedProject.getStatus() != null) {
             oldProject.setStatus(updatedProject.getStatus());
         }
+        oldProject.setPlannedBudget(updatedProject.getPlannedBudget());
         if (updatedProject.getCurrency() != null) {
             oldProject.setCurrency(updatedProject.getCurrency());
         }
