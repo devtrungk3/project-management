@@ -49,6 +49,7 @@ public class ProjectController {
                 projectAfterUpdate.getDescription(),
                 projectAfterUpdate.getStatus(),
                 projectAfterUpdate.getOwner().getUsername(),
+                projectAfterUpdate.getPlannedBudget(),
                 projectAfterUpdate.getCurrency(),
                 projectAfterUpdate.getCreatedAt(),
                 projectAfterUpdate.getUpdatedAt()

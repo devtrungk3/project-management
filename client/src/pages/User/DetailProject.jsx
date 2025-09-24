@@ -70,6 +70,7 @@ const DetailProject = ({isMyProject}) => {
                 </Link>
                 </Col>
                 <div className="d-inline-flex dropdown pt-2 gap-3">
+                    {/* project information dropdown */}
                     <a
                     className={`nav-link dropdown-toggle ${style.project_name}`}
                     href="#"
@@ -113,7 +114,7 @@ const DetailProject = ({isMyProject}) => {
                             />
                         </li>}
                         <li>
-                            <table>
+                            <table className="w-100">
                                 <tbody>
                                     {isMyProject === false &&
                                     <tr>
@@ -135,7 +136,7 @@ const DetailProject = ({isMyProject}) => {
                                         <td className='pe-4 py-2'>Status:</td>
                                         {isMyProject ?
                                         <td>
-                                            <select id="status_options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})}>
+                                            <select id="status_options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})} className="w-100 py-1">
                                                 <option value="PLANNING">PLANNING</option>
                                                 <option value="IN_PROGRESS">IN PROGRESS</option>
                                                 <option value="DONE">DONE</option>
@@ -147,6 +148,19 @@ const DetailProject = ({isMyProject}) => {
                                         }
                                     </tr>
                                     <tr>
+                                        <td className='pe-4 py-2'>Planned budget:</td>
+                                        {isMyProject ?
+                                        <td>
+                                            <input type="number" className="w-100" value={projectInfo?.plannedBudget || 0} min={0} onChange={(e) => setProjectInfo({
+                                                ...projectInfo,
+                                                plannedBudget: e.target.value
+                                            })} />
+                                        </td>
+                                        :
+                                        <td>{projectInfo?.plannedBudget || '0'}</td>
+                                        }
+                                    </tr>
+                                    <tr>
                                         <td className='pe-4 py-2'>Currency:</td>
                                         {isMyProject ?
                                         <td>
@@ -155,7 +169,7 @@ const DetailProject = ({isMyProject}) => {
                                                     ...projectInfo, 
                                                     currency: {id: e.target.value}
                                                 }
-                                            )}>
+                                            )} className="w-100 py-1">
                                                 <option key={0} value={0}>None</option>
                                                 {currencies?.map(currency => 
                                                     <option key={currency.id} value={currency.id}>{currency.name}</option>
@@ -169,7 +183,7 @@ const DetailProject = ({isMyProject}) => {
                                 </tbody>
                             </table>
                         </li>
-                        {isMyProject === true && <li className='d-flex justify-content-end'>
+                        {isMyProject === true && <li className='d-flex justify-content-end mt-4'>
                             <Button onClick={updateProjectInfo}>Save</Button>
                         </li>}
                     </ul>

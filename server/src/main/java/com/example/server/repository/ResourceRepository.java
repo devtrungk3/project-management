@@ -28,7 +28,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             """)
     Page<ProjectDTO> findProjectByResourceUserIdOrderByUpdatedAtDescAndCreatedAtDesc(int userId, Pageable pageable);
     @Query("""
-            SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.description, r.project.status, r.project.owner.username, c, r.project.createdAt, r.project.updatedAt)
+            SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.description, r.project.status, r.project.owner.username, r.project.plannedBudget, c, r.project.createdAt, r.project.updatedAt)
             FROM Resource r
             LEFT JOIN r.project.currency c
             WHERE r.project.id = :projectId AND r.user.id = :userId

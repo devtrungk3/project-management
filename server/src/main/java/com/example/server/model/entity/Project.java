@@ -1,6 +1,7 @@
 package com.example.server.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,8 @@ public class Project {
     @NotNull
     @JoinColumn(name = "ownerId")
     private User owner;
+    @Min(0)
+    private float plannedBudget = 0;
     @Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
     @UpdateTimestamp
