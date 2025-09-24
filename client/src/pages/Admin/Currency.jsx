@@ -108,9 +108,9 @@ const Currency = ({api}) => {
                 </thead>
                 <tbody>
                     {currencies?.map((currency) => (
-                        <tr key={currency.id} onClick={(e) => {handleSelectedCurrencyId(currency.id)}} className={currency.id === selectedCurrencyId ? 'table-active' : ''} style={{ verticalAlign: 'middle' }} onDoubleClick={() => handleOpenCurrencyDialog(false, currency.id)}>
-                            <td style={{ fontSize: 14, textAlign: 'center' }}>{currency.id}</td>
-                            <td style={{ fontSize: 14 }}>{currency.name}</td>
+                        <tr key={currency.id} onClick={(e) => {handleSelectedCurrencyId(currency.id)}} style={{ verticalAlign: 'middle' }} onDoubleClick={() => handleOpenCurrencyDialog(false, currency.id)}>
+                            <td style={{ fontSize: 14, textAlign: 'center' }} className={currency.id === selectedCurrencyId ? 'selected_row' : ''}>{currency.id}</td>
+                            <td style={{ fontSize: 14 }} className={currency.id === selectedCurrencyId ? 'selected_row' : ''}>{currency.name}</td>
                         </tr>
                     ))}
                 </tbody>

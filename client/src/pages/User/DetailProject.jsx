@@ -173,18 +173,18 @@ const DetailProject = ({isMyProject}) => {
                             <Button onClick={updateProjectInfo}>Save</Button>
                         </li>}
                     </ul>
-                    <Card className={`justify-content-center p-2 border border-none ${style.nav} ${isActive('tasks') === true && style.active}`}>
-                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}`} className="text-dark">
+                    <Card className={`justify-content-center border border-none ${style.nav} ${isActive('tasks') === true && style.active}`}>
+                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}`} className="text-dark p-2">
                             <MdOutlineViewTimeline className="fs-2"/>
                         </Link>
                     </Card>
-                    {isMyProject === true && <Card className={`justify-content-center p-2 border border-none ${style.nav} ${isActive('resources') === true && style.active}`}>
-                        <Link to={`/user/my-projects/${projectId}/resources`} className="text-dark">
+                    {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('resources') === true && style.active}`}>
+                        <Link to={`/user/my-projects/${projectId}/resources`} className="text-dark p-2">
                             <MdPeople className="fs-2"/>
                         </Link>
                     </Card>}
-                    {isMyProject === true && <Card className={`justify-content-center p-2 border border-none ${style.nav} ${isActive('reports') === true && style.active}`}>
-                        <Link to={`/user/my-projects/${projectId}/reports/project-overview`} className="text-dark">
+                    {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('reports') === true && style.active}`}>
+                        <Link to={`/user/my-projects/${projectId}/reports/project-overview`} className="text-dark p-2">
                             <HiOutlineChartBar className="fs-2"/>
                         </Link>
                     </Card>}

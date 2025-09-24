@@ -23,11 +23,12 @@ public class TaskDTO {
     private LocalDate start;
     private LocalDate finish;
     private TaskPriority priority;
+    private Integer parentId;
     private int complete;
     private float cost;
     private List<ResourceAllocationDTO> resourceAllocations;
 
-    public TaskDTO(int id, String name, String description, float effort, float duration, LocalDate start, LocalDate finish, TaskPriority priority, int complete, List<ResourceAllocationDTO> resourceAllocations) {
+    public TaskDTO(int id, String name, String description, float effort, float duration, LocalDate start, LocalDate finish, TaskPriority priority, Integer parentId, int complete, List<ResourceAllocationDTO> resourceAllocations) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -36,6 +37,7 @@ public class TaskDTO {
         this.start = start;
         this.finish = finish;
         this.priority = priority;
+        this.parentId = parentId;
         this.complete = complete;
         this.resourceAllocations = resourceAllocations;
     }

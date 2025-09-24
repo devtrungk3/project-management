@@ -22,7 +22,7 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
 
   const handleSelect = (e) => {
     if (!transform) {
-      onSelect(task.id)
+      onSelect(index)
     }
   }
 
@@ -31,10 +31,12 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
   }
 
   return (
-    <tr ref={setNodeRef} style={trStyle} className={isSelected ? 'bg-light' : ''} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
+    <tr ref={setNodeRef} style={trStyle} className={isSelected ? 'selected_row' : ''} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
       <td className={`${style.cell} text-center`} {...attributes} {...(isMyProject ? listeners : {})} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
       <td className={`${style.cell} text-center`}>{index + 1}</td>
-      <td className={`${style.cell} ${task.duration == 0 && 'fw-bold'}`}>{task.name}</td>
+      <td className={`${style.cell} ${task.duration == 0 && 'fw-bold'}`}>
+        <span style={{ paddingLeft: `${task.level * 20}px`}}>{task.name}</span>
+      </td>
       <td className={`${style.cell}`} style={{ backgroundColor: TASK_PRIORITY_COLOR[task.priority]}}>{task.priority}</td>
       <td className={`${style.cell}`}>
         <div className='d-flex gap-2'>

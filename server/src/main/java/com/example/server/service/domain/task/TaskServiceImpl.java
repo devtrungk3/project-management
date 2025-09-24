@@ -67,6 +67,7 @@ public class TaskServiceImpl implements TaskService {
                         task.getStart(),
                         task.getFinish(),
                         task.getPriority(),
+                        task.getParentId(),
                         task.getComplete(),
                         allocationMap.getOrDefault(task.getId(), List.of())
                     );
@@ -117,6 +118,7 @@ public class TaskServiceImpl implements TaskService {
             newTask.setDuration(taskDTO.getDuration());
             newTask.setStart(taskDTO.getStart());
             newTask.setFinish(taskDTO.getFinish());
+            newTask.setParentId(taskDTO.getParentId());
             newTask.setComplete(taskDTO.getComplete());
             newTask.setPriority(taskDTO.getPriority());
             return newTask;

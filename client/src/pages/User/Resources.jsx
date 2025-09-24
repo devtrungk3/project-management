@@ -146,7 +146,7 @@ const Resources = ({api, projectId}) => {
                             </thead>
                             <tbody>
                                 {resources.map(resource => 
-                                    <tr key={resource.id} onClick={(e) => {handleResourceSelect(resource.id)}} className={resource.id === resourceIdSelected ? 'bg-light' : ''}>
+                                    <tr key={resource.id} onClick={(e) => {handleResourceSelect(resource.id)}} className={resource.id === resourceIdSelected ? 'selected_row' : ''}>
                                         <td className={`${style.cell}`}>{resource.id}</td>
                                         <td className={`${style.cell}`}>{resource.username}</td>
                                         <td className={`${style.cell}`}>{formatDateTime(resource.createdAt)}</td>
@@ -183,7 +183,7 @@ const Resources = ({api, projectId}) => {
                                     <tr 
                                         key={tag.id} 
                                         onClick={(e) => {handleSelectedTagRateId(tag.id)}} 
-                                        className={tag.id === selectedTagRateId ? 'bg-light' : ''}
+                                        className={tag.id === selectedTagRateId ? 'selected_row' : ''}
                                         onDoubleClick={() => handleOpenTagRateDialog(false, tag.id)}
                                     >
                                         <td className={`${style.cell}`}>{tag.id}</td>

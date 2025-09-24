@@ -9,7 +9,6 @@ import {
   useSensors
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
@@ -24,6 +23,7 @@ import dayjs from "dayjs";
 import { useBlocker } from 'react-router-dom';
 import tagRateService from "../../services/User/TagRateService";
 import { calculateTaskCost } from "../../utils/calculateTaskCost";
+import { PiTextIndentBold, PiTextOutdentBold } from "react-icons/pi";
 
 const TaskList = ({api, projectId, isMyProject}) => {
     useBlocker(() => {
@@ -40,7 +40,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
     const [openTaskDialog, setOpenTaskDialog] = useState(0);
     const [tempTaskInfo, setTempTaskInfo] = useState(null);
     const [isAddDialog, setIsAddDialog] = useState(null);
-    const [taskIdSelected, setTaskIdSelected] = useState(0);
+    const [selectedTaskIndex, setSelectedTaskIndex] = useState(-1);
     const [tagRates, setTagRates] = useState(null);
     useEffect(() => {
         loadTaskTable();
@@ -72,7 +72,19 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     data = await taskService.getAllAssignedTasksForUser(api, projectId);
                 }
                 if (data != null) {
-                    setTasks(data);
+                    // set level of each task based on parent level
+                    const map = new Map();
+                    setTasks(data.map(d => {
+                        let level = 0;
+                        if (d.parentId != null && map.has(d.parentId)) {
+                            level = map.get(d.parentId).level + 1;
+                        }
+                        const newTask = { ...d, level };
+                        map.set(d.id, newTask);
+                        return newTask;
+                    }));
+                } else {
+                    setTasks([]);
                 }
             } catch(error) {}
         })();
@@ -99,21 +111,76 @@ const TaskList = ({api, projectId, isMyProject}) => {
     
     const handleDragEnd = (event) => {
         const { active, over } = event;
-        
-        if (active.id !== over?.id) {
-            setTasks((items) => {
-                const oldIndex = items.findIndex((item) => item.id === active.id);
-                const newIndex = items.findIndex((item) => item.id === over?.id);
-                return arrayMove(items, oldIndex, newIndex);
-            });
-            setIsDirty(true);
-        }
+        if (active.id === over?.id) return;
+
+        setTasks((tasks) => {
+            const draggedTask = tasks.find((t) => t.id === active.id);
+            if (!draggedTask) return items;
+
+            const descendantIds = getDescendantIds(tasks, draggedTask.id);
+            const childrenSize = descendantIds.length;
+            const fromIndex = tasks.findIndex((t) => t.id === draggedTask.id);
+
+            const toIndex = tasks.findIndex((t) => t.id === over?.id);
+            if (toIndex > fromIndex && toIndex <= fromIndex + childrenSize) return tasks;
+            return arrayMoveBlock(tasks, fromIndex, toIndex, childrenSize+1);
+        });
+        setIsDirty(true);
     };
-    const handleTaskSelect = (currentTaskIdSelected) => {
-        if (currentTaskIdSelected == taskIdSelected) {
-            setTaskIdSelected(0);
+    const getDescendantIds = (tasks, parentId) => {
+        const children = tasks.filter(t => t.parentId === parentId);
+        return children.reduce((acc, child) => 
+            [...acc, child.id, ...getDescendantIds(tasks, child.id)]
+        ,[]);
+    };
+    const arrayMoveBlock = (array, from, to, blockSize) => {
+        if (from === to) return array;
+        const newArr = [...array];
+        const blocks = newArr.splice(from, blockSize);
+        to = to > from ? (to - blockSize)+1 : to
+        newArr.splice(
+            to, 
+            0, ...blocks
+        )
+        newArr[to] = reCalculateTaskParent(newArr, newArr[to], to-1, to+blockSize);
+        refreshChildrenLevel(newArr, newArr[to].id);
+        return newArr;
+    };
+    // re calculate parent task and level based on tasks above and below
+    const reCalculateTaskParent = (array, currentTask, indexAbove, indexBelow) => {
+        const taskAbove = array[indexAbove];
+        const taskBelow = array[indexBelow];
+        if (taskAbove === undefined) {
+            return {
+                ...currentTask,
+                parentId: null,
+                level: 0,
+            }
+        } else if (taskBelow === undefined) {
+            return {
+                ...currentTask,
+                parentId: taskAbove.parentId,
+                level: taskAbove.level,
+            }
+        } else if (taskBelow.parentId === taskAbove.id) {
+            return {
+                ...currentTask,
+                parentId: taskBelow.parentId,
+                level: taskBelow.level,
+            }
         } else {
-            setTaskIdSelected(currentTaskIdSelected);
+            return {
+                ...currentTask,
+                parentId: taskAbove.parentId,
+                level: taskAbove.level,
+            }
+        }
+    }
+    const handleTaskSelect = (currentSelectedIndex) => {
+        if (currentSelectedIndex === selectedTaskIndex) {
+            setSelectedTaskIndex(-1);
+        } else {
+            setSelectedTaskIndex(currentSelectedIndex);
         }
     }
     const handleOpenTaskDialog = (taskId, addDialogFlag) => {
@@ -123,6 +190,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 id: -Date.now(),
                 start: currentDate,
                 priority: "LOW",
+                duration: 0,
                 resourceAllocations: []
             });
         } else {
@@ -153,17 +221,23 @@ const TaskList = ({api, projectId, isMyProject}) => {
             cost: calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
             finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
         }
-        setTasks(prev => [...prev, taskInfo])
+        const newTask = reCalculateTaskParent(tasks, taskInfo, selectedTaskIndex-1, selectedTaskIndex);
+        setTasks(prev => selectedTaskIndex > -1
+            ? [...prev.slice(0, selectedTaskIndex), newTask, ...prev.slice(selectedTaskIndex)]
+            : [...prev, newTask]
+        )
         setIsDirty(true);
         handleCloseTaskDialog();
     }
     const deleteTaskInfo = (e) => {
-        if (taskIdSelected != 0) {
-            if (confirm(`Are you sure?`)) {
-                setTasks(tasks.filter(task => task.id != taskIdSelected))
+        if (selectedTaskIndex > -1) {
+            if (confirm(`Do you want to delete this task and its subtasks?`)) {
+                const deletedSet = new Set([tasks[selectedTaskIndex].id, ...getDescendantIds(tasks, tasks[selectedTaskIndex].id)]);
+                setTasks(tasks.filter(task => !deletedSet.has(task.id)));
                 setIsDirty(true);
             }
         }
+        setSelectedTaskIndex(-1);
     }
     const saveAllTasks = async () => {
         try {
@@ -177,6 +251,64 @@ const TaskList = ({api, projectId, isMyProject}) => {
             toast.success("Save successfully");
         } catch (error) {}
     }
+    const findParent = (level, currentIndex) => {
+        if (currentIndex < 0) return null;
+        if (level > tasks[currentIndex].level) return tasks[currentIndex];
+        return findParent(level, currentIndex-1);
+    }
+    const refreshChildrenLevel = (array, parentId) => {
+        if (parentId === undefined) return;
+        const parent = array.find(t => t.id === parentId);
+        const children = array.filter(t => t.parentId === parent.id);
+        if (children.length == 0) return;
+        children.map(c => {
+            c.level = parent.level + 1;
+            refreshChildrenLevel(array, c.id)
+        });
+    }
+    const outdent = () => {
+        setTasks(tasks => {
+            const newTasks = tasks.map((task, index) => {
+                if (index === selectedTaskIndex) {
+                    const parent = findParent(task.level-1, index-1);
+                    return {
+                        ...task,
+                        parentId: parent != null ? parent.id : null,
+                        level: parent != null ? parent.level+1 : 0
+                    }
+                }
+                return task;
+            });
+            // Resets the parent of all tasks that are below the given task in hierarchy.
+            // Only tasks with a higher level (+1) than the specified task will have their parent reassigned.
+            if (selectedTaskIndex > -1) {
+                for (let i=selectedTaskIndex+1; i<newTasks.length; i++) {
+                    if (newTasks[i].level === newTasks[selectedTaskIndex].level+1) {
+                        newTasks[i].parentId = newTasks[selectedTaskIndex].id;
+                    }
+                }
+            }
+            refreshChildrenLevel(newTasks, newTasks[selectedTaskIndex]?.id);
+            return newTasks;
+        })     
+    }
+    const indent = () => {
+        setTasks(tasks => {
+            const newTasks = tasks.map((task, index) => {
+                if (index === selectedTaskIndex) {
+                    const parent = findParent(task.level+1, index-1);
+                    return {
+                        ...task,
+                        parentId: parent != null ? parent.id : null,
+                        level: parent != null ? parent.level+1 : 0
+                    }
+                }
+                return task;
+            })
+            refreshChildrenLevel(newTasks, newTasks[selectedTaskIndex]?.id);
+            return newTasks;
+        })
+    }
     return (
         <>
             <div>
@@ -184,6 +316,20 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     {isMyProject === true 
                     ?
                     <div className="d-flex gap-3">
+                        <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-2 border rounded-3 shadow-sm bg-secondary text-white`} onClick={outdent}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="fs-4">
+                                    <PiTextOutdentBold />
+                                </span>
+                            </div>
+                        </div>
+                        <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-2 border rounded-3 shadow-sm bg-secondary text-white`} onClick={indent}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="fs-4">
+                                    <PiTextIndentBold />
+                                </span>
+                            </div>
+                        </div>
                         <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-white`} onClick={() => handleOpenTaskDialog(tasks.length+1, true)}>
                             <div className="d-flex align-items-center gap-2">
                                 <FaPlus />
@@ -225,7 +371,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                             </thead>
                             <tbody>
                                 {tasks.map((task, index) => (
-                                    <SortableTask key={task.id} task={task} index={index} onSelect={handleTaskSelect} isSelected={taskIdSelected === task.id} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
+                                    <SortableTask key={task.id} task={task} index={index} onSelect={handleTaskSelect} isSelected={selectedTaskIndex === index} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
                                 ))}
                             </tbody>
                         </table>

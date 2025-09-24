@@ -48,3 +48,6 @@ table {
     font-weight: 400;
     opacity: 0.75;
 }
+.selected_row {
+  background-color: #f2edee !important;
+}

@@ -41,6 +41,7 @@ public class Task {
     private float duration;
     private LocalDate start;
     private LocalDate finish;
+    private Integer parentId;
     @Enumerated(EnumType.STRING)
     private TaskPriority priority;
     @Max(100)
