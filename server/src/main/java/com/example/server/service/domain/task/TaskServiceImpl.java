@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,6 +69,8 @@ public class TaskServiceImpl implements TaskService {
                         task.getFinish(),
                         task.getPriority(),
                         task.getParentId(),
+                        forOwner ? task.getPredecessor() : null,
+                        forOwner ? task.getDependencyType() : null,
                         task.getComplete(),
                         allocationMap.getOrDefault(task.getId(), List.of())
                     );
@@ -77,10 +80,10 @@ public class TaskServiceImpl implements TaskService {
                     return taskDTO;
                 }).toList();
     }
-    private float calculateCost(List<ResourceAllocationDTO> dtos, float effort) {
+    private float calculateCost(List<ResourceAllocationDTO> dtos, int effort) {
         if (effort == 0 || dtos.size() == 0) return 0;
         float cost = 0;
-        float hourPerResource = effort / dtos.size();
+        float hourPerResource = (float) effort / dtos.size();
         for (ResourceAllocationDTO ra : dtos) {
             cost += hourPerResource * ra.getRate();
         }
@@ -94,19 +97,16 @@ public class TaskServiceImpl implements TaskService {
         // validate project owner
         Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
 
-        List<Integer> preservedTaskIds = new ArrayList<>();
-        List<ResourceAllocationPK> preservedResourceAllocationIds = new ArrayList<>();
+        List<Integer> availableTaskIdsInDB = taskRepository.findIdsByProjectId(project.getId());
+        Map<Integer, Boolean> preservedTaskIdsChecker = availableTaskIdsInDB.stream()
+                .collect(Collectors.toMap(task -> task, task -> false));
 
         // map task dto to entity list
         List<Task> savedTasks = newTaskDTOs.stream().map(taskDTO -> {
             Task newTask = new Task();
-            if (taskDTO.getId() > 0) {
-                if (taskRepository.existsByIdAndProjectId(taskDTO.getId(), project.getId())) {
-                    preservedTaskIds.add(taskDTO.getId());
-                    newTask.setId(taskDTO.getId());
-                } else {
-                    throw new IllegalArgumentException("No task found with taskId " + taskDTO.getId() + " and projectId " + project.getId());
-                }
+            if  (preservedTaskIdsChecker.containsKey(taskDTO.getId())) {
+                preservedTaskIdsChecker.put(taskDTO.getId(), true);
+                newTask.setId(taskDTO.getId());
             } else {
                 newTask.setId(0);
             }
@@ -119,26 +119,38 @@ public class TaskServiceImpl implements TaskService {
             newTask.setStart(taskDTO.getStart());
             newTask.setFinish(taskDTO.getFinish());
             newTask.setParentId(taskDTO.getParentId());
+            newTask.setPredecessor(taskDTO.getPredecessor());
+            if (taskDTO.getPredecessor() != null) {
+                newTask.setDependencyType(taskDTO.getDependencyType());
+            }
             newTask.setComplete(taskDTO.getComplete());
             newTask.setPriority(taskDTO.getPriority());
             return newTask;
         }).toList();
         // delete tasks in project, which not in user input
+        Set<Integer> preservedTaskIds = preservedTaskIdsChecker.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        System.out.println("preserve task id length" + preservedTaskIds.isEmpty());
         if (preservedTaskIds.isEmpty()) {
-            taskRepository.deleteByProjectId(projectId);
+            taskRepository.deleteByProject_Id(project.getId());
         } else {
-            taskRepository.deleteByProjectIdAndIdNotIn(projectId, preservedTaskIds);
+            taskRepository.deleteByProject_IdAndIdNotIn(project.getId(), preservedTaskIds);
         }
         // insert new tasks and update old tasks
         savedTasks = taskRepository.saveAll(savedTasks);
 
+        List<ResourceAllocationPK> preservedResourceAllocationIds = new ArrayList<>();
         // map resource allocation dto to entity list
         List<ResourceAllocation> savedResourceAllocations = new ArrayList<>();
+
+        Set<Integer> availableResourceIdsInDB = resourceRepository.findIdsByProjectId(project.getId());
         for (int i=0; i<savedTasks.size(); i++) {
             Task savedTask = savedTasks.get(i);
             TaskDTO newTaskDTO = newTaskDTOs.get(i);
             for (ResourceAllocationDTO resourceAllocationDTO : newTaskDTO.getResourceAllocations()) {
-                if (!resourceRepository.existsById(resourceAllocationDTO.getResourceId())) {
+                if (!availableResourceIdsInDB.contains(resourceAllocationDTO.getResourceId())) {
                     throw new IllegalArgumentException("ResourceId " + resourceAllocationDTO.getResourceId() + " not found");
                 }
                 Resource resourceRef = new Resource();
@@ -163,9 +175,9 @@ public class TaskServiceImpl implements TaskService {
         }
         // delete resource allocations with ids not in user input
         if (preservedResourceAllocationIds.isEmpty()) {
-            resourceAllocationRepository.deleteByProjectId(projectId);
+            resourceAllocationRepository.deleteByProjectId(project.getId());
         } else {
-            resourceAllocationRepository.deleteByProjectIdAndIdNotIn(projectId, preservedResourceAllocationIds);
+            resourceAllocationRepository.deleteByProjectIdAndIdNotIn(project.getId(), preservedResourceAllocationIds);
         }
         // insert new resource allocations and update old resource allocations
         resourceAllocationRepository.saveAll(savedResourceAllocations);

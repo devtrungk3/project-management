@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     boolean existsByUserIdAndProjectId(int userId, int projectId);
@@ -45,4 +46,8 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             SELECT COUNT(r) > 0 FROM Resource r WHERE r.id = :resourceId AND r.project.owner.id = :ownerId
             """)
     boolean existsByIdAndOwner(int resourceId, int ownerId);
+    @Query("""
+            SELECT r.id FROM Resource r WHERE r.project.id = :projectId
+            """)
+    Set<Integer> findIdsByProjectId(int projectId);
 }

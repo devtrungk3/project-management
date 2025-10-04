@@ -6,11 +6,11 @@ import com.example.server.model.dto.admin.TaskStatisticsDTO;
 import com.example.server.model.dto.user.OverviewDTO;
 import com.example.server.model.entity.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public interface TaskRepository extends JpaRepository<Task, Integer> {
     @Query("""
@@ -20,6 +20,10 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             """)
     List<Task> findTasksByProjectIdAndProjectOwnerId(int projectId, int ownerId);
     @Query("""
+            SELECT t.id FROM Task t WHERE t.project.id = :projectId
+            """)
+    List<Integer> findIdsByProjectId(int projectId);
+    @Query("""
             SELECT t FROM Task t
             JOIN t.resourceAllocations ra
             JOIN ra.resource r
@@ -27,15 +31,8 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             ORDER BY t.arrangement ASC
             """)
     List<Task> findTasksByProjectIdAndResourceAllocationUserId(int projectId, int userId);
-
-    boolean existsByIdAndProjectId(int taskId, int projectId);
-    @Modifying
-    @Query("""
-            DELETE FROM Task t
-            WHERE t.project.id = :projectId AND t.id NOT IN :taskIds
-            """)
-    void deleteByProjectIdAndIdNotIn(int projectId, List<Integer> taskIds);
-    void deleteByProjectId(int projectId);
+    void deleteByProject_IdAndIdNotIn(int projectId, Set<Integer> taskIds);
+    void deleteByProject_Id(int projectId);
     @Query("""
             SELECT new com.example.server.model.dto.user.OverviewDTO(
                 SUM(CASE WHEN t.start <= CURRENT_DATE AND t.finish >= CURRENT_DATE AND t.complete < 100 THEN 1 ELSE 0 END) AS active_task,

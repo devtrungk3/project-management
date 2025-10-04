@@ -36,12 +36,15 @@ public class Task {
     @NotNull
     private Project project;
     @Min(0)
-    private float effort;
+    private int effort;
     @Min(0)
-    private float duration;
+    private int duration;
     private LocalDate start;
     private LocalDate finish;
     private Integer parentId;
+    private Integer predecessor;
+    @Enumerated(EnumType.STRING)
+    private DependencyType dependencyType;
     @Enumerated(EnumType.STRING)
     private TaskPriority priority;
     @Max(100)

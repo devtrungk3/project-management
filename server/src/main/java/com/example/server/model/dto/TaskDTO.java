@@ -1,5 +1,6 @@
 package com.example.server.model.dto;
 
+import com.example.server.model.entity.DependencyType;
 import com.example.server.model.entity.TaskPriority;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,17 +19,19 @@ public class TaskDTO {
     private String name;
     private int arrangement;
     private String description;
-    private float effort;
-    private float duration;
+    private int effort;
+    private int duration;
     private LocalDate start;
     private LocalDate finish;
     private TaskPriority priority;
     private Integer parentId;
+    private Integer predecessor;
+    private DependencyType dependencyType;
     private int complete;
     private float cost;
     private List<ResourceAllocationDTO> resourceAllocations;
 
-    public TaskDTO(int id, String name, String description, float effort, float duration, LocalDate start, LocalDate finish, TaskPriority priority, Integer parentId, int complete, List<ResourceAllocationDTO> resourceAllocations) {
+    public TaskDTO(int id, String name, String description, int effort, int duration, LocalDate start, LocalDate finish, TaskPriority priority, Integer parentId, Integer predecessor, DependencyType dependencyType, int complete, List<ResourceAllocationDTO> resourceAllocations) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -38,11 +41,13 @@ public class TaskDTO {
         this.finish = finish;
         this.priority = priority;
         this.parentId = parentId;
+        this.predecessor = predecessor;
+        this.dependencyType = dependencyType;
         this.complete = complete;
         this.resourceAllocations = resourceAllocations;
     }
 
-    public TaskDTO(int id, String name, int arrangement, float duration, LocalDate finish, TaskPriority priority, int complete) {
+    public TaskDTO(int id, String name, int arrangement, int duration, LocalDate finish, TaskPriority priority, int complete) {
         this.id = id;
         this.name = name;
         this.arrangement = arrangement;
