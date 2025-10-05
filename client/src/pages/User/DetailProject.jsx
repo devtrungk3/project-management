@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import projectService from "../../services/User/ProjectService";
 import useAuth from "../../hooks/useAuth";
@@ -19,7 +19,8 @@ const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const [projectInfo, setProjectInfo] = useState(null);
+    const [tempProjectInfo, setTempProjectInfo] = useState(null);
+    const projectInfo = useRef(null);
     const [currencies, setCurrencies] = useState(null);
     const { logout, setAccessToken, setUserRole } = useAuth();
     useEffect(() => {
@@ -46,7 +47,8 @@ const DetailProject = ({isMyProject}) => {
         (async () => {
             try {
                 const data = await projectService.getProjectById(api, projectId, isMyProject);
-                setProjectInfo(data);
+                projectInfo.current = data;
+                setTempProjectInfo(data);
             } catch(error) {
                 navigate('/user/my-projects')
             }
@@ -54,12 +56,14 @@ const DetailProject = ({isMyProject}) => {
     }
     const updateProjectInfo = async () => {
         try {   
-            const data = await projectService.updateProject(api, projectId, projectInfo);
-            const updatedAt = data.updatedAt;
-            setProjectInfo({...projectInfo, updatedAt: updatedAt})
+            const data = await projectService.updateProject(api, projectId, tempProjectInfo);
+            projectInfo.current = data;
+            setTempProjectInfo(data);
         } catch (error) {}
     }
-
+    const resetProjectInfo = () => {
+        setTempProjectInfo({...projectInfo.current})
+    }
     return(
         <Container fluid className='px-5'>
             <Row>
@@ -79,7 +83,7 @@ const DetailProject = ({isMyProject}) => {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                     >
-                    <span className='fs-3 fw-bold'>{projectInfo?.name || 'None'}</span>
+                    <span className='fs-3 fw-bold'>{tempProjectInfo?.name || 'None'}</span>
                     </a>
                     <ul
                     className="dropdown-menu dropdown-menu px-3 py-3 shadow-sm"
@@ -95,8 +99,8 @@ const DetailProject = ({isMyProject}) => {
                             id="name"
                             name="name"
                             label="Name"
-                            value={projectInfo?.name || ''}
-                            onChange={(e) => setProjectInfo({...projectInfo, name: e.target.value})}
+                            value={tempProjectInfo?.name || ''}
+                            onChange={(e) => setTempProjectInfo({...tempProjectInfo, name: e.target.value})}
                             />
                         </li>}
                         {isMyProject === true && 
@@ -109,8 +113,8 @@ const DetailProject = ({isMyProject}) => {
                             label="Description"
                             multiline
                             rows={4}
-                            value={projectInfo?.description || ''}
-                            onChange={(e) => setProjectInfo({...projectInfo, description: e.target.value})}
+                            value={tempProjectInfo?.description || ''}
+                            onChange={(e) => setTempProjectInfo({...tempProjectInfo, description: e.target.value})}
                             />
                         </li>}
                         <li>
@@ -118,25 +122,25 @@ const DetailProject = ({isMyProject}) => {
                                 <tbody>
                                     {isMyProject === false &&
                                     <tr>
-                                        <td colSpan={2} className={`${style["project-info-cell"]}`}>Description:<br/>{projectInfo?.description}</td>
+                                        <td colSpan={2} className={`${style["project-info-cell"]}`}>Description:<br/>{tempProjectInfo?.description}</td>
                                     </tr>}
                                     <tr>
                                         <td className='pe-4 py-2'>Owner:</td>
-                                        <td className={`${style["project-info-cell"]}`}>{projectInfo?.ownerUsername}</td>
+                                        <td className={`${style["project-info-cell"]}`}>{tempProjectInfo?.ownerUsername}</td>
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Created&nbsp;at:</td>
-                                        <td>{formatDateTime(projectInfo?.createdAt, 'vi-VN')}</td>
+                                        <td>{formatDateTime(tempProjectInfo?.createdAt, 'vi-VN')}</td>
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Updated&nbsp;at:</td>
-                                        <td>{formatDateTime(projectInfo?.updatedAt, 'vi-VN')}</td>
+                                        <td>{formatDateTime(tempProjectInfo?.updatedAt, 'vi-VN')}</td>
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Status:</td>
                                         {isMyProject ?
                                         <td>
-                                            <select id="status_options" value={projectInfo?.status} onChange={(e) => setProjectInfo({...projectInfo, status: e.target.value})} className="w-100 py-1">
+                                            <select id="status_options" value={tempProjectInfo?.status} onChange={(e) => setTempProjectInfo({...tempProjectInfo, status: e.target.value})} className="w-100 py-1">
                                                 <option value="PLANNING">PLANNING</option>
                                                 <option value="IN_PROGRESS">IN PROGRESS</option>
                                                 <option value="DONE">DONE</option>
@@ -144,29 +148,29 @@ const DetailProject = ({isMyProject}) => {
                                             </select>
                                         </td>
                                         :
-                                        <td>{projectInfo?.status}</td>
+                                        <td>{tempProjectInfo?.status}</td>
                                         }
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Planned budget:</td>
                                         {isMyProject ?
                                         <td>
-                                            <input type="number" className="w-100" value={projectInfo?.plannedBudget || 0} min={0} onChange={(e) => setProjectInfo({
-                                                ...projectInfo,
+                                            <input type="number" className="w-100" value={tempProjectInfo?.plannedBudget || 0} min={0} onChange={(e) => setTempProjectInfo({
+                                                ...tempProjectInfo,
                                                 plannedBudget: e.target.value
                                             })} />
                                         </td>
                                         :
-                                        <td>{projectInfo?.plannedBudget || '0'}</td>
+                                        <td>{tempProjectInfo?.plannedBudget || '0'}</td>
                                         }
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Currency:</td>
                                         {isMyProject ?
                                         <td>
-                                            <select id="currency_options" value={projectInfo?.currency?.id} onChange={(e) => setProjectInfo(
+                                            <select id="currency_options" value={tempProjectInfo?.currency?.id} onChange={(e) => setTempProjectInfo(
                                                 {
-                                                    ...projectInfo, 
+                                                    ...tempProjectInfo, 
                                                     currency: {id: e.target.value}
                                                 }
                                             )} className="w-100 py-1">
@@ -177,13 +181,14 @@ const DetailProject = ({isMyProject}) => {
                                             </select>
                                         </td>
                                         :
-                                        <td>{projectInfo?.currency?.name || 'None'}</td>
+                                        <td>{tempProjectInfo?.currency?.name || 'None'}</td>
                                         }
                                     </tr>
                                 </tbody>
                             </table>
                         </li>
-                        {isMyProject === true && <li className='d-flex justify-content-end mt-4'>
+                        {isMyProject === true && <li className='d-flex justify-content-end mt-4 gap-3'>
+                            <Button onClick={resetProjectInfo}>Reset</Button>
                             <Button onClick={updateProjectInfo}>Save</Button>
                         </li>}
                     </ul>
