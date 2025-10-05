@@ -1,25 +1,42 @@
 import { useEffect, useState } from "react";
 import { Gantt, Willow } from "wx-react-gantt";
 import "wx-react-gantt/dist/gantt.css";
-import {formatDate} from '../utils/format'
+import {formatDate} from '../utils/format';
+import dayjs from 'dayjs';
+const DEPENDENCY_TYPE = {
+  "SS": "s2s",
+  "SF": "s2e",
+  "FS": "e2s",
+  "FF": "e2e",
+}
 const GanttChart = ({tasks}) => {
   const [taskData, setTaskData] = useState([]);
+  const [links, setLinks] = useState([]);
   useEffect(() => {
     if (tasks) {
-        setTaskData(tasks.map(task => ({
-            id: task.id,
-            text: "",
-            start: new Date(formatDate(task.start)),
-            duration: parseInt(task.duration),
-            progress: task.complete,
-            type: parseInt(task.duration) === 0 ? "milestone" : "task",
-        })))
+      let tempLinks = [];
+      setTaskData(tasks.map((task, index) => {
+        if (task.start == null) return {};
+        tempLinks.push({id: index, source: task.predecessor?.id, target: task.id, type: DEPENDENCY_TYPE[task.dependencyType]})
+        return {
+          id: task.id,
+          text: task.name,
+          start: new Date(formatDate(task.start)),
+          duration: dayjs(task.finish).diff(task.start, "day")+1,
+          progress: task.complete,
+          type: task.duration === 0
+            ? "milestone"
+            : tasks[index+1]?.level > task.level 
+              ? "summary" : "task",
+        }
+      }))
+      setLinks(tempLinks);
     } else {
-        setTaskData([])
+        setTaskData([]);
+        setLinks([]);
     }
   }, [tasks]);
 
-  const links = [{ id: 1, source: 20, target: 21, type: "e2e" }];
 
   const scales = [
     { unit: "month", step: 1, format: "MMMM yyy" },
@@ -29,7 +46,7 @@ const GanttChart = ({tasks}) => {
   return (
     <Willow>
       <Gantt 
-        key={taskData.length}
+        key={taskData.length + links.length}
         tasks={taskData} 
         links={links} 
         scales={scales}

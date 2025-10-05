@@ -132,8 +132,8 @@ const UserManagement = ({api}) => {
                         <td style={{ fontSize: 14 }}>{user.fullname}</td>
                         <td style={{ fontSize: 14 }}>{user.role.name}</td>
                         <td style={{ fontSize: 14 }}>{user.status}</td>
-                        <td style={{ fontSize: 14 }}>{formatDateTime(user.createdAt)}</td>
-                        <td style={{ fontSize: 14 }}>{user.updatedAt ? formatDateTime(user.updatedAt) : 'None'}</td>
+                        <td style={{ fontSize: 14 }}>{formatDateTime(user.createdAt, 'vi-VN')}</td>
+                        <td style={{ fontSize: 14 }}>{user.updatedAt ? formatDateTime(user.updatedAt, 'vi-VN') : 'None'}</td>
                         <td>
                             {(user.status != 'ACTIVE' && user.status != 'BANNED') &&<button className="btn btn-primary me-2" onClick={() => activeUser(user.id)}>
                                 Active

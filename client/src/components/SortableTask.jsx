@@ -8,11 +8,10 @@ const TASK_PRIORITY_COLOR = {
     "MEDIUM": '#FFD54F',
     "HIGH": '#E57373'
 }
-const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyProject }) => {
+const SortableTask = ({ task, predecessorIndex, isParent, index, onSelect, onDoubleClick, isSelected, isMyProject }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: task.id
   });
-
   const trStyle = useMemo(() => ({
     transform: CSS.Transform.toString(transform),
     transition,
@@ -31,24 +30,28 @@ const SortableTask = ({ task, index, onSelect, onDoubleClick, isSelected, isMyPr
   }
 
   return (
-    <tr ref={setNodeRef} style={trStyle} className={isSelected ? 'selected_row' : ''} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
+    <tr ref={setNodeRef} style={trStyle} className={`${isSelected && 'selected_row'} ${isParent && 'fw-bold'}`} onClick={handleSelect} onDoubleClick={handleDoubleClick}>
       <td className={`${style.cell} text-center`} {...attributes} {...(isMyProject ? listeners : {})} onClick={(e) => e.stopPropagation()}>⋮⋮</td>
       <td className={`${style.cell} text-center`}>{index + 1}</td>
-      <td className={`${style.cell} ${task.duration == 0 && 'fw-bold'}`}>
-        <span style={{ paddingLeft: `${task.level * 20}px`}}>{task.name}</span>
+      <td className={`${style.cell} ${task.duration == 0 && task.start != null && 'text-primary'}`}>
+        <span style={{ paddingLeft: `${task.level * 35}px`}}>
+          {isParent && <span className='pe-1'>⮟</span>}
+          {task.name}
+        </span>
       </td>
       <td className={`${style.cell}`} style={{ backgroundColor: TASK_PRIORITY_COLOR[task.priority]}}>{task.priority}</td>
       <td className={`${style.cell}`}>
         <div className='d-flex gap-2'>
-          {task.resourceAllocations.map((resource) => 
+          {task.resourceAllocations?.map((resource) => 
             <span key={resource.resourceId} className={`${style['resource-item']} px-2 rounded-3`}>{`${resource.username}`}</span>
           )}
         </div>
       </td>
       <td className={`${style.cell}`}>{task.duration ? task.duration : 0} days</td>
-      <td className={`${style.cell}`}>{formatDate(task.start)}</td>
-      <td className={`${style.cell}`}>{formatDate(task.finish)}</td>
+      <td className={`${style.cell}`}>{formatDate(task.start, 'vi-VN')}</td>
+      <td className={`${style.cell}`}>{formatDate(task.finish, 'vi-VN')}</td>
       <td className={`${style.cell}`}>{task.complete ? task.complete : 0} %</td>
+      <td className={`${style.cell}`}>{predecessorIndex > 0 && predecessorIndex} {predecessorIndex > 0 && `(${task.dependencyType})`}</td>
       <td className={`${style.cell}`}>{task.effort ? task.effort : 0} hours</td>
       <td className={`${style.cell}`}>{task.cost ? task.cost : 0}</td>
     </tr>

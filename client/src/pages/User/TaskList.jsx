@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import taskService from "../../services/User/TaskService";
 import resourceService from "../../services/User/ResourceService";
 import {
@@ -19,16 +19,19 @@ import style from './DetailProject.module.css';
 import { Button, Col, Row } from "react-bootstrap";
 import { toast } from 'react-toastify';
 import GanttChart from "../../components/GanttChart";
-import dayjs from "dayjs";
 import { useBlocker } from 'react-router-dom';
 import tagRateService from "../../services/User/TagRateService";
 import { calculateTaskCost } from "../../utils/calculateTaskCost";
 import { PiTextIndentBold, PiTextOutdentBold } from "react-icons/pi";
-
+import Task from '../../models/Task';
+import { businessDuration } from "../../utils/businessDays";
 const TaskList = ({api, projectId, isMyProject}) => {
     useBlocker(() => {
       if (isDirty) {
         const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
+        if (leave) {
+            setIsDirty(false);
+        }
         return !leave;
       }
       return false;
@@ -72,17 +75,39 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     data = await taskService.getAllAssignedTasksForUser(api, projectId);
                 }
                 if (data != null) {
-                    // set level of each task based on parent level
-                    const map = new Map();
-                    setTasks(data.map(d => {
-                        let level = 0;
-                        if (d.parentId != null && map.has(d.parentId)) {
-                            level = map.get(d.parentId).level + 1;
+                    const taskMap = new Map();
+                    data.forEach(d => {
+                        const task = new Task(
+                            d.id, 
+                            d.name, 
+                            d.description, 
+                            d.effort, 
+                            d.duration, 
+                            d.start,
+                            d.priority,
+                            d.complete,
+                            d.cost,
+                            d.resourceAllocations,
+                            d.parentId != null ? new Task(d.parentId) : null,
+                            new Task(d.predecessor),
+                            d.dependencyType
+                        );
+                        taskMap.set(d.id, task);
+                    });
+                    const newTasks = [];
+                    taskMap.forEach(task => {
+                        // resolve task parent and predecessor
+                        if (task.parent != null && taskMap.has(task.parent.id)) {
+                            task.parent = taskMap.get(task.parent.id);
                         }
-                        const newTask = { ...d, level };
-                        map.set(d.id, newTask);
-                        return newTask;
-                    }));
+                        if (task.predecessor?.id > 0) {
+                            task.predecessor = taskMap.get(task.predecessor.id)
+                        } else {
+                            task.predecessor = null;
+                        }
+                        newTasks.push(task);
+                    });
+                    setTasks(newTasks);
                 } else {
                     setTasks([]);
                 }
@@ -113,28 +138,103 @@ const TaskList = ({api, projectId, isMyProject}) => {
         const { active, over } = event;
         if (active.id === over?.id) return;
 
-        setTasks((tasks) => {
-            const draggedTask = tasks.find((t) => t.id === active.id);
-            if (!draggedTask) return items;
+        const draggedTask = tasks.find((t) => t.id === active.id);
+        if (!draggedTask) return items;
 
-            const descendantIds = getDescendantIds(tasks, draggedTask.id);
-            const childrenSize = descendantIds.length;
-            const fromIndex = tasks.findIndex((t) => t.id === draggedTask.id);
+        const descendants = getDescendants(tasks, draggedTask.id);
+        const childrenSize = descendants.length;
+        const fromIndex = tasks.findIndex((t) => t.id === draggedTask.id);
 
-            const toIndex = tasks.findIndex((t) => t.id === over?.id);
-            if (toIndex > fromIndex && toIndex <= fromIndex + childrenSize) return tasks;
-            return arrayMoveBlock(tasks, fromIndex, toIndex, childrenSize+1);
-        });
+        const toIndex = tasks.findIndex((t) => t.id === over?.id);
+        if (toIndex > fromIndex && toIndex <= fromIndex + childrenSize) return;
+        const tasksAfterMoving = arrayMoveBlock(tasks, fromIndex, toIndex, childrenSize+1);
+        refreshSummaryTasks(tasksAfterMoving);
         setIsDirty(true);
     };
-    const getDescendantIds = (tasks, parentId) => {
-        const children = tasks.filter(t => t.parentId === parentId);
+    // re-calculate information of summary tasks and their subtasks
+    const refreshSummaryTasks = (newTasks) => {
+        if (newTasks.length <= 1) {
+            setTasks(newTasks);
+            return;
+        };
+        // trigger task start update
+        newTasks.forEach(t => {
+            t.start
+        })
+        // bottom to top
+        for (let i=newTasks.length-2; i>=0; i--) {
+            const currentTask = newTasks[i];
+            let earlestStart = null;
+            let latestFinish = null;
+            let sumEffort = 0;
+            let sumCost = 0;
+            const unspecifiedChildren = [];
+            // find children
+            let hasChild = false;
+            for (let y=i+1; y<newTasks.length; y++) {
+                const taskBelow = newTasks[y];
+                if (taskBelow.level <= currentTask.level) {
+                    break;
+                }
+                // this is a child
+                if (taskBelow.level === currentTask.level+1) {
+                    hasChild = true;
+                    if (taskBelow.start == null) {
+                        unspecifiedChildren.push(taskBelow);
+                        continue;
+                    }
+                    // start date
+                    if (earlestStart == null || earlestStart > taskBelow.start) {
+                        earlestStart = taskBelow.start;
+                    }
+                    // finish date
+                    if (latestFinish == null || latestFinish < taskBelow.finish) {
+                        latestFinish = taskBelow.finish;
+                    }
+                    // effort
+                    sumEffort += taskBelow.effort;
+                    // cost 
+                    sumCost += taskBelow.cost;
+                }
+            }
+            unspecifiedChildren.forEach(unspecifiedTask => {
+                // reassigned child based on summary task
+                unspecifiedTask.start = earlestStart;
+                unspecifiedTask.cost = calculateTaskCost(unspecifiedTask.resourceAllocations, unspecifiedTask.effort, tagRates);
+                // finish date for summary task
+                if (latestFinish == null || latestFinish < unspecifiedTask.finish) {
+                    latestFinish = unspecifiedTask.finish;
+                }
+                // effort for summary task
+                sumEffort += unspecifiedTask.effort;
+                // cost for summary task
+                sumCost += unspecifiedTask.cost;
+            })
+            if (hasChild === true) {
+                currentTask.cost = sumCost;
+                currentTask.effort = sumEffort;
+                if (earlestStart != null) {
+                    currentTask.duration = businessDuration(earlestStart, latestFinish);
+                }
+                currentTask.start = earlestStart;
+            }
+        }
+        setTasks(newTasks);
+    }
+    const getDescendants = (tasks, parentId) => {
+        const children = tasks.filter(t => t.parent?.id === parentId);
         return children.reduce((acc, child) => 
-            [...acc, child.id, ...getDescendantIds(tasks, child.id)]
+            [...acc, child, ...getDescendants(tasks, child.id)]
         ,[]);
     };
+    const getAncestorIds = (tasks, taskInfo) => {
+        if (!taskInfo || !taskInfo.parent) return [];
+        const parent = tasks.find(t => t.id === taskInfo.parent.id) || null;
+        return parent != null
+            ? [parent.id, ...getAncestorIds(tasks, parent)]
+            : [];
+    };
     const arrayMoveBlock = (array, from, to, blockSize) => {
-        if (from === to) return array;
         const newArr = [...array];
         const blocks = newArr.splice(from, blockSize);
         to = to > from ? (to - blockSize)+1 : to
@@ -142,38 +242,80 @@ const TaskList = ({api, projectId, isMyProject}) => {
             to, 
             0, ...blocks
         )
-        newArr[to] = reCalculateTaskParent(newArr, newArr[to], to-1, to+blockSize);
-        refreshChildrenLevel(newArr, newArr[to].id);
+        reCalculateTaskParent(newArr, newArr[to], to-1, to+blockSize);
+        validateDependency(array, newArr[to]);
         return newArr;
     };
-    // re calculate parent task and level based on tasks above and below
+    // re calculate parent task based on tasks above and below
     const reCalculateTaskParent = (array, currentTask, indexAbove, indexBelow) => {
         const taskAbove = array[indexAbove];
         const taskBelow = array[indexBelow];
-        if (taskAbove === undefined) {
-            return {
-                ...currentTask,
-                parentId: null,
-                level: 0,
-            }
-        } else if (taskBelow === undefined) {
-            return {
-                ...currentTask,
-                parentId: taskAbove.parentId,
-                level: taskAbove.level,
-            }
-        } else if (taskBelow.parentId === taskAbove.id) {
-            return {
-                ...currentTask,
-                parentId: taskBelow.parentId,
-                level: taskBelow.level,
-            }
+        if (!taskAbove) {
+            currentTask.parent = null;
+        } else if (!taskBelow) {
+            currentTask.parent = taskAbove.parent;
+        } else if (taskBelow.parent?.id === taskAbove.id) {
+            currentTask.parent = taskBelow.parent;
         } else {
-            return {
-                ...currentTask,
-                parentId: taskAbove.parentId,
-                level: taskAbove.level,
-            }
+            currentTask.parent = taskAbove.parent;
+        }
+    }
+    // validate task dependency
+    const validateDependency = (tasks, taskData) => {
+        if (!taskData) {
+            return;
+        }
+        let ancestorIds = getAncestorIds(tasks, taskData);
+        const children = getDescendants(tasks, taskData.id);
+        // validate target task's dependency
+        // not allowing summary task to have a predecessor
+        if (children.length > 0) {
+            taskData.predecessor = null;
+            taskData.predecessorType = null;
+        }
+        // make sure predecessor not null
+        else if (taskData.predecessor?.id > 0) {
+            if (
+                // self-dependent
+                taskData.predecessor.id == taskData.id
+                // unspecified predecessor's start
+                || taskData.predecessor.start == null
+                // conflict dependency
+                || (taskData.predecessor.predecessor?.id === taskData.id)
+            ) {
+                taskData.predecessor = null;
+                taskData.predecessorType = null;
+            } else {
+                // predecessor is a ancestor
+                for (let i=0; i<ancestorIds.length; i++) {
+                    if (ancestorIds[i] === taskData.predecessor.id) {
+                        taskData.predecessor = null;
+                        taskData.predecessorType = null;
+                        break;
+                    }
+                }   
+            }  
+        }
+        // validate children's dependencies
+        if (children.length != 0) {
+            children.forEach(child => {
+                // predecessor is a child
+                if (child.id === taskData.predecessor?.id) {
+                    taskData.predecessor = null;
+                    taskData.predecessorType = null;
+                } else {
+                    ancestorIds = [taskData.id, ...ancestorIds];
+                    // children's predecessor is an ancestor
+                    for (let i=0; i<ancestorIds.length; i++) {
+                        if (ancestorIds[i] === child.predecessor?.id) {
+                            child.predecessor = null;
+                            child.predecessorType = null;
+                            break;
+                        }
+                    }
+                }
+
+            })     
         }
     }
     const handleTaskSelect = (currentSelectedIndex) => {
@@ -185,16 +327,33 @@ const TaskList = ({api, projectId, isMyProject}) => {
     }
     const handleOpenTaskDialog = (taskId, addDialogFlag) => {
         if (addDialogFlag) {
-            const currentDate = (new Date()).toISOString().split('T')[0];
             setTempTaskInfo({
                 id: -Date.now(),
-                start: currentDate,
                 priority: "LOW",
                 duration: 0,
+                effort: 0,
+                start: null,
+                predecessor: 0,
+                dependencyType: null,
                 resourceAllocations: []
             });
         } else {
-            setTempTaskInfo(tasks.find(task => task.id === taskId))
+            const task = tasks.find(task => task.id === taskId);
+            const predecessorIndex = tasks.findIndex(t => t.id === task.predecessor?.id);
+            setTempTaskInfo({
+                id: task.id,
+                name: task.name,
+                description: task.description,
+                effort: task.effort,
+                duration: task.duration,
+                start: task.start,
+                priority: task.priority,
+                parentId: task.parent?.id || null,
+                predecessor: predecessorIndex > -1 ? predecessorIndex+1 : 0,
+                dependencyType: task.dependencyType,
+                complete: task.complete,
+                resourceAllocations: task.resourceAllocations
+            })
         }
         setIsAddDialog(addDialogFlag)
         setOpenTaskDialog(taskId);
@@ -205,35 +364,66 @@ const TaskList = ({api, projectId, isMyProject}) => {
     }
     const changeTaskInfo = (e) => {
         e.preventDefault();
-        const taskInfo = {
-            ...tempTaskInfo,
-            cost: calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
-            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
-        }
-        setTasks(prev => prev.map(task => task.id === taskInfo.id ? taskInfo : task));
+        const updatedTask = tasks.find(task => task.id === tempTaskInfo.id) || null;
+        updatedTask.setAll(
+            tempTaskInfo.name, 
+            tempTaskInfo.description, 
+            Number(tempTaskInfo.effort),
+            Number(tempTaskInfo.duration),
+            tempTaskInfo.start, 
+            tempTaskInfo.priority,  
+            Number(tempTaskInfo.complete), 
+            calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
+            tempTaskInfo.resourceAllocations,
+            tasks.find(task => task.id === tempTaskInfo.parentId) || null, 
+            tempTaskInfo.predecessor > 0 ? tasks[tempTaskInfo.predecessor-1] : null, 
+            tempTaskInfo.predecessor > 0 
+                ? tempTaskInfo.dependencyType 
+                    ? tempTaskInfo.dependencyType 
+                    : "FS"
+                : null
+        );
+        validateDependency(tasks, updatedTask);
+        refreshSummaryTasks([...tasks]);
         setIsDirty(true);
         handleCloseTaskDialog();
     }
     const addNewTaskInfo = (e) => {
         e.preventDefault();
-        const taskInfo = {
-            ...tempTaskInfo,
-            cost: calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
-            finish: (tempTaskInfo.duration && tempTaskInfo.duration != "" && tempTaskInfo.start != "") ? (dayjs(tempTaskInfo.start).add(tempTaskInfo.duration != 0 ? tempTaskInfo.duration-1 : 0, 'day')).format("YYYY-MM-DD") : tempTaskInfo.start
-        }
-        const newTask = reCalculateTaskParent(tasks, taskInfo, selectedTaskIndex-1, selectedTaskIndex);
-        setTasks(prev => selectedTaskIndex > -1
-            ? [...prev.slice(0, selectedTaskIndex), newTask, ...prev.slice(selectedTaskIndex)]
-            : [...prev, newTask]
-        )
+        const newTask = new Task(
+            tempTaskInfo.id,
+            tempTaskInfo.name, 
+            tempTaskInfo.description, 
+            Number(tempTaskInfo.effort),
+            Number(tempTaskInfo.duration),
+            tempTaskInfo.start, 
+            tempTaskInfo.priority,  
+            Number(tempTaskInfo.complete), 
+            calculateTaskCost(tempTaskInfo.resourceAllocations, tempTaskInfo.effort, tagRates),
+            tempTaskInfo.resourceAllocations,
+            null, 
+            tempTaskInfo.predecessor > 0 ? tasks[tempTaskInfo.predecessor-1] : null, 
+            tempTaskInfo.predecessor > 0 
+                ? tempTaskInfo.dependencyType 
+                    ? tempTaskInfo.dependencyType 
+                    : "FS"
+                : null
+        );
+        reCalculateTaskParent(tasks, newTask, selectedTaskIndex-1, selectedTaskIndex);
+        validateDependency(tasks, newTask);
+        const tasksAfterAdding = selectedTaskIndex > -1
+            ? [...tasks.slice(0, selectedTaskIndex), newTask, ...tasks.slice(selectedTaskIndex)]
+            : [...tasks, newTask];
+        refreshSummaryTasks(tasksAfterAdding);
         setIsDirty(true);
         handleCloseTaskDialog();
     }
     const deleteTaskInfo = (e) => {
         if (selectedTaskIndex > -1) {
             if (confirm(`Do you want to delete this task and its subtasks?`)) {
-                const deletedSet = new Set([tasks[selectedTaskIndex].id, ...getDescendantIds(tasks, tasks[selectedTaskIndex].id)]);
-                setTasks(tasks.filter(task => !deletedSet.has(task.id)));
+                const deletedSet = new Set([tasks[selectedTaskIndex].id, ...getDescendants(tasks, tasks[selectedTaskIndex].id).map(d => d.id)]);
+                const tasksAfterDeleting = tasks.filter(task => !deletedSet.has(task.id));
+                refreshSummaryTasks(tasksAfterDeleting)
                 setIsDirty(true);
             }
         }
@@ -243,11 +433,12 @@ const TaskList = ({api, projectId, isMyProject}) => {
         try {
             if (isMyProject) {
                 await taskService.syncTasks(api, projectId, tasks);
-                loadTaskTable()
+                loadTaskTable();
+                setIsDirty(false);
             } else {
                 await taskService.updateTaskComplete(api, projectId, tasks);
+                setIsDirty(false);
             }
-            setIsDirty(false);
             toast.success("Save successfully");
         } catch (error) {}
     }
@@ -256,58 +447,36 @@ const TaskList = ({api, projectId, isMyProject}) => {
         if (level > tasks[currentIndex].level) return tasks[currentIndex];
         return findParent(level, currentIndex-1);
     }
-    const refreshChildrenLevel = (array, parentId) => {
-        if (parentId === undefined) return;
-        const parent = array.find(t => t.id === parentId);
-        const children = array.filter(t => t.parentId === parent.id);
-        if (children.length == 0) return;
-        children.map(c => {
-            c.level = parent.level + 1;
-            refreshChildrenLevel(array, c.id)
-        });
-    }
     const outdent = () => {
-        setTasks(tasks => {
-            const newTasks = tasks.map((task, index) => {
-                if (index === selectedTaskIndex) {
-                    const parent = findParent(task.level-1, index-1);
-                    return {
-                        ...task,
-                        parentId: parent != null ? parent.id : null,
-                        level: parent != null ? parent.level+1 : 0
-                    }
-                }
-                return task;
-            });
-            // Resets the parent of all tasks that are below the given task in hierarchy.
-            // Only tasks with a higher level (+1) than the specified task will have their parent reassigned.
-            if (selectedTaskIndex > -1) {
-                for (let i=selectedTaskIndex+1; i<newTasks.length; i++) {
-                    if (newTasks[i].level === newTasks[selectedTaskIndex].level+1) {
-                        newTasks[i].parentId = newTasks[selectedTaskIndex].id;
-                    }
-                }
+        const outdentedTask = tasks[selectedTaskIndex] || null;
+        if (outdentedTask == null) return;
+
+        const parent = findParent(outdentedTask.level-1, selectedTaskIndex-1);
+        outdentedTask.parent = parent;
+        // Reassigns parent for the subtasks directly below the selected task.
+        // Stop when reaching another task at the same level or higher level than selected task.
+        // For tasks exactly one level deeper, set their parentId to the selected task’s id.
+        for (let i=selectedTaskIndex+1; i<tasks.length; i++) {
+            const taskBelow = tasks[i];
+            if (taskBelow.level <= outdentedTask.level) {
+                break;
             }
-            refreshChildrenLevel(newTasks, newTasks[selectedTaskIndex]?.id);
-            return newTasks;
-        })     
+            if (taskBelow.level === outdentedTask.level+1) {
+                taskBelow.parent = outdentedTask;
+            }
+        }
+        validateDependency(tasks, outdentedTask);
+        refreshSummaryTasks([...tasks]);
+        setIsDirty(true);
     }
     const indent = () => {
-        setTasks(tasks => {
-            const newTasks = tasks.map((task, index) => {
-                if (index === selectedTaskIndex) {
-                    const parent = findParent(task.level+1, index-1);
-                    return {
-                        ...task,
-                        parentId: parent != null ? parent.id : null,
-                        level: parent != null ? parent.level+1 : 0
-                    }
-                }
-                return task;
-            })
-            refreshChildrenLevel(newTasks, newTasks[selectedTaskIndex]?.id);
-            return newTasks;
-        })
+        const indentedTask = tasks[selectedTaskIndex] || null;
+        if (indentedTask == null) return;
+        const parent = findParent(indentedTask.level+1, selectedTaskIndex-1);
+        indentedTask.parent = parent;
+        validateDependency(tasks, indentedTask);
+        refreshSummaryTasks([...tasks]);
+        setIsDirty(true);
     }
     return (
         <>
@@ -349,7 +518,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                     <Button onClick={saveAllTasks} className="border rounded-3 shadow-sm px-3 py-2">Save all tasks</Button>
                 </div>
             </div>
-            <Row className="pt-4">
+            <Row className="pt-4 pb-5">
                 <Col md={7} className="overflow-auto">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
@@ -365,13 +534,14 @@ const TaskList = ({api, projectId, isMyProject}) => {
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Start</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Finish</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Complete</th>
+                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Predecessor</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Effort</th>
                                 <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Total cost</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {tasks.map((task, index) => (
-                                    <SortableTask key={task.id} task={task} index={index} onSelect={handleTaskSelect} isSelected={selectedTaskIndex === index} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
+                                    <SortableTask isParent={tasks[index+1]?.level > task.level} key={task.id} task={task} predecessorIndex={tasks.findIndex(t => t.id === task.predecessor?.id)+1} index={index} onSelect={handleTaskSelect} isSelected={selectedTaskIndex === index} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
                                 ))}
                             </tbody>
                         </table>

@@ -149,7 +149,7 @@ const Resources = ({api, projectId}) => {
                                     <tr key={resource.id} onClick={(e) => {handleResourceSelect(resource.id)}} className={resource.id === resourceIdSelected ? 'selected_row' : ''}>
                                         <td className={`${style.cell}`}>{resource.id}</td>
                                         <td className={`${style.cell}`}>{resource.username}</td>
-                                        <td className={`${style.cell}`}>{formatDateTime(resource.createdAt)}</td>
+                                        <td className={`${style.cell}`}>{formatDateTime(resource.createdAt, 'vi-VN')}</td>
                                     </tr>
                                 )}
                             </tbody>

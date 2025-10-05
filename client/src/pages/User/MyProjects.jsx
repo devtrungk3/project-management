@@ -256,8 +256,8 @@ const MyProjects = ({api}) => {
                                 <td style={{ fontSize: 18 }}><a href={statisticsOption == 0 ? `/user/my-projects/${project.id}` : `/user/joined-projects/${project.id}`}>{project.name}</a></td>
                                 <td style={{ fontSize: 18 }}>{project.ownerUsername}</td>
                                 <td style={{ fontSize: 18 }}>{project.status}</td>
-                                <td style={{ fontSize: 16 }}>{formatDateTime(project.createdAt)}</td>
-                                <td style={{ fontSize: 16 }}>{project?.updatedAt ? formatDateTime(project.updatedAt) : 'None'}</td>
+                                <td style={{ fontSize: 16 }}>{formatDateTime(project.createdAt, 'vi-VN')}</td>
+                                <td style={{ fontSize: 16 }}>{project?.updatedAt ? formatDateTime(project.updatedAt, 'vi-VN') : 'None'}</td>
                                 {statisticsOption == 0 && <td style={{ textAlign: 'center' }}>
                                 <Button variant="link" style={{ color: 'red', padding: 0 }} onClick={() => deleteProject(project.id)}>
                                     <FaTrash size={20} />

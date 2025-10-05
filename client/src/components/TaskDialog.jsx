@@ -75,7 +75,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                             id="effort"
                             name="effort"
                             label="Effort"
-                            type="decimal"
+                            type="number"
                             inputProps={{ min: 0 }}
                             slotProps={{
                                 input: {
@@ -83,14 +83,55 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                 },
                             }}
                             value={tempTaskInfo?.effort || 0}
-                            onChange={(e) => setTempTaskInfo({...tempTaskInfo, effort: e.target.value})}
+                            onChange={(e) => setTempTaskInfo({...tempTaskInfo, effort: Number(e.target.value)})}
                         />
                         <Row>
                             <Col md={6}>
                                 <TextField
                                     fullWidth
                                     margin="dense"
-                                    required
+                                    id="predecessor"
+                                    name="predecessor"
+                                    label="Predecessor"
+                                    type="number"
+                                    inputProps={{ min: 0 }}
+                                    slotProps={{
+                                        input: {
+                                            readOnly: isMyProject != true,
+                                        },
+                                    }}
+                                    value={tempTaskInfo?.predecessor || 0}
+                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, 
+                                        predecessor: Number(e.target.value), 
+                                        dependencyType: e.target.value != 0 ? tempTaskInfo.dependencyType : null
+                                        })}
+                                />
+                            </Col>
+                            <Col md={6}>
+                                <div style={{position:'relative'}} className="mt-2">
+                                    <div className="dialog_input_label_container">
+                                        <span className="dialog_input_label">Dependency type</span>
+                                    </div>
+                                    <select
+                                        id="priority-select"
+                                        value={tempTaskInfo?.dependencyType || "FS"}
+                                        disabled={tempTaskInfo?.predecessor === 0}
+                                        onChange={(e) => setTempTaskInfo({...tempTaskInfo, dependencyType: e.target.value})}
+                                        className="w-100 py-3 px-2 rounded-1 dialog_input"
+                                    >
+                                        <option value="SS">Start to start</option>
+                                        <option value="SF">Start to finish</option>
+                                        <option value="FS">Finish to start</option>
+                                        <option value="FF">Finish to finish</option>
+                                    </select>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <TextField
+                                    fullWidth
+                                    margin="dense"
                                     id="start"
                                     name="start"
                                     label="Start"
@@ -102,7 +143,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                         },
                                     }}
                                     value={tempTaskInfo?.start || ''}
-                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, start: e.target.value})}
+                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, start: e.target.value != "" ? e.target.value : null})}
                                 />
                             </Col>
                             <Col md={6}>
@@ -113,7 +154,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                     id="duration"
                                     name="duration"
                                     label="Duration"
-                                    type="decimal"
+                                    type="number"
                                     slotProps={{
                                         input: {
                                             readOnly: isMyProject != true,
@@ -121,7 +162,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                     }}
                                     inputProps={{ min: 0}}
                                     value={tempTaskInfo?.duration || 0}
-                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, duration: e.target.value})}
+                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, duration: Number(e.target.value)})}
                                 />
                             </Col>
                         </Row>
@@ -136,7 +177,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                     type="number"
                                     inputProps={{ min: 0, max: 100 }}
                                     value={tempTaskInfo?.complete || 0}
-                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, complete: e.target.value})}
+                                    onChange={(e) => setTempTaskInfo({...tempTaskInfo, complete: Number(e.target.value)})}
                                 />
                             </Col>
                             <Col md={6}>
@@ -203,7 +244,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                         <FormControlLabel
                                             control={
                                                 <Checkbox 
-                                                    checked={(tempTaskInfo?.resourceAllocations || []).some(ra => ra.resourceId === resource.id) || false}
+                                                    checked={(tempTaskInfo?.resourceAllocations || []).findIndex(ra => ra.resourceId === resource.id) != -1 || false}
                                                     onChange={(e) => handleResourcesChange(e, resource)}
                                                 />
                                             }

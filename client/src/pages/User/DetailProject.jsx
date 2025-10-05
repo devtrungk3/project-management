@@ -126,11 +126,11 @@ const DetailProject = ({isMyProject}) => {
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Created&nbsp;at:</td>
-                                        <td>{formatDateTime(projectInfo?.createdAt)}</td>
+                                        <td>{formatDateTime(projectInfo?.createdAt, 'vi-VN')}</td>
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Updated&nbsp;at:</td>
-                                        <td>{formatDateTime(projectInfo?.updatedAt)}</td>
+                                        <td>{formatDateTime(projectInfo?.updatedAt, 'vi-VN')}</td>
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Status:</td>

@@ -27,7 +27,7 @@ const ProjectOverview = ({api, projectId}) => {
                 <Col md={5}>
                     <div className={`${style.title}`}>Project overview</div>
                     <div className={`fs-4 ${style.project_duration}`}>
-                        {overviewData?.projectStart ? formatDate(overviewData?.projectStart) : 'None'} - {overviewData?.projectFinish ? formatDate(overviewData?.projectFinish) : 'None'}
+                        {overviewData?.projectStart ? formatDate(overviewData?.projectStart, 'vi-VN') : 'None'} - {overviewData?.projectFinish ? formatDate(overviewData?.projectFinish, 'vi-VN') : 'None'}
                     </div>
                     <div className={`${style.project_complete_container}`}>
                         <div className='position-relative h-75'>
@@ -52,7 +52,7 @@ const ProjectOverview = ({api, projectId}) => {
                                 {overviewData?.upcomingMilestones.map(ms => (
                                     <tr key={ms.id}>
                                         <td className={`${style.cell}`}>{ms.name}</td>
-                                        <td className={`${style.cell}`}>{ms.finish}</td>
+                                        <td className={`${style.cell}`}>{formatDate(ms.finish, 'vi-VN')}</td>
                                         <td className={`${style.cell}`}>{ms.complete}%</td>
                                     </tr>
                                 ))}
@@ -79,7 +79,7 @@ const ProjectOverview = ({api, projectId}) => {
                                     <td className={`${style.cell} text-center`}>{t.arrangement}</td>
                                     <td className={`${style.cell}`}>{t.name}</td>
                                     <td className={`${style.cell}`}>{t.duration} days</td>
-                                    <td className={`${style.cell}`}>{t.finish}</td>
+                                    <td className={`${style.cell}`}>{formatDate(t.finish, 'vi-VN')}</td>
                                     <td className={`${style.cell}`}>{t.complete}%</td>
                                     <td className={`${style.cell}`} style={{ backgroundColor: TASK_PRIORITY_COLOR[t.priority]}}>{t.priority}</td>
                                 </tr>
