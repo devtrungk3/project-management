@@ -5,5 +5,5 @@ export const calculateTaskCost = (resourceAllocations, effort, tagRates) => {
     resourceAllocations.forEach(ra => {
         cost += hourPerResource * (tagRates.find(tr => tr.id == ra.tagRateId)?.rate || 0);
     })
-    return cost;
+    return cost.toFixed(2);
 }

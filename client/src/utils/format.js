@@ -1,12 +1,12 @@
-export const formatDateTime = (isoString) => {
+export const formatDateTime = (isoString, tagLocale='en-US') => {
     if (!isoString) {
-        return "None";
+        return "";
     }
-    return (new Date(isoString)).toLocaleString();
+    return (new Date(isoString)).toLocaleString(tagLocale);
 }
-export const formatDate = (isoString) => {
+export const formatDate = (isoString, tagLocale='en-US') => {
     if (!isoString) {
-        return "None";
+        return "";
     }
-    return (new Date(isoString)).toLocaleDateString();
+    return (new Date(isoString)).toLocaleDateString(tagLocale);
 }
