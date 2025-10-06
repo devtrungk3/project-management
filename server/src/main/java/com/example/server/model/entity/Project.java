@@ -28,7 +28,8 @@ public class Project {
     @Column(columnDefinition = "TEXT")
     private String description;
     @Enumerated(EnumType.STRING)
-    private ProjectStatus status;
+    @NotNull
+    private ProjectStatus status = ProjectStatus.PLANNING;
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull

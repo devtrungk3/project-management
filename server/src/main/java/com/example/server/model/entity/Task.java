@@ -41,6 +41,8 @@ public class Task {
     private int duration;
     private LocalDate start;
     private LocalDate finish;
+    private LocalDate baseStart;
+    private LocalDate baseFinish;
     private Integer parentId;
     private Integer predecessor;
     @Enumerated(EnumType.STRING)
