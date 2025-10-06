@@ -19,10 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             ORDER BY t.arrangement ASC
             """)
     List<Task> findTasksByProjectIdAndProjectOwnerId(int projectId, int ownerId);
-    @Query("""
-            SELECT t.id FROM Task t WHERE t.project.id = :projectId
-            """)
-    List<Integer> findIdsByProjectId(int projectId);
+    List<Task> findByProject_Id(int projectId);
     @Query("""
             SELECT t FROM Task t
             JOIN t.resourceAllocations ra
@@ -76,12 +73,14 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             SELECT new com.example.server.model.dto.MilestoneDTO(t.id, t.name, t.finish, t.complete)
             FROM Task t
             WHERE t.project.owner.id = :userId AND t.project.id = :projectId AND t.complete < 100 AND t.duration = 0
+            ORDER BY t.finish ASC
             """)
     List<MilestoneDTO> getUpcomingMilestones(int userId, int projectId);
     @Query("""
             SELECT new com.example.server.model.dto.TaskDTO(t.id, t.name, t.arrangement, t.duration, t.finish, t.priority, t.complete)
             FROM Task t
-            WHERE t.project.owner.id = :userId AND t.project.id = :projectId AND t.complete < 100 AND t.finish < CURRENT_DATE
+            WHERE t.project.owner.id = :userId AND t.project.id = :projectId AND t.duration > 0 AND t.complete < 100 AND t.finish < CURRENT_DATE
+            ORDER BY t.finish ASC
             """)
     List<TaskDTO> getOverdueTasks(int userId, int projectId);
 }

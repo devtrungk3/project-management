@@ -9,16 +9,14 @@ import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceAllocationRepository;
 import com.example.server.repository.ResourceRepository;
 import com.example.server.repository.TaskRepository;
+import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,6 +65,8 @@ public class TaskServiceImpl implements TaskService {
                         task.getDuration(),
                         task.getStart(),
                         task.getFinish(),
+                        forOwner ? task.getBaseStart() : null,
+                        forOwner ? task.getBaseFinish() : null,
                         task.getPriority(),
                         task.getParentId(),
                         forOwner ? task.getPredecessor() : null,
@@ -96,16 +96,22 @@ public class TaskServiceImpl implements TaskService {
     public void syncTasks(List<TaskDTO> newTaskDTOs, int projectId, int ownerId) {
         // validate project owner
         Project project = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
-
-        List<Integer> availableTaskIdsInDB = taskRepository.findIdsByProjectId(project.getId());
-        Map<Integer, Boolean> preservedTaskIdsChecker = availableTaskIdsInDB.stream()
-                .collect(Collectors.toMap(task -> task, task -> false));
+        // validate project's state
+        ProjectStatusValidator.validateClosedProject(project);
+        List<Task> availableTasksInDB = taskRepository.findByProject_Id(project.getId());
+        Map<Integer, Task> preservedTasksChecker = availableTasksInDB.stream()
+                .collect(Collectors.toMap(Task::getId, task -> task));
 
         // map task dto to entity list
         List<Task> savedTasks = newTaskDTOs.stream().map(taskDTO -> {
             Task newTask = new Task();
-            if  (preservedTaskIdsChecker.containsKey(taskDTO.getId())) {
-                preservedTaskIdsChecker.put(taskDTO.getId(), true);
+            if  (preservedTasksChecker.containsKey(taskDTO.getId())) {
+                // old tasks
+                // take old base time
+                newTask.setBaseStart(preservedTasksChecker.get(taskDTO.getId()).getBaseStart());
+                newTask.setBaseFinish(preservedTasksChecker.get(taskDTO.getId()).getBaseFinish());
+                // set null for preserved task
+                preservedTasksChecker.put(taskDTO.getId(), null);
                 newTask.setId(taskDTO.getId());
             } else {
                 newTask.setId(0);
@@ -118,6 +124,12 @@ public class TaskServiceImpl implements TaskService {
             newTask.setDuration(taskDTO.getDuration());
             newTask.setStart(taskDTO.getStart());
             newTask.setFinish(taskDTO.getFinish());
+            // new task or project in the planning state
+            // allow assigning task base time
+            if (newTask.getId() == 0 || project.getStatus() == ProjectStatus.PLANNING) {
+                newTask.setBaseStart(taskDTO.getStart());
+                newTask.setBaseFinish(taskDTO.getFinish());
+            }
             newTask.setParentId(taskDTO.getParentId());
             newTask.setPredecessor(taskDTO.getPredecessor());
             if (taskDTO.getPredecessor() != null) {
@@ -127,12 +139,11 @@ public class TaskServiceImpl implements TaskService {
             newTask.setPriority(taskDTO.getPriority());
             return newTask;
         }).toList();
-        // delete tasks in project, which not in user input
-        Set<Integer> preservedTaskIds = preservedTaskIdsChecker.entrySet().stream()
-                .filter(Map.Entry::getValue)
+        // delete tasks in project, which not in user input (not null value in preservedTasksChecker)
+        Set<Integer> preservedTaskIds = preservedTasksChecker.entrySet().stream()
+                .filter(task -> task.getValue() == null)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
-        System.out.println("preserve task id length" + preservedTaskIds.isEmpty());
         if (preservedTaskIds.isEmpty()) {
             taskRepository.deleteByProject_Id(project.getId());
         } else {
@@ -192,7 +203,10 @@ public class TaskServiceImpl implements TaskService {
         if (oldTasks.size() == 0) {
             return;
         }
-        if (!projectRepository.existsByIdAndStatus(projectId, ProjectStatus.IN_PROGRESS)) {
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("ProjectId " + projectId + " not found"));
+        // validate project's state
+        ProjectStatusValidator.validateClosedProject(project);
+        if (project.getStatus() != ProjectStatus.IN_PROGRESS) {
             throw new ProjectNotInProgressException("UserId " + userId + " cannot update task complete because project with id " + projectId + " is not in progress");
         }
         Map<Integer, Integer> newTaskDTOMap = newTaskDTOs.stream()

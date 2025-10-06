@@ -6,9 +6,11 @@ import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.dto.StatusCountDTO;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.model.entity.Project;
+import com.example.server.model.entity.ProjectStatus;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
 import com.example.server.repository.UserRepository;
+import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -80,19 +82,29 @@ public class ProjectServiceImpl implements ProjectService{
     @CacheEvict(value = "ownProjectsCache", allEntries = true)
     public Project updateProject(int projectId, int ownerId, Project updatedProject) {
         Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
+        ProjectStatusValidator.validateClosedProject(oldProject);
         if (updatedProject.getName() != null && !updatedProject.getName().isEmpty()) {
             oldProject.setName(updatedProject.getName());
         }
         if (updatedProject.getDescription() != null) {
             oldProject.setDescription(updatedProject.getDescription());
         }
-        if (updatedProject.getStatus() != null) {
+        if (updatedProject.getStatus() != ProjectStatus.DONE
+                && updatedProject.getStatus() != ProjectStatus.CANCELLED) {
             oldProject.setStatus(updatedProject.getStatus());
         }
         oldProject.setPlannedBudget(updatedProject.getPlannedBudget());
         if (updatedProject.getCurrency() != null) {
             oldProject.setCurrency(updatedProject.getCurrency());
         }
+        return projectRepository.save(oldProject);
+    }
+
+    @Override
+    public Project cancelProject(int projectId, int ownerId) {
+        Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
+        ProjectStatusValidator.validateClosedProject(oldProject);
+        oldProject.setStatus(ProjectStatus.CANCELLED);
         return projectRepository.save(oldProject);
     }
 

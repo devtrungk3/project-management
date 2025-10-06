@@ -6,7 +6,6 @@ import com.example.server.model.dto.admin.ProjectStatisticsDTO;
 import com.example.server.model.dto.admin.TopProjectManagerDTO;
 import com.example.server.model.dto.user.ProjectOverviewReportDTO;
 import com.example.server.model.entity.Project;
-import com.example.server.model.entity.ProjectStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -48,7 +47,6 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             """)
     List<StatusCountDTO> countByStatus();
     boolean existsByIdAndOwnerId(int projectId, int ownerId);
-    boolean existsByIdAndStatus(int projectId, ProjectStatus status);
     @Query("""
             SELECT new com.example.server.model.dto.admin.ProjectStatisticsDTO(
                 COUNT(*),

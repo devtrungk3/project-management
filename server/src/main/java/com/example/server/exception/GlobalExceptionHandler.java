@@ -103,4 +103,9 @@ public class GlobalExceptionHandler {
         System.out.println("TooManyRequestException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", "Too many request"));
     }
+    @ExceptionHandler(InvalidProjectStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidProjectState(InvalidProjectStateException e) {
+        System.out.println("InvalidProjectStateException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "This project has been closed"));
+    }
 }
