@@ -42,10 +42,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             ORDER BY r.createdAt DESC
             """)
     List<ResourceDTO> findByProjectIdAndProjectOwnerId(int projectId, int ownerId);
-    @Query("""
-            SELECT COUNT(r) > 0 FROM Resource r WHERE r.id = :resourceId AND r.project.owner.id = :ownerId
-            """)
-    boolean existsByIdAndOwner(int resourceId, int ownerId);
+    Optional<Resource> findByIdAndProject_Owner_Id(int resourceId, int ownerId);
     @Query("""
             SELECT r.id FROM Resource r WHERE r.project.id = :projectId
             """)

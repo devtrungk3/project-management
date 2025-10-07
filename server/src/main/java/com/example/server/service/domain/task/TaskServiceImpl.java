@@ -192,9 +192,14 @@ public class TaskServiceImpl implements TaskService {
         }
         // insert new resource allocations and update old resource allocations
         resourceAllocationRepository.saveAll(savedResourceAllocations);
+        // check completed project
+        if (taskRepository.findAverageCompleteByProjectId(project.getId()).floatValue() == 100) {
+            project.setStatus(ProjectStatus.DONE);
+        }
     }
 
     @Override
+    @Transactional
     public void updateTaskCompleteForUser(List<TaskDTO> newTaskDTOs, int projectId, int userId) {
         if (newTaskDTOs.size() == 0) {
             return;
@@ -217,6 +222,9 @@ public class TaskServiceImpl implements TaskService {
                 oldTask.setComplete(newTaskComplete);
             }
         });
-        taskRepository.saveAll(oldTasks);
+        // check completed project
+        if (taskRepository.findAverageCompleteByProjectId(project.getId()).floatValue() == 100) {
+            project.setStatus(ProjectStatus.DONE);
+        }
     }
 }

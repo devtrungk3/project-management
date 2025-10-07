@@ -96,7 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProjectNotInProgressException.class)
     public ResponseEntity<Map<String, String>> handleProjectNotInProgress(ProjectNotInProgressException e) {
         System.out.println("ProjectNotInProgressException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("Error", "Cannot update task completion when project is not in progress"));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Cannot update task completion when project is not in progress"));
     }
     @ExceptionHandler(TooManyRequestException.class)
     public ResponseEntity<Map<String, String>> handleTooManyRequest(TooManyRequestException e) {

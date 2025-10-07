@@ -8,6 +8,7 @@ import com.example.server.model.entity.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -83,4 +84,8 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             ORDER BY t.finish ASC
             """)
     List<TaskDTO> getOverdueTasks(int userId, int projectId);
+    @Query("""
+            SELECT AVG(t.complete) FROM Task t WHERE t.project.id = :projectId
+            """)
+    BigDecimal findAverageCompleteByProjectId(int projectId);
 }

@@ -8,6 +8,7 @@ import com.example.server.model.entity.Resource;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
 import com.example.server.repository.UserRepository;
+import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,10 +41,9 @@ public class ResourceServiceImpl implements ResourceService{
 
     @Override
     public void deleteResourceByOwner(int resourceId, int ownerId) {
-        if (resourceRepository.existsByIdAndOwner(resourceId, ownerId)) {
-            resourceRepository.deleteById(resourceId);
-        } else {
-            throw new EntityNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId);
-        }
+        Resource resource = resourceRepository.findByIdAndProject_Owner_Id(resourceId, ownerId)
+                .orElseThrow(() -> new EntityNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId));
+        ProjectStatusValidator.validateClosedProject(resource.getProject());
+        resourceRepository.delete(resource);
     }
 }

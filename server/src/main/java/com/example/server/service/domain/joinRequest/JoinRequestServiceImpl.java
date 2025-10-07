@@ -3,12 +3,14 @@ package com.example.server.service.domain.joinRequest;
 import com.example.server.model.dto.JoinRequestDTO;
 import com.example.server.exception.*;
 import com.example.server.model.entity.JoinRequest;
+import com.example.server.model.entity.Project;
 import com.example.server.model.entity.Resource;
 import com.example.server.repository.JoinRequestRepository;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.service.domain.resource.ResourceService;
+import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,16 +29,15 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     public JoinRequest addJoinRequest(JoinRequest newJoinRequest) {
         int userId = newJoinRequest.getUser().getId();
         int projectId = newJoinRequest.getProject().getId();
-        if (!projectRepository.existsById(projectId)) {
-            throw new IdNotFoundException("ProjectId " + projectId + " not found");
-        }
         if (!userRepository.existsById(userId)) {
             throw new IdNotFoundException("UserId " + userId + " not found");
         }
         if (joinRequestRepository.existsByUserIdAndProjectIdAndAcceptFlagIsNull(userId, projectId)) {
             throw new JoinRequestExistsException("JoinRequest with userId " + userId + " and projectId " + projectId + " already exists");
         }
-        if (projectRepository.existsByIdAndOwnerId(projectId, userId)) {
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new IdNotFoundException("ProjectId " + projectId + " not found"));
+        ProjectStatusValidator.validateClosedProject(project);
+        if (project.getOwner().getId() == userId) {
             throw new SelfJoinRequestNotAllowException("UserId " + userId + " cannot add joinRequest with own project");
         }
         if (resourceRepository.existsByUserIdAndProjectId(userId, projectId)) {
@@ -58,6 +59,7 @@ public class JoinRequestServiceImpl implements JoinRequestService {
         if (oldJoinRequest.getAcceptFlag() != null) {
             throw new InvalidJoinRequestException("JoinRequest with not null accept flag cannot be change");
         }
+        ProjectStatusValidator.validateClosedProject(oldJoinRequest.getProject());
         if (updatedJoinRequest.getAcceptFlag()) {
             Resource newResource = new Resource();
             newResource.setUser(oldJoinRequest.getUser());
