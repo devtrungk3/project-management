@@ -34,6 +34,15 @@ const updateProject = async (api, projectId, projectInfo) => {
         throw error;
     }
 }
+const cancelProject = async (api, projectId) => {
+    try {
+        const response = await api.patch(`user/projects/${projectId}/cancel`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to cancel project: ', error);
+        throw error;
+    }
+}
 const getProjectById = async (api, id, isMyProject) => {
     if (!/^[1-9]\d*$/.test(id)) {
         throw new Error("Invalid parameters");
@@ -83,6 +92,7 @@ export default {
     getAllJoinedProjects,
     addProject,
     updateProject,
+    cancelProject,
     getProjectById,
     getMyProjectStatistics,
     getJoinedProjectStatistics,

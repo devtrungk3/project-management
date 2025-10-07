@@ -14,6 +14,8 @@ import Resources from "./Resources";
 import { formatDateTime } from '../../utils/format';
 import Reports from "./Reports";
 import currencyService from '../../services/User/CurrencyService';
+import { FaGear } from "react-icons/fa6";
+import ProjectSettings from "./ProjectSettings";
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
@@ -138,13 +140,13 @@ const DetailProject = ({isMyProject}) => {
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Status:</td>
-                                        {isMyProject ?
-                                        <td>
+                                        {isMyProject 
+                                        && projectInfo.current?.status != "DONE"
+                                        && projectInfo.current?.status != "CANCELLED"
+                                        ? <td>
                                             <select id="status_options" value={tempProjectInfo?.status} onChange={(e) => setTempProjectInfo({...tempProjectInfo, status: e.target.value})} className="w-100 py-1">
                                                 <option value="PLANNING">PLANNING</option>
                                                 <option value="IN_PROGRESS">IN PROGRESS</option>
-                                                <option value="DONE">DONE</option>
-                                                <option value="CANCELLED">CANCELLED</option>
                                             </select>
                                         </td>
                                         :
@@ -153,8 +155,10 @@ const DetailProject = ({isMyProject}) => {
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Planned budget:</td>
-                                        {isMyProject ?
-                                        <td>
+                                        {isMyProject 
+                                        && projectInfo.current?.status != "DONE"
+                                        && projectInfo.current?.status != "CANCELLED"
+                                        ?<td>
                                             <input type="number" className="w-100" value={tempProjectInfo?.plannedBudget || 0} min={0} onChange={(e) => setTempProjectInfo({
                                                 ...tempProjectInfo,
                                                 plannedBudget: e.target.value
@@ -166,8 +170,10 @@ const DetailProject = ({isMyProject}) => {
                                     </tr>
                                     <tr>
                                         <td className='pe-4 py-2'>Currency:</td>
-                                        {isMyProject ?
-                                        <td>
+                                        {isMyProject 
+                                        && projectInfo.current?.status != "DONE"
+                                        && projectInfo.current?.status != "CANCELLED"
+                                        ? <td>
                                             <select id="currency_options" value={tempProjectInfo?.currency?.id} onChange={(e) => setTempProjectInfo(
                                                 {
                                                     ...tempProjectInfo, 
@@ -207,15 +213,24 @@ const DetailProject = ({isMyProject}) => {
                             <HiOutlineChartBar className="fs-2"/>
                         </Link>
                     </Card>}
+                    {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('settings') === true && style.active}`}>
+                        <Link to={`/user/my-projects/${projectId}/settings`} className="text-dark p-2">
+                            <FaGear className="fs-2"/>
+                        </Link>
+                    </Card>}
                 </div>
                 <div className="content pt-3">
                     <Routes>
-                        <Route path="/" element={<TaskList api={api} isMyProject={isMyProject} projectId={projectId} />} />
+                        <Route path="/" element={<TaskList api={api} isMyProject={isMyProject} projectId={projectId} projectInfo={projectInfo} />} />
                         {isMyProject === true &&
                         (<Route path="/resources" element={<Resources api={api} projectId={projectId} />} />)
                         }
                         {isMyProject === true &&
                         (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} />} />)
+                        }
+                        <Route path="*" element={<Navigate to=".." replace />} />
+                        {isMyProject === true &&
+                        (<Route path="/settings" element={<ProjectSettings api={api} projectId={projectId} setTempProjectInfo={setTempProjectInfo} projectInfo={projectInfo} />} />)
                         }
                         <Route path="*" element={<Navigate to=".." replace />} />
                     </Routes>

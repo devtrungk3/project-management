@@ -9,7 +9,7 @@ const DEPENDENCY_TYPE = {
   "FS": "e2s",
   "FF": "e2e",
 }
-const GanttChart = ({tasks}) => {
+const GanttChart = ({projectInfo, tasks, isMyProject}) => {
   const [taskData, setTaskData] = useState([]);
   const [links, setLinks] = useState([]);
   useEffect(() => {
@@ -23,6 +23,8 @@ const GanttChart = ({tasks}) => {
           text: task.name,
           start: new Date(formatDate(task.start)),
           duration: dayjs(task.finish).diff(task.start, "day")+1,
+          base_start: new Date(formatDate(task.baseStart)),
+          base_end: new Date(formatDate(dayjs(task.baseFinish).add(1, 'day'))),
           progress: task.complete,
           type: task.duration === 0
             ? "milestone"
@@ -51,6 +53,7 @@ const GanttChart = ({tasks}) => {
         links={links} 
         scales={scales}
         readonly={true}
+        baselines={projectInfo.current != null && isMyProject == true && projectInfo.current.status != "PLANNING"}
         taskAdd={false}
         linkAdd={false}
         menu={false}

@@ -25,7 +25,7 @@ import { calculateTaskCost } from "../../utils/calculateTaskCost";
 import { PiTextIndentBold, PiTextOutdentBold } from "react-icons/pi";
 import Task from '../../models/Task';
 import { businessDuration } from "../../utils/businessDays";
-const TaskList = ({api, projectId, isMyProject}) => {
+const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
     useBlocker(() => {
       if (isDirty) {
         const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
@@ -90,7 +90,9 @@ const TaskList = ({api, projectId, isMyProject}) => {
                             d.resourceAllocations,
                             d.parentId != null ? new Task(d.parentId) : null,
                             new Task(d.predecessor),
-                            d.dependencyType
+                            d.dependencyType,
+                            d.baseStart,
+                            d.baseFinish,
                         );
                         taskMap.set(d.id, task);
                     });
@@ -549,7 +551,7 @@ const TaskList = ({api, projectId, isMyProject}) => {
                 </DndContext>
                 </Col>
                 <Col md={5} className="flex-grow overflow-hidden">
-                    <GanttChart tasks={tasks} />
+                    <GanttChart tasks={tasks} projectInfo={projectInfo} isMyProject={isMyProject} />
                 </Col>
             </Row>
             <TaskDialog 

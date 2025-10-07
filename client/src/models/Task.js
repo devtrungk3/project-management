@@ -13,7 +13,9 @@ export default class Task {
         resourceAllocations=null,
         parent=null, 
         predecessor=null, 
-        dependencyType=null
+        dependencyType=null,
+        baseStart=null,
+        baseFinish=null,
     ) {
         this._id = id;
         this._name = name;
@@ -30,6 +32,8 @@ export default class Task {
         }
         this._start = start;
         this._finish = null;
+        this._baseStart = baseStart;
+        this._baseFinish = baseFinish;
         this._priority = priority;
         this._parent = parent;
         this._predecessor = predecessor;
@@ -158,6 +162,14 @@ export default class Task {
 
     get finish() {
         return addBusinessDays(this._start, this._duration > 0 ? this._duration-1 : 0);
+    }
+
+    get baseStart() {
+        return this._baseStart;
+    }
+
+    get baseFinish() {
+        return this._baseFinish;
     }
 
     get priority() {
