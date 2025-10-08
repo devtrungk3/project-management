@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import projectService from "../../services/User/ProjectService";
+import ProjectService from "../../services/User/ProjectService";
 import useAuth from "../../hooks/useAuth";
 import api, { setAuthHandlers } from '../../utils/axios';
 import style from './DetailProject.module.css';
@@ -16,6 +16,7 @@ import Reports from "./Reports";
 import currencyService from '../../services/User/CurrencyService';
 import { FaGear } from "react-icons/fa6";
 import ProjectSettings from "./ProjectSettings";
+import { toast } from "react-toastify";
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
@@ -48,7 +49,7 @@ const DetailProject = ({isMyProject}) => {
     const loadProjectInformation = () => {
         (async () => {
             try {
-                const data = await projectService.getProjectById(api, projectId, isMyProject);
+                const data = await ProjectService.getProjectById(api, projectId, isMyProject);
                 projectInfo.current = data;
                 setTempProjectInfo(data);
             } catch(error) {
@@ -58,13 +59,22 @@ const DetailProject = ({isMyProject}) => {
     }
     const updateProjectInfo = async () => {
         try {   
-            const data = await projectService.updateProject(api, projectId, tempProjectInfo);
+            const data = await ProjectService.updateProject(api, projectId, tempProjectInfo);
             projectInfo.current = data;
             setTempProjectInfo(data);
         } catch (error) {}
     }
     const resetProjectInfo = () => {
         setTempProjectInfo({...projectInfo.current})
+    }
+    const deleteProject = async () => {
+        if (confirm('Do you want to delete this project?')) {
+            try {
+                await ProjectService.deleteProjectById(api, projectId);
+                toast.success("Delete the project successfully");
+                navigate('/user/my-projects')
+            } catch (error) {}
+        }
     }
     return(
         <Container fluid className='px-5'>
@@ -230,7 +240,7 @@ const DetailProject = ({isMyProject}) => {
                         }
                         <Route path="*" element={<Navigate to=".." replace />} />
                         {isMyProject === true &&
-                        (<Route path="/settings" element={<ProjectSettings api={api} projectId={projectId} setTempProjectInfo={setTempProjectInfo} projectInfo={projectInfo} />} />)
+                        (<Route path="/settings" element={<ProjectSettings api={api} projectId={projectId} setTempProjectInfo={setTempProjectInfo} projectInfo={projectInfo} deleteProject={deleteProject} />} />)
                         }
                         <Route path="*" element={<Navigate to=".." replace />} />
                     </Routes>

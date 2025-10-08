@@ -1,14 +1,16 @@
 import { Row, Col, Card, Button } from "react-bootstrap";
 import ProjectService from "../../services/User/ProjectService";
 import { toast } from "react-toastify";
-const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo}) => {
+const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo, deleteProject}) => {
     const cancelProject = async () => {
-        try {
-            const data = await ProjectService.cancelProject(api, projectId);
-            projectInfo.current = data;
-            setTempProjectInfo(data);
-            toast.success("Cancel project successfully");
-        } catch (error) {}
+        if (confirm('Do you want to cancel this project?')) {
+            try {
+                const data = await ProjectService.cancelProject(api, projectId);
+                projectInfo.current = data;
+                setTempProjectInfo(data);
+                toast.success("Cancel project successfully");
+            } catch (error) {}
+        }
     }
     return (
         <>
@@ -40,7 +42,7 @@ const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo}) => {
                             </Col>
                             <Col md={4} className="d-flex justify-content-end align-items-center">
                             <span className="">
-                                <Button className="btn btn-danger">Delete project</Button>
+                                <Button className="btn btn-danger" onClick={deleteProject}>Delete project</Button>
                             </span>
                             </Col>
                         </Row>
