@@ -1,15 +1,32 @@
-const getAllMyProjects = async (api, pageNumber) => {
+const getAllMyProjects = async (api, pageNumber, searchParams) => {
+    let apiUrl = `user/projects/my-projects?page=${pageNumber}`;
+    if (searchParams.get("name") !== null) {
+        apiUrl += `&name=${searchParams.get("name").trim()}`;
+    }
+    if (searchParams.get("status") !== null && searchParams.get("status") !== "ALL") {
+        apiUrl += `&status=${searchParams.get("status")}`;
+    }
     try {
-        const response = await api.get(`user/projects/my-projects?page=${pageNumber}`);
+        const response = await api.get(apiUrl);
         return response.data;
     } catch (error) {
         console.error('Failed to fetch my projects: ', error);
         throw error;
     }
 }
-const getAllJoinedProjects = async (api, pageNumber) => {
+const getAllJoinedProjects = async (api, pageNumber, searchParams) => {
+    let apiUrl = `user/projects/joined-projects?page=${pageNumber}`;
+    if (searchParams.get("name") !== null) {
+        apiUrl += `&name=${searchParams.get("name").trim()}`;
+    }
+    if (searchParams.get("owner") !== null) {
+        apiUrl += `&owner=${trsearchParams.get("owner").trim()}`;
+    }
+    if (searchParams.get("status") !== null && searchParams.get("status") !== "ALL") {
+        apiUrl += `&status=${searchParams.get("status")}`;
+    }
     try {
-        const response = await api.get(`user/projects/joined-projects?page=${pageNumber}`);
+        const response = await api.get(apiUrl);
         return response.data;
     } catch (error) {
         console.error('Failed to fetch joined projects: ', error);

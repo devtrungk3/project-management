@@ -38,7 +38,7 @@ const Reports = ({api, projectId}) => {
                 <Routes>
                     <Route path="/project-overview" element={<ProjectOverview api={api} projectId={projectId} />} />
                     <Route path="/upcoming-tasks" element={<UpcomingTasks api={api} projectId={projectId} />}/>
-                    <Route path="*" element={<Navigate to="/" />} />
+                    <Route path="*" element={<Navigate to="../project-overview" replace />} />
                 </Routes>
             </div>
         </>

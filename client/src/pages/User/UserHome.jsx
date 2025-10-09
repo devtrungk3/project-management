@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api, { setAuthHandlers } from '../../utils/axios';
 import HomePage from './HomePage';
-import MyProjects from './MyProjects';
+import Projects from './Projects';
 import useAuth from '../../hooks/useAuth';
 import style from './UserHome.module.css';
 import { Link, Routes, Route, Navigate, useLocation } from 'react-router-dom';
@@ -36,9 +36,9 @@ function UserHome() {
           </Link>
           <Link
             to="/user/my-projects"
-            className={`nav-link ${style["nav-link"]} ${isActive('my-projects') ? style.active : ''}`}
+            className={`nav-link ${style["nav-link"]} ${isActive('my-projects') || isActive('joined-projects') ? style.active : ''}`}
           >
-            My projects
+            Projects
           </Link>
           <Link
             to="/user/join-requests"
@@ -87,7 +87,8 @@ function UserHome() {
       <div className={`${style.content}`}>
         <Routes>
           <Route path="/home" element={<HomePage api={api} />} />
-          <Route path="/my-projects" element={<MyProjects api={api} />}/>
+          <Route path="/my-projects" element={<Projects api={api} isMyProject={true} />}/>
+          <Route path="/joined-projects" element={<Projects api={api} isMyProject={false} />}/>
           <Route path="/join-requests" element={<JoinRequests api={api} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

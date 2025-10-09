@@ -2,7 +2,7 @@ import { Container, Row, Col, Card, Button, Table } from 'react-bootstrap';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { FaArrowLeft, FaArrowRight, FaTrash } from "react-icons/fa";
 import style from './MyProjects.module.css';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -10,9 +10,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import projectService from '../../services/User/ProjectService';
 import joinRequestService from '../../services/User/JoinRequestService';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { formatDateTime } from '../../utils/format';
+import SearchDialog from '../../components/SearchDialog';
 
 const PROJECT_STATUS_COLORS = {
     "PLANNING": '#bc9995',
@@ -21,42 +22,43 @@ const PROJECT_STATUS_COLORS = {
     "CANCELLED": '#547abb'
 }
 
-const MyProjects = ({api}) => {
+const Projects = ({api, isMyProject=true}) => {
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
     const [openJoinNewDialog, setOpenJoinNewDialog] = useState(false);
     const [projectData, setProjectData] = useState(null);
-    const [myProjectPageNumber, setMyProjectPageNumber] = useState(0);
-    const [joinedProjectPageNumber, setJoinedProjectPageNumber] = useState(0);
-    const [statisticsOption , setStatisticsOption] = useState(0);
+    const projectPageNumber = useRef(0);
     const [statisticsData, setStatisticsData] = useState(null);
     const [goPrev, setGoPrev] = useState(false);
     const [goNext, setGoNext] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const [openSearchDialog, setOpenSearchDialog] = useState(false);
     const [projectCreationForm, setProjectCreationForm] = useState({
         'name': '',
         'description': ''
     });
     const [joinedProjectId, setJoinedProjectId] = useState(0);
+    const [searchParams] = useSearchParams();
     useEffect(() => {
+        projectPageNumber.current = 0;
         loadProjectTable();
-    }, [myProjectPageNumber, joinedProjectPageNumber, statisticsOption]);
-
+        loadProjectStatistics();
+    }, [isMyProject, location, searchParams]);
     const loadProjectTable = () => {
         (async () => {
             try {
                 let data = null;
-                if (statisticsOption == 0) {
-                    data = await projectService.getAllMyProjects(api, myProjectPageNumber);
+                if (isMyProject) {
+                    data = await projectService.getAllMyProjects(api, projectPageNumber.current, searchParams);
                     setProjectData(data);
                 } else {
-                    data = await projectService.getAllJoinedProjects(api, joinedProjectPageNumber);
+                    data = await projectService.getAllJoinedProjects(api, projectPageNumber.current, searchParams);
                     setProjectData(data);
                 }
                 if (goPrev !== !data.first) setGoPrev(!data.first);
                 if (goNext !== !data.last) setGoNext(!data.last);
             } catch(error) {
-                setMyProjectPageNumber(0);
-                setJoinedProjectPageNumber(0);
+                projectPageNumber.current = 0;
             }
         })();
     }
@@ -64,7 +66,7 @@ const MyProjects = ({api}) => {
         (async () => {
             try {
                 let statisticData = null;
-                if (statisticsOption == 0) {
+                if (isMyProject) {
                     statisticData = await projectService.getMyProjectStatistics(api);
                     setStatisticsData(statisticData);
                 } else {
@@ -98,20 +100,16 @@ const MyProjects = ({api}) => {
 
     const goToPrevPage = useCallback(() => {
         if (goPrev) {
-            if (statisticsOption == 0) {
-                setMyProjectPageNumber(myProjectPageNumber-1)
-            } else {
-                setJoinedProjectPageNumber(joinedProjectPageNumber-1)
-            }
+            projectPageNumber.current -= 1;
+            loadProjectTable();
+            loadProjectStatistics();
         }
     }, [goPrev]);
     const goToNextPage = useCallback(() => {
         if (goNext) {
-            if (statisticsOption == 0) {
-                setMyProjectPageNumber(myProjectPageNumber+1)
-            } else {
-                setJoinedProjectPageNumber(joinedProjectPageNumber+1)
-            }
+            projectPageNumber.current += 1;
+            loadProjectTable();
+            loadProjectStatistics();
         }
     }, [goNext]);
 
@@ -148,9 +146,6 @@ const MyProjects = ({api}) => {
         })();
         handleCloseJoinNewDialog();
     }
-    useEffect(() => {
-        loadProjectStatistics();
-    }, [statisticsOption]);
 
     const deleteProject = (id) => {
         if (confirm(`Do you want to delete project ${id}?`)) {
@@ -170,18 +165,22 @@ const MyProjects = ({api}) => {
                 <Col md={6}>
                     <Row>
                         <Col md={6}>
-                            <Card className={`${style.card} ${statisticsOption || style.active}`} onClick={() => setStatisticsOption(0)}>
+                            <Card className={`${style.card} ${isMyProject && style.active}`} onClick={() => {
+                                navigate('/user/my-projects')
+                            }}>
                                 <Card.Body>
                                     <Card.Title className="fs-4 fw-bold">My projects</Card.Title>
-                                    {!statisticsOption ? <Card.Text className="mt-3 fs-4">{projectData ? `Total: ${projectData.totalElements}`: '\u00A0'}</Card.Text> : <Card.Text className="mt-3 fs-4">&nbsp;</Card.Text>}
+                                    {isMyProject ? <Card.Text className="mt-3 fs-4">{projectData ? `Total: ${projectData.totalElements}`: '\u00A0'}</Card.Text> : <Card.Text className="mt-3 fs-4">&nbsp;</Card.Text>}
                                 </Card.Body>
                             </Card>
                         </Col>
                         <Col md={6}>
-                            <Card className={`${style.card} ${statisticsOption && style.active}`} onClick={() => setStatisticsOption(1)}>
+                            <Card className={`${style.card} ${isMyProject || style.active}`} onClick={() => {
+                                navigate('/user/joined-projects')
+                            }}>
                                 <Card.Body>
                                     <Card.Title className="fs-4 fw-bold">Joined projects</Card.Title>
-                                    {statisticsOption ? <Card.Text className="mt-3 fs-4">{projectData ? `Total: ${projectData.totalElements}`: '\u00A0'}</Card.Text> : <Card.Text className="mt-3 fs-4">&nbsp;</Card.Text>}
+                                    {!isMyProject ? <Card.Text className="mt-3 fs-4">{projectData ? `Total: ${projectData.totalElements}`: '\u00A0'}</Card.Text> : <Card.Text className="mt-3 fs-4">&nbsp;</Card.Text>}
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -198,7 +197,7 @@ const MyProjects = ({api}) => {
                             </Button>
                         </Col>
                         <Col md={3}>
-                            <Button className={`${style.button}`}>
+                            <Button className={`${style.button}`} onClick={() => setOpenSearchDialog(true)}>
                                 Filter
                             </Button>
                         </Col>
@@ -209,7 +208,7 @@ const MyProjects = ({api}) => {
                         <Card.Body>
                             <Row>
                                 <Col md={8}>
-                                    { statisticsData &&
+                                    {statisticsData &&
                                     <PieChart width={180} height={180}>
                                         <Pie data={statisticsData.statusCounts} cx={90} cy={90} outerRadius={80} dataKey="count" nameKey="status">
                                         {statisticsData.statusCounts.map((entry, index) => (
@@ -246,19 +245,19 @@ const MyProjects = ({api}) => {
                                 <th style={{ fontWeight: 600, fontSize: 18, textAlign: 'center' }}>Status</th>
                                 <th style={{ fontWeight: 600, fontSize: 18, textAlign: 'center' }}>Created at</th>
                                 <th style={{ fontWeight: 600, fontSize: 18, textAlign: 'center' }}>Updated at</th>
-                                {statisticsOption == 0 && <th style={{ width: 60 }}>Delete</th>}
+                                {isMyProject && <th style={{ width: 60 }}>Delete</th>}
                             </tr>
                         </thead>
                         <tbody>
                             {projectData?.content.map((project) => (
                             <tr key={project.id} style={{ verticalAlign: 'middle' }}>
                                 <td style={{ fontSize: 18 }}>{project.id}</td>
-                                <td style={{ fontSize: 18 }}><a href={statisticsOption == 0 ? `/user/my-projects/${project.id}` : `/user/joined-projects/${project.id}`}>{project.name}</a></td>
+                                <td style={{ fontSize: 18 }}><a href={isMyProject ? `/user/my-projects/${project.id}` : `/user/joined-projects/${project.id}`}>{project.name}</a></td>
                                 <td style={{ fontSize: 18 }}>{project.ownerUsername}</td>
                                 <td style={{ fontSize: 18 }}>{project.status}</td>
                                 <td style={{ fontSize: 16 }}>{formatDateTime(project.createdAt, 'vi-VN')}</td>
                                 <td style={{ fontSize: 16 }}>{project?.updatedAt ? formatDateTime(project.updatedAt, 'vi-VN') : 'None'}</td>
-                                {statisticsOption == 0 && <td style={{ textAlign: 'center' }}>
+                                {isMyProject && <td style={{ textAlign: 'center' }}>
                                 <Button variant="link" style={{ color: 'red', padding: 0 }} onClick={() => deleteProject(project.id)}>
                                     <FaTrash size={20} />
                                 </Button>
@@ -274,7 +273,7 @@ const MyProjects = ({api}) => {
                     <Button variant="" disabled={!goPrev} className={goPrev || `${style["unactive-arrow"]}`} onClick={goToPrevPage}>
                         <FaArrowLeft />
                     </Button>
-                    <Button disabled>{statisticsOption == 0 ? myProjectPageNumber+1 : joinedProjectPageNumber+1}</Button>
+                    <Button disabled>{projectPageNumber.current+1}</Button>
                     <Button variant="" disabled={!goNext} className={goNext || `${style["unactive-arrow"]}`} onClick={goToNextPage}>
                         <FaArrowRight />
                     </Button>
@@ -350,7 +349,8 @@ const MyProjects = ({api}) => {
                     <Button type="submit">Send request</Button>
                 </DialogActions>
             </Dialog>
+            <SearchDialog openSearchDialog={openSearchDialog} setOpenSearchDialog={setOpenSearchDialog} isMyProject={isMyProject}/>
         </Container>
     );
 }
-export default MyProjects;
+export default Projects;
