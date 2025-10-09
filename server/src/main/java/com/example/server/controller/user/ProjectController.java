@@ -3,6 +3,7 @@ package com.example.server.controller.user;
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.entity.Project;
+import com.example.server.model.entity.ProjectStatus;
 import com.example.server.model.entity.User;
 import com.example.server.service.domain.project.ProjectService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController("userProjectController")
 @RequiredArgsConstructor
@@ -19,15 +22,41 @@ import java.net.URI;
 public class ProjectController {
     private final ProjectService projectService;
     @GetMapping("/my-projects")
-    public ResponseEntity<Page<ProjectDTO>> getAllMyProjects(@RequestParam int page, HttpServletRequest request) {
+    public ResponseEntity<Page<ProjectDTO>> getAllMyProjects(
+            @RequestParam(name = "page") int page,
+            @RequestParam(name = "name", required = false) String projectName,
+            @RequestParam(name = "status", required = false) ProjectStatus projectStatus,
+            HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        Page<ProjectDTO> projects = projectService.getAllOwnProjects(userIdExtractedFromJWT, page, 5);
+        Map<String, Object> filters = new HashMap<>();
+        if (projectName != null) {
+            filters.put("projectName", projectName);
+        }
+        if (projectStatus != null) {
+            filters.put("projectStatus", projectStatus);
+        }
+        Page<ProjectDTO> projects = projectService.getAllOwnProjects(userIdExtractedFromJWT, page, 5, filters);
         return ResponseEntity.ok(projects);
     }
     @GetMapping("/joined-projects")
-    public ResponseEntity<Page<ProjectDTO>> getAllJoinedProjects(@RequestParam int page, HttpServletRequest request) {
+    public ResponseEntity<Page<ProjectDTO>> getAllJoinedProjects(
+            @RequestParam int page,
+            @RequestParam(name = "name", required = false) String projectName,
+            @RequestParam(name = "owner", required = false) String ownerUsername,
+            @RequestParam(name = "status", required = false) ProjectStatus projectStatus,
+            HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        Page<ProjectDTO> projects = projectService.getAllJoinedProjects(userIdExtractedFromJWT, page, 5);
+        Map<String, Object> filters = new HashMap<>();
+        if (projectName != null) {
+            filters.put("projectName", projectName);
+        }
+        if (ownerUsername != null) {
+            filters.put("ownerUsername", ownerUsername);
+        }
+        if (projectStatus != null) {
+            filters.put("projectStatus", projectStatus);
+        }
+        Page<ProjectDTO> projects = projectService.getAllJoinedProjects(userIdExtractedFromJWT, page, 5, filters);
         return ResponseEntity.ok(projects);
     }
     @PostMapping

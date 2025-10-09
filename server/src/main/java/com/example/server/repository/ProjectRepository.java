@@ -6,6 +6,7 @@ import com.example.server.model.dto.admin.ProjectStatisticsDTO;
 import com.example.server.model.dto.admin.TopProjectManagerDTO;
 import com.example.server.model.dto.user.ProjectOverviewReportDTO;
 import com.example.server.model.entity.Project;
+import com.example.server.model.entity.ProjectStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -24,6 +25,15 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             ORDER BY p.updatedAt DESC, p.createdAt DESC
             """)
     Page<ProjectDTO> findByOwnerIdOrderByUpdatedAtDescAndCreatedAtDesc(int ownerId, Pageable pageable);
+    @Query("""
+            SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.status, p.owner.username, p.createdAt, p.updatedAt)
+            FROM Project p
+            WHERE p.owner.id = :ownerId
+            AND (:projectName IS NULL OR p.name LIKE CONCAT('%', :projectName, '%'))
+            AND (:projectStatus IS NULL OR p.status = :projectStatus)
+            ORDER BY p.updatedAt DESC, p.createdAt DESC
+            """)
+    Page<ProjectDTO> findByOwnerIdWithFilters(int ownerId, Pageable pageable, String projectName, ProjectStatus projectStatus);
     @Query("""
             SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.owner.username, p.plannedBudget, c, p.createdAt, p.updatedAt)
             FROM Project p

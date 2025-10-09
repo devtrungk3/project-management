@@ -3,6 +3,7 @@ package com.example.server.repository;
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.ResourceDTO;
 import com.example.server.model.dto.StatusCountDTO;
+import com.example.server.model.entity.ProjectStatus;
 import com.example.server.model.entity.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +27,20 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.status, r.project.owner.username, r.project.createdAt, r.project.updatedAt)
             FROM Resource r
             WHERE r.user.id = :userId
+            ORDER BY r.project.updatedAt DESC, r.project.createdAt DESC
             """)
     Page<ProjectDTO> findProjectByResourceUserIdOrderByUpdatedAtDescAndCreatedAtDesc(int userId, Pageable pageable);
+    @Query("""
+            SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.status, r.project.owner.username, r.project.createdAt, r.project.updatedAt)
+            FROM Resource r
+            WHERE r.user.id = :userId
+            AND (:projectName IS NULL OR r.project.name LIKE CONCAT('%', :projectName, '%'))
+            AND (:ownerUsername IS NULL OR r.project.owner.username LIKE CONCAT('%', :ownerUsername, '%'))
+            AND (:projectStatus IS NULL OR r.project.status = :projectStatus)
+            ORDER BY r.project.updatedAt DESC, r.project.createdAt DESC
+            """)
+    Page<ProjectDTO> findProjectByResourceUserIdWithFilters(int userId, Pageable pageable, String projectName, String ownerUsername, ProjectStatus projectStatus);
+
     @Query("""
             SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.description, r.project.status, r.project.owner.username, r.project.plannedBudget, c, r.project.createdAt, r.project.updatedAt)
             FROM Resource r

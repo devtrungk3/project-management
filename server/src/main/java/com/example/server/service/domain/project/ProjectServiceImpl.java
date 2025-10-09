@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -31,14 +32,26 @@ public class ProjectServiceImpl implements ProjectService{
         return projectRepository.findAll(PageRequest.of(pageNumber, pageSize));
     }
     @Override
-    @Cacheable(value = "ownProjectsCache", key = "#ownerId + '_' + #pageNumber")
-    public Page<ProjectDTO> getAllOwnProjects(int ownerId, int pageNumber, int pageSize) {
-        return projectRepository.findByOwnerIdOrderByUpdatedAtDescAndCreatedAtDesc(ownerId, PageRequest.of(pageNumber, pageSize));
+   @Cacheable(value = "ownProjectsCache", key = "#ownerId + '_' + #pageNumber")
+    public Page<ProjectDTO> getAllOwnProjects(int ownerId, int pageNumber, int pageSize, Map<String, Object> filters) {
+        if (filters.size() == 0) {
+            return projectRepository.findByOwnerIdOrderByUpdatedAtDescAndCreatedAtDesc(ownerId, PageRequest.of(pageNumber, pageSize));
+        }
+        return projectRepository.findByOwnerIdWithFilters(ownerId, PageRequest.of(pageNumber, pageSize), (String) filters.get("projectName"), (ProjectStatus) filters.get("projectStatus"));
     }
 
     @Override
-    public Page<ProjectDTO> getAllJoinedProjects(int userId, int pageNumber, int pageSize) {
-        return resourceRepository.findProjectByResourceUserIdOrderByUpdatedAtDescAndCreatedAtDesc(userId, PageRequest.of(pageNumber, pageSize));
+    public Page<ProjectDTO> getAllJoinedProjects(int userId, int pageNumber, int pageSize, Map<String, Object> filters) {
+        if (filters.size() == 0) {
+            return resourceRepository.findProjectByResourceUserIdOrderByUpdatedAtDescAndCreatedAtDesc(userId, PageRequest.of(pageNumber, pageSize));
+        }
+        return resourceRepository.findProjectByResourceUserIdWithFilters(
+                userId,
+                PageRequest.of(pageNumber, pageSize),
+                (String) filters.get("projectName"),
+                (String) filters.get("ownerUsername"),
+                (ProjectStatus) filters.get("projectStatus")
+        );
     }
 
     @Override
