@@ -45,6 +45,17 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
     const [isAddDialog, setIsAddDialog] = useState(null);
     const [selectedTaskIndex, setSelectedTaskIndex] = useState(-1);
     const [tagRates, setTagRates] = useState(null);
+    const [activeColumns, setActiveColumns] = useState(new Map([
+        ["WBS", true],
+        ["priority", true],
+        ["owners", true],
+        ["duration", true],
+        ["start", true],
+        ["finish", true],
+        ["complete", true],
+        ["predecessor", true],
+        ["total cost", true],
+    ]));
     useEffect(() => {
         loadTaskTable();
         loadResourceList();
@@ -480,6 +491,13 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
         refreshSummaryTasks([...tasks]);
         setIsDirty(true);
     }
+    const handleActiveColumns = (key) => {
+        setActiveColumns((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(key, !newMap.get(key));
+            return newMap;
+        });
+    }
     return (
         <>
             <div>
@@ -524,26 +542,90 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                 <Col md={7} className="overflow-auto">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
+                        <div style={{marginTop: '10px', height: '30px'}}>
+                            <div className="d-flex">
+                                <div className="dropdown ms-3">
+                                    <a
+                                        className="nav-link dropdown-toggle"
+                                        href="#"
+                                        id="hideColumnDropdown"
+                                        role="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        Hide columns
+                                    </a>
+                                    <ul
+                                        className="dropdown-menu dropdown-menu-end shadow px-3"
+                                        aria-labelledby="userDropdown"
+                                    >
+                                        {
+                                            Array.from(activeColumns).map(([key, value]) => (
+                                                <li className="d-flex" onClick={(e) => e.stopPropagation()} key={key}>
+                                                    <input
+                                                    type="checkbox"
+                                                    checked={!value}
+                                                    onChange={() => handleActiveColumns(key)}
+                                                    />
+                                                    <span className="ps-2">{key}</span>
+                                                </li>
+                                            ))
+                                        } 
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                         <table className={`${style.table}`}>
                             <thead>
                                 <tr>
                                 <th className={`${style.cell} min_width_25 ${style['cell-header']}`}></th>
                                 <th className={`${style.cell} min_width_50 ${style['cell-header']} text-center`}>#</th>
+                                {
+                                    activeColumns.get("WBS") === true &&
+                                    <th className={`${style.cell} min_width_50 ${style['cell-header']} text-center`}>WBS</th>
+                                }
                                 <th className={`${style.cell} ${style['cell-header']}`}>Name</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Priority</th>
-                                <th className={`${style.cell} ${style['cell-header']}`}>Owners</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Duration</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Start</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Finish</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Complete</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Predecessor</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Effort</th>
-                                <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Total cost</th>
+                                {
+                                    activeColumns.get("priority") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Priority</th>
+                                }
+                                {
+                                    activeColumns.get("owners") === true &&
+                                    <th className={`${style.cell} ${style['cell-header']}`}>Owners</th>
+                                }
+                                {
+                                    activeColumns.get("duration") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Duration</th>
+                                }
+                                {
+                                    activeColumns.get("start") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Start</th>
+                                }
+                                {
+                                    activeColumns.get("finish") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Finish</th>
+                                }
+                                {
+                                    activeColumns.get("complete") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Complete</th>
+                                }
+                                {
+                                    activeColumns.get("predecessor") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Predecessor</th>
+                                }
+                                {
+                                    activeColumns.get("effort") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Effort</th>
+                                }
+                                {
+                                    activeColumns.get("total cost") === true &&
+                                    <th className={`${style.cell} min_width_100 ${style['cell-header']}`}>Total cost</th>
+                                }
                                 </tr>
                             </thead>
                             <tbody>
                                 {tasks.map((task, index) => (
-                                    <SortableTask isParent={tasks[index+1]?.level > task.level} key={task.id} task={task} predecessorIndex={tasks.findIndex(t => t.id === task.predecessor?.id)+1} index={index} onSelect={handleTaskSelect} isSelected={selectedTaskIndex === index} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
+                                    <SortableTask activeColumns={activeColumns} isParent={tasks[index+1]?.level > task.level} taskAbove={tasks[index-1]} key={task.id} task={task} predecessorIndex={tasks.findIndex(t => t.id === task.predecessor?.id)+1} index={index} onSelect={handleTaskSelect} isSelected={selectedTaskIndex === index} onDoubleClick={handleOpenTaskDialog} isMyProject={isMyProject}/>
                                 ))}
                             </tbody>
                         </table>

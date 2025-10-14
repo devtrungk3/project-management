@@ -13,7 +13,7 @@ const Resources = ({api, projectId}) => {
     const [resources, setResources] = useState([]);
     const [resourceIdSelected, setResourceIdSelected] = useState(0);
     const [tagRates, setTagRates] = useState(null);
-    const [selectedTagRateId, setSelectedTagRateId] = useState(0);
+    const [selectedTagRateIndex, setSelectedTagRateIndex] = useState(-1);
     const [openTagRateDialog, setOpenTagRateDialog] = useState(0);
     const [isAddTagRateDialog, setIsAddTagRateDialog] = useState(false);
     const [tempTagRate, setTempTagRate] = useState(null);
@@ -59,11 +59,11 @@ const Resources = ({api, projectId}) => {
                 }
         }
     }
-    const handleSelectedTagRateId = (currentSelectedTagRateId) => {
-        if (currentSelectedTagRateId == selectedTagRateId) {
-            setSelectedTagRateId(0);
+    const handleselectedTagRateIndex = (currentSelectedTagRateIndex) => {
+        if (currentSelectedTagRateIndex == selectedTagRateIndex) {
+            setSelectedTagRateIndex(-1);
         } else {
-            setSelectedTagRateId(currentSelectedTagRateId);
+            setSelectedTagRateIndex(currentSelectedTagRateIndex);
         }
     }
     const handleOpenTagRateDialog = (addDialogFlag, tagRateId = -1) => {
@@ -112,14 +112,14 @@ const Resources = ({api, projectId}) => {
         handleCloseTagRateDialog(0);
     }
     const deleteTagRate = async () => {
-        if (selectedTagRateId != 0) {
-            if (confirm(`Do you want to delete tag id ${selectedTagRateId}?`)) {
+        if (selectedTagRateIndex != -1) {
+            if (confirm(`Do you want to delete tag [${tagRates[selectedTagRateIndex]?.tagName}] ?`)) {
                 try {
-                    await tagRateService.deleteTagRate(api, selectedTagRateId);
-                    setTagRates(prev => prev.filter(tag => tag.id !== selectedTagRateId));
+                    await tagRateService.deleteTagRate(api, tagRates[selectedTagRateIndex]?.id);
+                    setTagRates(prev => prev.filter(tag => tag.id !== tagRates[selectedTagRateIndex]?.id));
                     toast.success("Delete tag rate successfully");
                 } catch (error) {}   
-            setSelectedTagRateId(0);                         
+            setSelectedTagRateIndex(-1);                         
             }
         }
     }
@@ -139,7 +139,6 @@ const Resources = ({api, projectId}) => {
                         <table className={`${style.table}`}>
                             <thead>
                                 <tr>
-                                <th className={`${style.cell} ${style['cell-header']}`}>ID</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Username</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Added at</th>
                                 </tr>
@@ -147,7 +146,6 @@ const Resources = ({api, projectId}) => {
                             <tbody>
                                 {resources.map(resource => 
                                     <tr key={resource.id} onClick={(e) => {handleResourceSelect(resource.id)}} className={resource.id === resourceIdSelected ? 'selected_row' : ''}>
-                                        <td className={`${style.cell}`}>{resource.id}</td>
                                         <td className={`${style.cell}`}>{resource.username}</td>
                                         <td className={`${style.cell}`}>{formatDateTime(resource.createdAt, 'vi-VN')}</td>
                                     </tr>
@@ -173,20 +171,18 @@ const Resources = ({api, projectId}) => {
                         <table className={`${style.table}`}>
                             <thead>
                                 <tr>
-                                <th className={`${style.cell} ${style['cell-header']}`}>ID</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Tag name</th>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Rate</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {tagRates?.map(tag => 
+                                {tagRates?.map((tag, index) => 
                                     <tr 
                                         key={tag.id} 
-                                        onClick={(e) => {handleSelectedTagRateId(tag.id)}} 
-                                        className={tag.id === selectedTagRateId ? 'selected_row' : ''}
+                                        onClick={(e) => {handleselectedTagRateIndex(index)}} 
+                                        className={index === selectedTagRateIndex ? 'selected_row' : ''}
                                         onDoubleClick={() => handleOpenTagRateDialog(false, tag.id)}
                                     >
-                                        <td className={`${style.cell}`}>{tag.id}</td>
                                         <td className={`${style.cell}`}>{tag.tagName}</td>
                                         <td className={`${style.cell}`}>{tag.rate}</td>
                                     </tr>

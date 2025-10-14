@@ -165,11 +165,11 @@ export default class Task {
     }
 
     get baseStart() {
-        return this._baseStart;
+        return this._baseStart ? this._baseStart : this.start;
     }
 
     get baseFinish() {
-        return this._baseFinish;
+        return this._baseFinish ? this._baseFinish : this.finish;
     }
 
     get priority() {
