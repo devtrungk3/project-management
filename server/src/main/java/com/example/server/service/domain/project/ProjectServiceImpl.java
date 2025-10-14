@@ -5,10 +5,10 @@ import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.dto.StatusCountDTO;
 import com.example.server.exception.IdNotFoundException;
-import com.example.server.model.entity.Project;
-import com.example.server.model.entity.ProjectStatus;
+import com.example.server.model.entity.*;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
+import com.example.server.repository.TagRateRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class ProjectServiceImpl implements ProjectService{
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
+    private final TagRateRepository tagRateRepository;
     @Override
     public Page<Project> getAllProjects(int pageNumber, int pageSize) {
         return projectRepository.findAll(PageRequest.of(pageNumber, pageSize));
@@ -83,13 +85,27 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "ownProjectsCache", allEntries = true)
     public Project addProject(Project newProject) {
         if (!userRepository.existsById(newProject.getOwner().getId())) {
            throw new IdNotFoundException("UserId " + newProject.getOwner().getId() + " not found");
         }
         newProject.setId(0);
-        return projectRepository.save(newProject);
+        Project savedProject = projectRepository.save(newProject);
+        // automatically adds project owner to resource and project manager tag to tag rate
+        User projectOwner = new User();
+        projectOwner.setId(newProject.getOwner().getId());
+        Resource resource = new Resource();
+        resource.setUser(projectOwner);
+        resource.setProject(savedProject);
+        resourceRepository.save(resource);
+        TagRate tagRate = new TagRate();
+        tagRate.setTagName("PROJECT_MANAGER");
+        tagRate.setProject(savedProject);
+        tagRate.setRate(0);
+        tagRateRepository.save(tagRate);
+        return savedProject;
     }
     @Override
     @CacheEvict(value = "ownProjectsCache", allEntries = true)

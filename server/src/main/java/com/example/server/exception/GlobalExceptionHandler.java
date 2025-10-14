@@ -89,9 +89,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Void> handleIllegalArgument(IllegalArgumentException e) {
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
         System.out.println("IllegalArgumentException - " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
     @ExceptionHandler(ProjectNotInProgressException.class)
     public ResponseEntity<Map<String, String>> handleProjectNotInProgress(ProjectNotInProgressException e) {

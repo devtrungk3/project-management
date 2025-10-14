@@ -1,6 +1,7 @@
 package com.example.server.service.domain.task;
 
 import com.example.server.exception.EntityNotFoundException;
+import com.example.server.exception.IdNotFoundException;
 import com.example.server.model.dto.ResourceAllocationDTO;
 import com.example.server.model.dto.TaskDTO;
 import com.example.server.exception.ProjectNotInProgressException;
@@ -162,7 +163,7 @@ public class TaskServiceImpl implements TaskService {
             TaskDTO newTaskDTO = newTaskDTOs.get(i);
             for (ResourceAllocationDTO resourceAllocationDTO : newTaskDTO.getResourceAllocations()) {
                 if (!availableResourceIdsInDB.contains(resourceAllocationDTO.getResourceId())) {
-                    throw new IllegalArgumentException("ResourceId " + resourceAllocationDTO.getResourceId() + " not found");
+                    throw new IdNotFoundException("ResourceId " + resourceAllocationDTO.getResourceId() + " not found");
                 }
                 Resource resourceRef = new Resource();
                 resourceRef.setId(resourceAllocationDTO.getResourceId());

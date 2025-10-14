@@ -43,6 +43,9 @@ public class ResourceServiceImpl implements ResourceService{
     public void deleteResourceByOwner(int resourceId, int ownerId) {
         Resource resource = resourceRepository.findByIdAndProject_Owner_Id(resourceId, ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId));
+        if (resource.getUser().getId() == ownerId) {
+            throw new IllegalArgumentException("Cannot delete Project manager resource");
+        }
         ProjectStatusValidator.validateClosedProject(resource.getProject());
         resourceRepository.delete(resource);
     }
