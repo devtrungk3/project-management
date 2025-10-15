@@ -10,6 +10,9 @@ import com.example.server.repository.ResourceRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +23,9 @@ public class ResourceServiceImpl implements ResourceService{
     private final ResourceRepository resourceRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final CacheManager cacheManager;
     @Override
+    @CacheEvict(value = "resourceInProject", key = "{#result.project.id, #result.project.owner.id}")
     public Resource addResource(Resource newResource) {
         if (!userRepository.existsById(newResource.getUser().getId())) {
             throw new IdNotFoundException("UserId " + newResource.getUser().getId() + " not found");
@@ -35,6 +40,7 @@ public class ResourceServiceImpl implements ResourceService{
         return resourceRepository.save(newResource);
     }
     @Override
+    @Cacheable(value = "resourceInProject", key = "{#projectId, #ownerId}", unless = "#result == null or #result.size()<5")
     public List<ResourceDTO> getAllResourcesForProjectOwner(int projectId, int ownerId) {
         return resourceRepository.findByProjectIdAndProjectOwnerId(projectId, ownerId);
     }
@@ -48,5 +54,9 @@ public class ResourceServiceImpl implements ResourceService{
         }
         ProjectStatusValidator.validateClosedProject(resource.getProject());
         resourceRepository.delete(resource);
+        cacheManager.getCache("resourceInProject").evictIfPresent(new Object[]{
+                resource.getProject().getId(),
+                resource.getProject().getOwner().getId()
+        });
     }
 }

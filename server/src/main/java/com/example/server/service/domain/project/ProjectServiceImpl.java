@@ -12,8 +12,6 @@ import com.example.server.repository.TagRateRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,7 +32,6 @@ public class ProjectServiceImpl implements ProjectService{
         return projectRepository.findAll(PageRequest.of(pageNumber, pageSize));
     }
     @Override
-   @Cacheable(value = "ownProjectsCache", key = "#ownerId + '_' + #pageNumber")
     public Page<ProjectDTO> getAllOwnProjects(int ownerId, int pageNumber, int pageSize, Map<String, Object> filters) {
         if (filters.size() == 0) {
             return projectRepository.findByOwnerIdOrderByUpdatedAtDescAndCreatedAtDesc(ownerId, PageRequest.of(pageNumber, pageSize));
@@ -86,7 +83,6 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     @Transactional
-    @CacheEvict(value = "ownProjectsCache", allEntries = true)
     public Project addProject(Project newProject) {
         if (!userRepository.existsById(newProject.getOwner().getId())) {
            throw new IdNotFoundException("UserId " + newProject.getOwner().getId() + " not found");
@@ -108,7 +104,6 @@ public class ProjectServiceImpl implements ProjectService{
         return savedProject;
     }
     @Override
-    @CacheEvict(value = "ownProjectsCache", allEntries = true)
     public Project updateProject(int projectId, int ownerId, Project updatedProject) {
         Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
         ProjectStatusValidator.validateClosedProject(oldProject);
@@ -145,7 +140,6 @@ public class ProjectServiceImpl implements ProjectService{
             throw new IdNotFoundException("ProjectId " + id + " not found");
     }
     @Override
-    @CacheEvict(value = "ownProjectsCache", allEntries = true)
     public void deleteProjectByOwner(int projectId, int ownerId) {
         if (projectRepository.existsByIdAndOwnerId(projectId, ownerId))
             projectRepository.deleteById(projectId);

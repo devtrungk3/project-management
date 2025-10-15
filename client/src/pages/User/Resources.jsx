@@ -136,7 +136,7 @@ const Resources = ({api, projectId}) => {
                                 </div>
                             </div>
                         </div>
-                        <table className={`${style.table}`}>
+                        <table className={`${style.table} mt-4`}>
                             <thead>
                                 <tr>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Username</th>
@@ -168,7 +168,7 @@ const Resources = ({api, projectId}) => {
                                 </div>
                             </div>
                         </div>
-                        <table className={`${style.table}`}>
+                        <table className={`${style.table} mt-4`}>
                             <thead>
                                 <tr>
                                 <th className={`${style.cell} ${style['cell-header']}`}>Tag name</th>

@@ -20,7 +20,8 @@ public class RedisCacheConfig {
                 .disableCachingNullValues();
         // per-cache config
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
-        cacheConfigs.put("ownProjectsCache", defaultCacheConfiguration.entryTtl(Duration.ofMinutes(15)));
+        cacheConfigs.put("resourceInProject", defaultCacheConfiguration.entryTtl(Duration.ofHours(1)));
+        cacheConfigs.put("tagRateInProject", defaultCacheConfiguration.entryTtl(Duration.ofHours(1)));
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultCacheConfiguration)

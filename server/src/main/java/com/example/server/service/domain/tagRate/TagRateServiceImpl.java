@@ -8,6 +8,9 @@ import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.TagRateRepository;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,13 +20,16 @@ import java.util.List;
 public class TagRateServiceImpl implements TagRateService{
     private final TagRateRepository tagRateRepository;
     private final ProjectRepository projectRepository;
+    private final CacheManager cacheManager;
 
     @Override
+    @Cacheable(value = "tagRateInProject", key = "{#projectId, #ownerId}", unless = "#result == null or #result.size()<5")
     public List<TagRate> getTagRatesByProjectAndOwner(int projectId, int ownerId) {
         return tagRateRepository.findByProject_IdAndProject_Owner_IdOrderByIdDesc(projectId, ownerId);
     }
 
     @Override
+    @CacheEvict(value = "tagRateInProject", key = "{#result.project.id, #ownerId}")
     public TagRate addTagRate(TagRate newTagRate, int ownerId) {
         Project project = projectRepository.findByIdAndOwnerId(newTagRate.getProject().getId(), ownerId).orElseThrow(() ->
             new EntityNotFoundException("No project found with projectId " + newTagRate.getProject().getId() + " and ownerId " + ownerId));
@@ -33,6 +39,7 @@ public class TagRateServiceImpl implements TagRateService{
     }
 
     @Override
+    @CacheEvict(value = "tagRateInProject", key = "{#result.project.id, #ownerId}")
     public TagRate updateTagRate(TagRate updatedTagRate, int ownerId) {
         Project project = projectRepository.findByIdAndOwnerId(updatedTagRate.getProject().getId(), ownerId).orElseThrow(() ->
                 new EntityNotFoundException("No project found with projectId " + updatedTagRate.getProject().getId() + " and ownerId " + ownerId));
@@ -49,5 +56,9 @@ public class TagRateServiceImpl implements TagRateService{
             new EntityNotFoundException("No TagRate found with tagRateId " + tagRateId + " and ownerId " + ownerId));
         ProjectStatusValidator.validateClosedProject(tagRate.getProject());
         tagRateRepository.delete(tagRate);
+        cacheManager.getCache("tagRateInProject").evictIfPresent(new Object[]{
+                tagRate.getProject().getId(),
+                ownerId
+        });
     }
 }

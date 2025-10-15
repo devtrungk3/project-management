@@ -5,15 +5,11 @@ import com.example.server.model.entity.ProjectStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ProjectDTO implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class ProjectDTO {
     private int id;
     private String name;
     private String description;
