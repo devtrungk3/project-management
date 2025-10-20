@@ -12,5 +12,15 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
+  mongodb:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: devtrungk3
+    volumes:
+      - project_management_mongo_data:/data/db
 volumes:
   project_management_data:
+  project_management_mongo_data:
