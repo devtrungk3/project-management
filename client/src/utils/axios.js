@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
-import { getCsrfToken } from '../services/AuthService';
 
 let getAccessToken = () => localStorage.getItem('accessToken');
 let setAccessToken = (token) => localStorage.setItem('accessToken', token);
@@ -26,8 +25,6 @@ const plainApi = axios.create({
 });
 
 customApi.interceptors.request.use(async (config) => {
-  const csrf = await getCsrfToken();
-  config.headers["X-XSRF-TOKEN"] = csrf?.token || "";
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -46,15 +43,8 @@ customApi.interceptors.response.use(
           if (isUnauthorized && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-              let csrf = await getCsrfToken();
               const refreshTokenResponse = await plainApi.post(
-                'auth/refresh-token',
-                {},
-                {
-                  headers: {
-                  "X-XSRF-TOKEN": csrf?.token || ""
-                  }
-                }
+                'auth/refresh-token'
               );
               const newAccessToken = refreshTokenResponse.data;
               const decoded = jwtDecode(newAccessToken);
@@ -63,8 +53,6 @@ customApi.interceptors.response.use(
               setUserRole(decoded?.role);
 
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-              csrf = await getCsrfToken();
-              originalRequest.headers['X-XSRF-TOKEN'] = csrf?.token || "";
               return plainApi(originalRequest);
             } catch (refreshErr) {
               await logoutFn();

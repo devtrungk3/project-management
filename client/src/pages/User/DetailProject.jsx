@@ -7,16 +7,19 @@ import style from './DetailProject.module.css';
 import TaskList from "./TaskList";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { FaAngleLeft } from "react-icons/fa";
-import { MdOutlineViewTimeline, MdPeople } from "react-icons/md";
+import { MdOutlineViewTimeline } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
 import { TextField } from "@mui/material";
 import Resources from "./Resources";
 import { formatDateTime } from '../../utils/format';
 import Reports from "./Reports";
 import currencyService from '../../services/User/CurrencyService';
-import { FaGear } from "react-icons/fa6";
+import { PiGearBold  } from "react-icons/pi";
 import ProjectSettings from "./ProjectSettings";
 import { toast } from "react-toastify";
+import { FiUsers } from "react-icons/fi";
+import { HiOutlineChatAlt } from "react-icons/hi";
+import ChatRoom from "./ChatRoom";
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
@@ -215,7 +218,7 @@ const DetailProject = ({isMyProject}) => {
                     </Card>
                     {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('resources') === true && style.active}`}>
                         <Link to={`/user/my-projects/${projectId}/resources`} className="text-dark p-2">
-                            <MdPeople className="fs-2"/>
+                            <FiUsers className="fs-2"/>
                         </Link>
                     </Card>}
                     {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('reports') === true && style.active}`}>
@@ -223,9 +226,14 @@ const DetailProject = ({isMyProject}) => {
                             <HiOutlineChartBar className="fs-2"/>
                         </Link>
                     </Card>}
+                    <Card className={`justify-content-center border border-none ${style.nav} ${isActive('chat') === true && style.active}`}>
+                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/chat`} className="text-dark p-2">
+                            <HiOutlineChatAlt className="fs-2"/>
+                        </Link>
+                    </Card>
                     {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('settings') === true && style.active}`}>
                         <Link to={`/user/my-projects/${projectId}/settings`} className="text-dark p-2">
-                            <FaGear className="fs-2"/>
+                            <PiGearBold className="fs-2"/>
                         </Link>
                     </Card>}
                 </div>
@@ -238,7 +246,7 @@ const DetailProject = ({isMyProject}) => {
                         {isMyProject === true &&
                         (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} />} />)
                         }
-                        <Route path="*" element={<Navigate to=".." replace />} />
+                        <Route path="/chat" element={<ChatRoom api={api} projectId={projectId} />} />
                         {isMyProject === true &&
                         (<Route path="/settings" element={<ProjectSettings api={api} projectId={projectId} setTempProjectInfo={setTempProjectInfo} projectInfo={projectInfo} deleteProject={deleteProject} />} />)
                         }
