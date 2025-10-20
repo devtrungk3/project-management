@@ -13,11 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,16 +31,6 @@ public class AuthController {
     public ResponseEntity<Void> register(@RequestBody User newUser) {
         userService.register(newUser);
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @GetMapping("/csrf-token")
-    public ResponseEntity<?> getCsrfToken(HttpServletRequest request) {
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-
-        Map<String, String> tokenMap = new HashMap<>();
-        tokenMap.put("headerName", csrfToken.getHeaderName());
-        tokenMap.put("token", csrfToken.getToken());
-        return ResponseEntity.ok(tokenMap);
     }
 
     @PostMapping("/login")

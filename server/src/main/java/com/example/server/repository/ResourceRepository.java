@@ -26,14 +26,14 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     @Query("""
             SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.status, r.project.owner.username, r.project.createdAt, r.project.updatedAt)
             FROM Resource r
-            WHERE r.user.id = :userId
+            WHERE r.user.id = :userId AND r.project.owner.id != :userId
             ORDER BY r.project.updatedAt DESC, r.project.createdAt DESC
             """)
     Page<ProjectDTO> findProjectByResourceUserIdOrderByUpdatedAtDescAndCreatedAtDesc(int userId, Pageable pageable);
     @Query("""
             SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.status, r.project.owner.username, r.project.createdAt, r.project.updatedAt)
             FROM Resource r
-            WHERE r.user.id = :userId
+            WHERE r.user.id = :userId AND r.project.owner.id != :userId
             AND (:projectName IS NULL OR r.project.name LIKE CONCAT('%', :projectName, '%'))
             AND (:ownerUsername IS NULL OR r.project.owner.username LIKE CONCAT('%', :ownerUsername, '%'))
             AND (:projectStatus IS NULL OR r.project.status = :projectStatus)
@@ -45,7 +45,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             SELECT new com.example.server.model.dto.ProjectDTO(r.project.id, r.project.name, r.project.description, r.project.status, r.project.owner.username, r.project.plannedBudget, c, r.project.createdAt, r.project.updatedAt)
             FROM Resource r
             LEFT JOIN r.project.currency c
-            WHERE r.project.id = :projectId AND r.user.id = :userId
+            WHERE r.project.id = :projectId AND r.user.id = :userId AND r.project.owner.id != :userId
             """)
     Optional<ProjectDTO> findProjectIdByProjectIdAndResourceUserId(int projectId, int userId);
     @Query("""
