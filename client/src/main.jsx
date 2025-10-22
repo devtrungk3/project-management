@@ -17,7 +17,12 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <App />
-        <ToastContainer />
+        <ToastContainer
+          className={"custom-toast"}
+          autoClose={2000}
+          position='bottom-right'
+          theme="colored"
+        />
       </AuthProvider>
     </ThemeProvider>
 )
