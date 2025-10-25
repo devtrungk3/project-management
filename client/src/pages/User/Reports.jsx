@@ -1,8 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import ProjectOverview from "./ProjectOverview";
 import UpcomingTasks from "./UpcomingTasks";
+import CostOverview from "./CostOverview";
 
-const Reports = ({api, projectId}) => {
+const Reports = ({api, projectId, projectInfo}) => {
     return (
         <>
             <div className="mt-2">
@@ -27,6 +28,11 @@ const Reports = ({api, projectId}) => {
                     </a>
                     </li>
                     <li>
+                    <a className="dropdown-item" href='cost-overview'>
+                        Cost overview
+                    </a>
+                    </li>
+                    <li>
                     <a className="dropdown-item" href='upcoming-tasks'>
                         Upcoming tasks
                     </a>
@@ -38,6 +44,7 @@ const Reports = ({api, projectId}) => {
                 <Routes>
                     <Route path="/project-overview" element={<ProjectOverview api={api} projectId={projectId} />} />
                     <Route path="/upcoming-tasks" element={<UpcomingTasks api={api} projectId={projectId} />}/>
+                    <Route path="/cost-overview" element={<CostOverview api={api} projectId={projectId} projectInfo={projectInfo} />}/>
                     <Route path="*" element={<Navigate to="../project-overview" replace />} />
                 </Routes>
             </div>

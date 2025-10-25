@@ -99,11 +99,16 @@ const ChatRoom = ({api, projectId}) => {
                     {
                         messages?.map((msg, index) => (
                             <div key={index}>
-                                <div className={style.sender}>
-                                    {msg.sender} at {formatDateTime(new Date(msg.sentAt))}
-                                </div>
-                                <div className={style.message}>
-                                    {msg.content}
+                                <div className={msg.sender === usernameRef.current && msg.sender !== 'unknown' ? style.own : ''}>
+                                    <div className={style.sender}>
+                                        {msg.sender}
+                                    </div>
+                                    <div className={style.message}>
+                                        {msg.content}
+                                        <div className={style.sending_time}>
+                                            {formatDateTime(new Date(msg.sentAt), 'vi-VN')}
+                                        </div>
+                                    </div>                                    
                                 </div>
                             </div>
                         ))
@@ -113,6 +118,7 @@ const ChatRoom = ({api, projectId}) => {
                     <div className={style.inputMessage}>
                         <input type="text"
                             value={userInput}
+                            placeholder='Enter the message...'
                             onChange={(e) => setUserInput(e.target.value)}
                         />
                     </div>

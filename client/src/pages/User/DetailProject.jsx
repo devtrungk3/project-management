@@ -167,21 +167,6 @@ const DetailProject = ({isMyProject}) => {
                                         }
                                     </tr>
                                     <tr>
-                                        <td className='pe-4 py-2'>Planned budget:</td>
-                                        {isMyProject 
-                                        && projectInfo.current?.status != "DONE"
-                                        && projectInfo.current?.status != "CANCELLED"
-                                        ?<td>
-                                            <input type="number" className="w-100" value={tempProjectInfo?.plannedBudget || 0} min={0} onChange={(e) => setTempProjectInfo({
-                                                ...tempProjectInfo,
-                                                plannedBudget: e.target.value
-                                            })} />
-                                        </td>
-                                        :
-                                        <td>{tempProjectInfo?.plannedBudget || '0'}</td>
-                                        }
-                                    </tr>
-                                    <tr>
                                         <td className='pe-4 py-2'>Currency:</td>
                                         {isMyProject 
                                         && projectInfo.current?.status != "DONE"
@@ -244,7 +229,7 @@ const DetailProject = ({isMyProject}) => {
                         (<Route path="/resources" element={<Resources api={api} projectId={projectId} />} />)
                         }
                         {isMyProject === true &&
-                        (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} />} />)
+                        (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} projectInfo={projectInfo} />} />)
                         }
                         <Route path="/chat" element={<ChatRoom api={api} projectId={projectId} />} />
                         {isMyProject === true &&

@@ -237,7 +237,7 @@ const Projects = ({api, isMyProject=true}) => {
             <Row>
                 <Col>
                     <Table bordered hover responsive style={{ border: '2px solid #000', borderRadius: 12, overflow: 'hidden' }}>
-                        <thead style={{ background: '#dddddd' }}>
+                        <thead>
                             <tr>
                                 <th style={{ fontWeight: 600, fontSize: 18, textAlign: 'center' }}>ID</th>    
                                 <th style={{ fontWeight: 600, fontSize: 18, textAlign: 'center' }}>Project name</th>
@@ -252,7 +252,7 @@ const Projects = ({api, isMyProject=true}) => {
                             {projectData?.content.map((project) => (
                             <tr key={project.id} style={{ verticalAlign: 'middle' }}>
                                 <td style={{ fontSize: 18 }}>{project.id}</td>
-                                <td style={{ fontSize: 18 }}><a href={isMyProject ? `/user/my-projects/${project.id}` : `/user/joined-projects/${project.id}`}>{project.name}</a></td>
+                                <td style={{ fontSize: 18 }}><a href={isMyProject ? `/user/my-projects/${project.id}` : `/user/joined-projects/${project.id}`} className='text-decoration-none'>{project.name}</a></td>
                                 <td style={{ fontSize: 18 }}>{project.ownerUsername}</td>
                                 <td style={{ fontSize: 18 }}>{project.status}</td>
                                 <td style={{ fontSize: 16 }}>{formatDateTime(project.createdAt, 'vi-VN')}</td>

@@ -54,6 +54,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
         ["finish", true],
         ["complete", true],
         ["predecessor", true],
+        ["effort", true],
         ["total cost", true],
     ]));
     useEffect(() => {
@@ -120,7 +121,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                         }
                         newTasks.push(task);
                     });
-                    setTasks(newTasks);
+                    refreshSummaryTasks([...newTasks]);
                 } else {
                     setTasks([]);
                 }
@@ -207,7 +208,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                     // effort
                     sumEffort += taskBelow.effort;
                     // cost 
-                    sumCost += taskBelow.cost;
+                    sumCost += Number(taskBelow.cost);
                 }
             }
             unspecifiedChildren.forEach(unspecifiedTask => {
@@ -538,7 +539,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                     <Button onClick={saveAllTasks} className="border rounded-3 shadow-sm px-3 py-2">Save all tasks</Button>
                 </div>
             </div>
-            <Row className="pt-4 pb-5">
+            <Row className="mt-4" style={{ height: '500px', overflowY: 'scroll'}}>
                 <Col md={7} className="overflow-auto">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>

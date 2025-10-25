@@ -25,6 +25,9 @@ table {
 .width_55 {
   width: 55%;
 }
+.bg-light_gray {
+  background-color: #c5c4c4;
+}
 .dialog_input {
     border: 1px solid #77e6c1ff;
     outline: none;

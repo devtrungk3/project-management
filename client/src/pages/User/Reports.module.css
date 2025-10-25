@@ -6,14 +6,10 @@
     color: #a7a2a2;
     font-weight: 600;
 }
-.project_complete_container {
-    height: 130px;
-}
-.project_complete_shape {
+.shape_container {
     height: 100px;
-    width: 70%;
+    max-width: 350px;
     border-radius: 7px;
-    position: absolute;
 }
 .cell {
   border: 1px solid #ccc;

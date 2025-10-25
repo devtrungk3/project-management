@@ -128,7 +128,7 @@ const HomePage = ({api}) => {
                 </Col>
                 <Col lg={8}>
                     <MDBCard shadow='sm' background='light'>
-                        <MDBCardHeader>Upcoming tasks in next 10 days</MDBCardHeader>
+                        <MDBCardHeader>Tasks due in next 10 days</MDBCardHeader>
                         <MDBCardBody className='text-dark d-flex gap-4'>
                             <div style={{ width: '100%', height: 460 }}>
                             {overviewData &&

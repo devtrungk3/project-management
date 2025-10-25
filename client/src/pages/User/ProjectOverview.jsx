@@ -29,17 +29,16 @@ const ProjectOverview = ({api, projectId}) => {
                     <div className={`fs-4 ${style.project_duration}`}>
                         {overviewData?.projectStart ? formatDate(overviewData?.projectStart, 'vi-VN') : 'None'} - {overviewData?.projectFinish ? formatDate(overviewData?.projectFinish, 'vi-VN') : 'None'}
                     </div>
-                    <div className={`${style.project_complete_container}`}>
-                        <div className='position-relative h-75'>
-                            <div className={`${style.project_complete_shape} z-1 bg-warning`}></div>
-                            <div className='z-2 position-absolute p-2'>
+                    <div className={`${style.shape_container} bg-warning`}>
+                        <div className='h-75'>
+                            <div className='p-2'>
                                 <h6 className='opacity-50'>% COMPLETE</h6>
-                                <div className='z-2 position-absolute fs-1 fw-medium'>{overviewData?.projectComplete.toFixed(1)}%</div>
+                                <div className='fs-1 fw-medium'>{overviewData?.projectComplete.toFixed(1)}%</div>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <div className='text-primary mb-1 fw-medium'>UPCOMING MILESTONES</div>
+                        <div className='text-primary mb-1 mt-3 fw-medium'>UPCOMING MILESTONES</div>
                         <table className={`${style.table} w-100`}>
                             <thead>
                                 <tr>

@@ -16,13 +16,44 @@
 }
 .message {
     padding: 10px;
+    position: relative;
     background-color: #e0d496;
     border-radius: 4px;
     max-width: 80%;
     margin-bottom: 10px;
     font-size: 14px;
     display: inline-block;
-    word-break: keep-all;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+.own {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+.own .message {
+    background-color: rgb(135, 193, 212);
+}
+.sending_time {
+    position: absolute;
+    background-color: #000;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px;
+    border-radius: 4px;
+    display: none;
+    width: auto;
+    white-space: nowrap;
+    right: 0;
+    transform: translateX(105%);
+}
+.own .message .sending_time {
+    left: 0;
+    right: auto;
+    transform: translateX(-105%);
+}
+.message:hover .sending_time {
+    display: inline-block;
 }
 .sender {
     font-size: 11px;
