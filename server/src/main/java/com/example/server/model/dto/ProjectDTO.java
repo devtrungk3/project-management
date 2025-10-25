@@ -15,7 +15,6 @@ public class ProjectDTO {
     private String description;
     private ProjectStatus status;
     private String ownerUsername;
-    private float plannedBudget;
     private Currency currency;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -29,13 +28,12 @@ public class ProjectDTO {
         this.updatedAt = updatedAt;
     }
 
-    public ProjectDTO(int id, String name, String description, ProjectStatus status, String ownerUsername, float plannedBudget, Currency currency, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ProjectDTO(int id, String name, String description, ProjectStatus status, String ownerUsername, Currency currency, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
         this.ownerUsername = ownerUsername;
-        this.plannedBudget = plannedBudget;
         this.currency = currency;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

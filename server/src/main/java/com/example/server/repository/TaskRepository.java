@@ -3,8 +3,10 @@ package com.example.server.repository;
 import com.example.server.model.dto.MilestoneDTO;
 import com.example.server.model.dto.TaskDTO;
 import com.example.server.model.dto.admin.TaskStatisticsDTO;
+import com.example.server.model.dto.user.CostOverviewReportDTO;
 import com.example.server.model.dto.user.OverviewDTO;
 import com.example.server.model.entity.Task;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -88,4 +90,52 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             SELECT AVG(t.complete) FROM Task t WHERE t.project.id = :projectId
             """)
     BigDecimal findAverageCompleteByProjectId(int projectId);
+    @Query("""
+            SELECT new com.example.server.model.dto.TaskDTO(t.name, t.start, t.finish)
+            FROM Task t
+            WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.start >= :from AND t.start <= :to
+            ORDER BY t.start ASC
+            """)
+    List<TaskDTO> getTasksStartingIn(int projectId, int ownerId, LocalDate from, LocalDate to);
+    @Query("""
+            SELECT new com.example.server.model.dto.TaskDTO(t.name, t.complete)
+            FROM Task t
+            WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.finish >= :from AND t.finish <= :to AND t.complete < 100
+            ORDER BY t.finish ASC
+            """)
+    List<TaskDTO> getTasksDueIn(int projectId, int ownerId, LocalDate from, LocalDate to);
+    @Query("""
+            SELECT new com.example.server.model.dto.user.CostOverviewReportDTO(
+                SUM(t.baseCost),
+                SUM(t.actualCost),
+                SUM((100 - t.complete) * t.actualCost / 100)
+            )
+            FROM Task t
+            WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.isLeaf = true
+            """)
+    CostOverviewReportDTO getCostSummary(int projectId, int ownerId);
+    @EntityGraph(attributePaths = {
+            "resourceAllocations",
+            "resourceAllocations.resource",
+            "resourceAllocations.tagRate"
+    })
+    @Query("""
+            SELECT DISTINCT t FROM Task t
+            WHERE t.project.id = :projectId
+            AND EXISTS (
+                SELECT 1 FROM ResourceAllocation ra2
+                WHERE ra2.task = t AND ra2.tagRate.id = :tagRateId
+            )
+            """)
+    List<Task> findTasksByProjectIdAndTagRateId(int projectId, int tagRateId);
+    @EntityGraph(attributePaths = {
+            "resourceAllocations",
+            "resourceAllocations.resource",
+            "resourceAllocations.tagRate",
+            "resourceAllocations.resource.user"})
+    @Query("""
+            SELECT t FROM Task t
+            WHERE t.project.id = :projectId AND t.project.owner.id = :ownerId AND t.isLeaf = true
+            """)
+    List<Task> findTaskLeafByProjectIdAndProjectOwnerId(int projectId, int ownerId);
 }

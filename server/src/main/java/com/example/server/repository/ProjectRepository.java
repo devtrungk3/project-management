@@ -35,7 +35,7 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             """)
     Page<ProjectDTO> findByOwnerIdWithFilters(int ownerId, Pageable pageable, String projectName, ProjectStatus projectStatus);
     @Query("""
-            SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.owner.username, p.plannedBudget, c, p.createdAt, p.updatedAt)
+            SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.description, p.status, p.owner.username, c, p.createdAt, p.updatedAt)
             FROM Project p
             LEFT JOIN p.currency c
             WHERE p.id = :projectId AND p.owner.id = :ownerId

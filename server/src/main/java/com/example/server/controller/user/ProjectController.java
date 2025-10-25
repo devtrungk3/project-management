@@ -78,7 +78,6 @@ public class ProjectController {
                 projectAfterUpdate.getDescription(),
                 projectAfterUpdate.getStatus(),
                 projectAfterUpdate.getOwner().getUsername(),
-                projectAfterUpdate.getPlannedBudget(),
                 projectAfterUpdate.getCurrency(),
                 projectAfterUpdate.getCreatedAt(),
                 projectAfterUpdate.getUpdatedAt()
@@ -95,7 +94,6 @@ public class ProjectController {
                 cancelledProject.getDescription(),
                 cancelledProject.getStatus(),
                 cancelledProject.getOwner().getUsername(),
-                cancelledProject.getPlannedBudget(),
                 cancelledProject.getCurrency(),
                 cancelledProject.getCreatedAt(),
                 cancelledProject.getUpdatedAt()

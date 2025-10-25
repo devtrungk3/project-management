@@ -15,8 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,6 +63,7 @@ public class TaskServiceImpl implements TaskService {
                         task.getDescription(),
                         task.getEffort(),
                         task.getDuration(),
+                        task.getActualCost(),
                         task.getStart(),
                         task.getFinish(),
                         forOwner ? task.getBaseStart() : null,
@@ -76,21 +76,16 @@ public class TaskServiceImpl implements TaskService {
                         allocationMap.getOrDefault(task.getId(), List.of())
                     );
                     if (forOwner && allocationMap.get(task.getId()) != null) {
-                        taskDTO.setCost(calculateCost(allocationMap.get(task.getId()), task.getEffort()));
+                        taskDTO.setCost(task.getActualCost());
                     }
                     return taskDTO;
                 }).toList();
     }
-    private float calculateCost(List<ResourceAllocationDTO> dtos, int effort) {
-        if (effort == 0 || dtos.size() == 0) return 0;
-        float cost = 0;
-        float hourPerResource = (float) effort / dtos.size();
-        for (ResourceAllocationDTO ra : dtos) {
-            cost += hourPerResource * ra.getRate();
+    private LocalDate calculateTaskCompleteDate(int complete, LocalDate oldCompleteDate) {
+        if (complete == 100) {
+            return Objects.requireNonNullElseGet(oldCompleteDate, LocalDate::now);
         }
-        BigDecimal bigDecimal = new BigDecimal(String.valueOf(cost)).setScale(2, RoundingMode.HALF_UP);
-        cost = bigDecimal.floatValue();
-        return cost;
+        return null;
     }
     @Override
     @Transactional
@@ -104,13 +99,31 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toMap(Task::getId, task -> task));
 
         // map task dto to entity list
-        List<Task> savedTasks = newTaskDTOs.stream().map(taskDTO -> {
+        List<Task> savedTasks = new ArrayList<>();
+        for (int i=0; i<newTaskDTOs.size(); i++) {
+            TaskDTO taskDTO = newTaskDTOs.get(i);
+            if (i > 0 && i < newTaskDTOs.size()-1) {
+                // check task leaf
+                if (taskDTO.getParentId() != null && taskDTO.getParentId() == newTaskDTOs.get(i-1).getId()) {
+                    savedTasks.get(i - 1).setLeaf(false);
+                    savedTasks.get(i - 1).setBaseCost(0);
+                    savedTasks.get(i - 1).setActualCost(0);
+                }
+                // check arrangement
+                if (taskDTO.getArrangement() != newTaskDTOs.get(i-1).getArrangement()+1) {
+                    throw new IllegalArgumentException("Task sequence is invalid");
+                }
+            }
             Task newTask = new Task();
             if  (preservedTasksChecker.containsKey(taskDTO.getId())) {
-                // old tasks
+                Task oldTask = preservedTasksChecker.get(taskDTO.getId());
+                // take old base cost
+                newTask.setBaseCost(oldTask.getBaseCost());
                 // take old base time
-                newTask.setBaseStart(preservedTasksChecker.get(taskDTO.getId()).getBaseStart());
-                newTask.setBaseFinish(preservedTasksChecker.get(taskDTO.getId()).getBaseFinish());
+                newTask.setBaseStart(oldTask.getBaseStart());
+                newTask.setBaseFinish(oldTask.getBaseFinish());
+                // check task completion
+                newTask.setCompletedDate(calculateTaskCompleteDate(newTask.getComplete(), oldTask.getCompletedDate()));
                 // set null for preserved task
                 preservedTasksChecker.put(taskDTO.getId(), null);
                 newTask.setId(taskDTO.getId());
@@ -123,6 +136,11 @@ public class TaskServiceImpl implements TaskService {
             newTask.setProject(project);
             newTask.setEffort(taskDTO.getEffort());
             newTask.setDuration(taskDTO.getDuration());
+            newTask.setActualCost(taskDTO.getCost());
+            // project in the planning state -> set task's base cost
+            if (project.getStatus() == ProjectStatus.PLANNING) {
+                newTask.setBaseCost(taskDTO.getCost());
+            }
             newTask.setStart(taskDTO.getStart());
             newTask.setFinish(taskDTO.getFinish());
             // new task or project in the planning state
@@ -138,8 +156,8 @@ public class TaskServiceImpl implements TaskService {
             }
             newTask.setComplete(taskDTO.getComplete());
             newTask.setPriority(taskDTO.getPriority());
-            return newTask;
-        }).toList();
+            savedTasks.add(newTask);
+        }
         // delete tasks in project, which not in user input (not null value in preservedTasksChecker)
         Set<Integer> preservedTaskIds = preservedTasksChecker.entrySet().stream()
                 .filter(task -> task.getValue() == null)
@@ -219,8 +237,12 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toMap(TaskDTO::getId, TaskDTO::getComplete));
         oldTasks.forEach(oldTask -> {
             Integer newTaskComplete = newTaskDTOMap.get(oldTask.getId());
-            if (newTaskComplete != null) {
+            if (newTaskComplete != null &&
+                    oldTask.getStart() != null &&
+                    (oldTask.getStart().isEqual(LocalDate.now()) || oldTask.getStart().isBefore(LocalDate.now()))
+            ) {
                 oldTask.setComplete(newTaskComplete);
+                oldTask.setCompletedDate(calculateTaskCompleteDate(newTaskComplete, oldTask.getCompletedDate()));
             }
         });
         // check completed project

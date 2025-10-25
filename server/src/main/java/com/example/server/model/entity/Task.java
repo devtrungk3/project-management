@@ -45,10 +45,16 @@ public class Task {
     private LocalDate baseFinish;
     private Integer parentId;
     private Integer predecessor;
+    @Min(0)
+    private float actualCost;
+    @Min(0)
+    private float baseCost = 0;
     @Enumerated(EnumType.STRING)
     private DependencyType dependencyType;
     @Enumerated(EnumType.STRING)
     private TaskPriority priority;
+    private LocalDate completedDate;
+    private boolean isLeaf = true;
     @Max(100)
     @Min(0)
     private int complete;

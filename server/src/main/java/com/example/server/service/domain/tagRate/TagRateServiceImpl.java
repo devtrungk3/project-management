@@ -3,16 +3,22 @@ package com.example.server.service.domain.tagRate;
 import com.example.server.exception.EntityNotFoundException;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.model.entity.Project;
+import com.example.server.model.entity.ResourceAllocation;
 import com.example.server.model.entity.TagRate;
+import com.example.server.model.entity.Task;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.TagRateRepository;
+import com.example.server.repository.TaskRepository;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -20,6 +26,7 @@ import java.util.List;
 public class TagRateServiceImpl implements TagRateService{
     private final TagRateRepository tagRateRepository;
     private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
     private final CacheManager cacheManager;
 
     @Override
@@ -39,13 +46,36 @@ public class TagRateServiceImpl implements TagRateService{
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "tagRateInProject", key = "{#result.project.id, #ownerId}")
     public TagRate updateTagRate(TagRate updatedTagRate, int ownerId) {
         Project project = projectRepository.findByIdAndOwnerId(updatedTagRate.getProject().getId(), ownerId).orElseThrow(() ->
                 new EntityNotFoundException("No project found with projectId " + updatedTagRate.getProject().getId() + " and ownerId " + ownerId));
         ProjectStatusValidator.validateClosedProject(project);
-        if (!tagRateRepository.existsById(updatedTagRate.getId())) {
+        TagRate oldTagRate = tagRateRepository.findById(updatedTagRate.getId()).orElseThrow(() -> {
             throw new IdNotFoundException("TagRateId " + updatedTagRate.getId() + " not found");
+        });
+        if (oldTagRate.getRate() != updatedTagRate.getRate()) {
+            List<Task> tasks = taskRepository.findTasksByProjectIdAndTagRateId(project.getId(), updatedTagRate.getId());
+            for (Task task : tasks) {
+                if (task.getEffort() > 0) {
+                    float effortPerResource = (float) task.getEffort() / task.getResourceAllocations().size();
+                    int tagRateChangeCount = 0;
+                    for (ResourceAllocation ra : task.getResourceAllocations()) {
+                        if (ra.getTagRate().getId() == updatedTagRate.getId()) {
+                            tagRateChangeCount++;
+                        }
+                    }
+                    if (tagRateChangeCount > 0) {
+                        BigDecimal costVariance = new BigDecimal(
+                                String.valueOf(effortPerResource * (updatedTagRate.getRate() - oldTagRate.getRate()))
+                        ).setScale(2, RoundingMode.HALF_UP);
+                        task.setActualCost(
+                                task.getActualCost() + costVariance.floatValue()*tagRateChangeCount
+                        );
+                    }
+                }
+            }
         }
         return tagRateRepository.save(updatedTagRate);
     }
