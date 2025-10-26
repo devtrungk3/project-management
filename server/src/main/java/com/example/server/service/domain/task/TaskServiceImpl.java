@@ -61,9 +61,9 @@ public class TaskServiceImpl implements TaskService {
                         task.getId(),
                         task.getName(),
                         task.getDescription(),
-                        task.getEffort(),
+                        forOwner ? task.getEffort() : 0,
                         task.getDuration(),
-                        task.getActualCost(),
+                        forOwner ? task.getActualCost() : 0,
                         task.getStart(),
                         task.getFinish(),
                         forOwner ? task.getBaseStart() : null,
@@ -75,9 +75,6 @@ public class TaskServiceImpl implements TaskService {
                         task.getComplete(),
                         allocationMap.getOrDefault(task.getId(), List.of())
                     );
-                    if (forOwner && allocationMap.get(task.getId()) != null) {
-                        taskDTO.setCost(task.getActualCost());
-                    }
                     return taskDTO;
                 }).toList();
     }
@@ -122,6 +119,8 @@ public class TaskServiceImpl implements TaskService {
                 // take old base time
                 newTask.setBaseStart(oldTask.getBaseStart());
                 newTask.setBaseFinish(oldTask.getBaseFinish());
+                // take old base effort
+                newTask.setBaseEffort(oldTask.getBaseEffort());
                 // check task completion
                 newTask.setCompletedDate(calculateTaskCompleteDate(newTask.getComplete(), oldTask.getCompletedDate()));
                 // set null for preserved task
@@ -137,9 +136,10 @@ public class TaskServiceImpl implements TaskService {
             newTask.setEffort(taskDTO.getEffort());
             newTask.setDuration(taskDTO.getDuration());
             newTask.setActualCost(taskDTO.getCost());
-            // project in the planning state -> set task's base cost
+            // project in the planning state -> set task's base cost, base effort
             if (project.getStatus() == ProjectStatus.PLANNING) {
                 newTask.setBaseCost(taskDTO.getCost());
+                newTask.setBaseEffort(taskDTO.getEffort());
             }
             newTask.setStart(taskDTO.getStart());
             newTask.setFinish(taskDTO.getFinish());

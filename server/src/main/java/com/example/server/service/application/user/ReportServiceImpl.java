@@ -3,6 +3,7 @@ package com.example.server.service.application.user;
 import com.example.server.model.dto.TaskDTO;
 import com.example.server.model.dto.user.CostOverviewReportDTO;
 import com.example.server.model.dto.user.ProjectOverviewReportDTO;
+import com.example.server.model.dto.user.WorkOverviewReportDTO;
 import com.example.server.model.entity.ResourceAllocation;
 import com.example.server.model.entity.Task;
 import com.example.server.repository.ProjectRepository;
@@ -49,16 +50,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public CostOverviewReportDTO getCostOverviewReport(int userId, int projectId) {
         CostOverviewReportDTO costOverview = taskRepository.getCostSummary(projectId, userId);
-        List<Task> tasks = taskRepository.findTaskLeafByProjectIdAndProjectOwnerId(projectId, userId);
+        List<Task> tasks = taskRepository.findTaskLeavesByProjectAndOwnerFetchResourcesAndTagRates(projectId, userId);
         Map<String, Double> resourceWithCost = new HashMap<>();
         for (Task task : tasks) {
             if (task.getEffort() > 0) {
                 float effortPerResource = (float) task.getEffort() / task.getResourceAllocations().size();
                 for (ResourceAllocation ra : task.getResourceAllocations()) {
-                    Double cost = 0.0;
-                    if (resourceWithCost.containsKey(ra.getResource().getUser().getUsername())) {
-                        cost = resourceWithCost.get(ra.getResource().getUser().getUsername());
-                    }
+                    Double cost = resourceWithCost.getOrDefault(ra.getResource().getUser().getUsername(), 0.0);
                     if (ra.getTagRate() != null) {
                         cost = cost + effortPerResource * ra.getTagRate().getRate();
                     }
@@ -68,5 +66,23 @@ public class ReportServiceImpl implements ReportService {
         }
         costOverview.setResourceWithCost(resourceWithCost);
         return costOverview;
+    }
+    @Override
+    public WorkOverviewReportDTO getWorkOverviewReport(int userId, int projectId) {
+        WorkOverviewReportDTO workOverview = taskRepository.getWorkSummary(projectId, userId);
+        List<Task> tasks = taskRepository.findTaskLeavesByProjectAndOwnerFetchResources(projectId, userId);
+        Map<String, Integer> resourceWithEffort = new HashMap<>();
+        for (Task task : tasks) {
+            if (task.getEffort() > 0) {
+                float effortPerResource = (float) task.getEffort() / task.getResourceAllocations().size();
+                for (ResourceAllocation ra : task.getResourceAllocations()) {
+                    int totalEffort = resourceWithEffort.getOrDefault(ra.getResource().getUser().getUsername(), 0);
+                    totalEffort += effortPerResource;
+                    resourceWithEffort.put(ra.getResource().getUser().getUsername(), totalEffort);
+                }
+            }
+        }
+        workOverview.setResourceWithEffort(resourceWithEffort);
+        return workOverview;
     }
 }

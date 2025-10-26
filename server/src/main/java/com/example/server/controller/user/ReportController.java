@@ -3,6 +3,7 @@ package com.example.server.controller.user;
 import com.example.server.model.dto.TaskDTO;
 import com.example.server.model.dto.user.CostOverviewReportDTO;
 import com.example.server.model.dto.user.ProjectOverviewReportDTO;
+import com.example.server.model.dto.user.WorkOverviewReportDTO;
 import com.example.server.service.application.user.ReportService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,10 @@ public class ReportController {
     public ResponseEntity<CostOverviewReportDTO> getCostOverviewReport(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
         return ResponseEntity.ok(reportService.getCostOverviewReport(userIdExtractedFromJWT, projectId));
+    }
+    @GetMapping("/work-overview")
+    public ResponseEntity<WorkOverviewReportDTO> getWorkOverviewReport(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
+        int userIdExtractedFromJWT = (int) request.getAttribute("userId");
+        return ResponseEntity.ok(reportService.getWorkOverviewReport(userIdExtractedFromJWT, projectId));
     }
 }

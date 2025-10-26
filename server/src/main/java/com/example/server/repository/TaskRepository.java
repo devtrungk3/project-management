@@ -5,6 +5,7 @@ import com.example.server.model.dto.TaskDTO;
 import com.example.server.model.dto.admin.TaskStatisticsDTO;
 import com.example.server.model.dto.user.CostOverviewReportDTO;
 import com.example.server.model.dto.user.OverviewDTO;
+import com.example.server.model.dto.user.WorkOverviewReportDTO;
 import com.example.server.model.entity.Task;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -137,5 +138,24 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             SELECT t FROM Task t
             WHERE t.project.id = :projectId AND t.project.owner.id = :ownerId AND t.isLeaf = true
             """)
-    List<Task> findTaskLeafByProjectIdAndProjectOwnerId(int projectId, int ownerId);
+    List<Task> findTaskLeavesByProjectAndOwnerFetchResourcesAndTagRates(int projectId, int ownerId);
+    @EntityGraph(attributePaths = {
+            "resourceAllocations",
+            "resourceAllocations.resource",
+            "resourceAllocations.resource.user"})
+    @Query("""
+            SELECT t FROM Task t
+            WHERE t.project.id = :projectId AND t.project.owner.id = :ownerId AND t.isLeaf = true
+            """)
+    List<Task> findTaskLeavesByProjectAndOwnerFetchResources(int projectId, int ownerId);
+    @Query("""
+            SELECT new com.example.server.model.dto.user.WorkOverviewReportDTO(
+                SUM(t.baseEffort),
+                SUM(t.effort),
+                SUM((100 - t.complete) * t.effort / 100)
+            )
+            FROM Task t
+            WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.isLeaf = true
+            """)
+    WorkOverviewReportDTO getWorkSummary(int projectId, int ownerId);
 }

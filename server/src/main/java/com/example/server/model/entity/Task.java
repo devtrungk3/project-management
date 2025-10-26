@@ -38,6 +38,8 @@ public class Task {
     @Min(0)
     private int effort;
     @Min(0)
+    private int baseEffort = 0;
+    @Min(0)
     private int duration;
     private LocalDate start;
     private LocalDate finish;
