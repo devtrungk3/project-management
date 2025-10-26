@@ -25,8 +25,18 @@ const getCostOverviewReport = async (api, projectId) => {
         throw new error;
     }
 }
+const getWorkOverviewReport = async (api, projectId) => {
+    try {
+        const response = await api.get(`/user/reports/${projectId}/work-overview`)
+        return response.data;
+    } catch (error) {
+        console.log("Failed to fetch work overview report: ", error);
+        throw new error;
+    }
+}
 export default {
     getProjectOverviewReport,
     getUpcomingTasksReport,
-    getCostOverviewReport
+    getCostOverviewReport,
+    getWorkOverviewReport
 }
