@@ -68,7 +68,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                             value={tempTaskInfo?.name || ''}
                             onChange={(e) => setTempTaskInfo({...tempTaskInfo, name: e.target.value})}
                         />
-                        <TextField
+                        {isMyProject === true && <TextField
                             fullWidth
                             margin="dense"
                             required
@@ -77,15 +77,10 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                             label="Effort"
                             type="number"
                             inputProps={{ min: 0 }}
-                            slotProps={{
-                                input: {
-                                    readOnly: isMyProject != true,
-                                },
-                            }}
                             value={tempTaskInfo?.effort || 0}
                             onChange={(e) => setTempTaskInfo({...tempTaskInfo, effort: Number(e.target.value)})}
-                        />
-                        <Row>
+                        />}
+                        {isMyProject === true && <Row>
                             <Col md={6}>
                                 <TextField
                                     fullWidth
@@ -95,11 +90,6 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                     label="Predecessor"
                                     type="number"
                                     inputProps={{ min: 0 }}
-                                    slotProps={{
-                                        input: {
-                                            readOnly: isMyProject != true,
-                                        },
-                                    }}
                                     value={tempTaskInfo?.predecessor || 0}
                                     onChange={(e) => setTempTaskInfo({...tempTaskInfo, 
                                         predecessor: Number(e.target.value), 
@@ -126,7 +116,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                     </select>
                                 </div>
                             </Col>
-                        </Row>
+                        </Row>}
                         <Row>
                             <Col md={6}>
                                 <TextField
@@ -189,6 +179,7 @@ const TaskDialog = ({ isMyProject, openTaskDialog, handleCloseTaskDialog, tempTa
                                         id="priority-select"
                                         value={tempTaskInfo?.priority || "LOW"}
                                         onChange={(e) => setTempTaskInfo({...tempTaskInfo, priority: e.target.value})}
+                                        disabled={isMyProject === false}
                                         className="w-100 py-3 px-2 rounded-1 dialog_input"
                                     >
                                         <option value="LOW">Low</option>

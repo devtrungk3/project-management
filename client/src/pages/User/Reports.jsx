@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import ProjectOverview from "./ProjectOverview";
 import UpcomingTasks from "./UpcomingTasks";
 import CostOverview from "./CostOverview";
+import WorkOverview from "./WorkOverview";
 
 const Reports = ({api, projectId, projectInfo}) => {
     return (
@@ -33,6 +34,11 @@ const Reports = ({api, projectId, projectInfo}) => {
                     </a>
                     </li>
                     <li>
+                    <a className="dropdown-item" href='work-overview'>
+                        Work overview
+                    </a>
+                    </li>
+                    <li>
                     <a className="dropdown-item" href='upcoming-tasks'>
                         Upcoming tasks
                     </a>
@@ -45,6 +51,7 @@ const Reports = ({api, projectId, projectInfo}) => {
                     <Route path="/project-overview" element={<ProjectOverview api={api} projectId={projectId} />} />
                     <Route path="/upcoming-tasks" element={<UpcomingTasks api={api} projectId={projectId} />}/>
                     <Route path="/cost-overview" element={<CostOverview api={api} projectId={projectId} projectInfo={projectInfo} />}/>
+                    <Route path="/work-overview" element={<WorkOverview api={api} projectId={projectId} />}/>
                     <Route path="*" element={<Navigate to="../project-overview" replace />} />
                 </Routes>
             </div>

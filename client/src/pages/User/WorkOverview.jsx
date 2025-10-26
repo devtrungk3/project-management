@@ -1,20 +1,20 @@
-import { Row, Col } from "react-bootstrap";
-import style from './Reports.module.css';
-import { useEffect, useState } from "react";
+import { Row, Col } from "react-bootstrap"
+import style from "./Reports.module.css"
 import ReportService from "../../services/User/ReportService";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-const CostOverview = ({api, projectId, projectInfo}) => {
+const WorkOverview = ({api, projectId}) => {
     const [reportData, setReportData] = useState(null);
     useEffect(() => {
-        loadCostOverview();
+        loadWorkOverview();
     }, []);
-    const loadCostOverview = async () => {
+    const loadWorkOverview = async () => {
         let data = null;
         try {
-            data = await ReportService.getCostOverviewReport(api, projectId);
-            data.resourceWithCost = Object.entries(data.resourceWithCost).map(([resourceName, cost]) => ({
+            data = await ReportService.getWorkOverviewReport(api, projectId);
+            data.resourceWithEffort = Object.entries(data.resourceWithEffort).map(([resourceName, effort]) => ({
                 resourceName: resourceName,
-                cost: cost
+                effort: effort
             }))
         } catch (error) {}
         setReportData(data);
@@ -23,43 +23,43 @@ const CostOverview = ({api, projectId, projectInfo}) => {
         <>
             <Row className='mt-3'>
                 <Col md={5}>
-                    <div className={`${style.title}`}>Cost overview</div>
+                    <div className={`${style.title}`}>Work overview</div>
                     <div>
                         <div className={`${style.shape_container} bg-light_gray`}>
                             <div className='h-75'>
                                 <div className='p-2'>
-                                    <h6 className='opacity-75'>PLANNED COST</h6>
-                                    <div className='fs-3 fw-medium'>{reportData?.plannedCost || 0}</div>
+                                    <h6 className='opacity-75'>PLANNED EFFORT</h6>
+                                    <div className='fs-3 fw-medium'>{reportData?.plannedEffort || 0}</div>
                                 </div>
                             </div>
                         </div>
                         <div className={`${style.shape_container} mt-2 bg-light_gray`}>
                             <div className='h-75'>
                                 <div className='p-2'>
-                                    <h6 className='opacity-75 m-0'>ACTUAL COST</h6>
-                                    <div className='fs-3 fw-medium'>{reportData?.actualCost || 0}</div>
-                                    <div className='fs-6 fw-light'>({reportData?.actualCost < reportData?.plannedCost ? '-' : '+'}{reportData?.actualCost - reportData?.plannedCost || 0} vs planned cost)</div>
+                                    <h6 className='opacity-75 m-0'>ACTUAL EFFORT</h6>
+                                    <div className='fs-3 fw-medium'>{reportData?.actualEffort || 0}</div>
+                                    <div className='fs-6 fw-light'>({reportData?.actualEffort < reportData?.plannedEffort ? '-' : '+'}{reportData?.actualEffort - reportData?.plannedEffort || 0} vs planned effort)</div>
                                 </div>
                             </div>
                         </div>
                         <div className={`${style.shape_container} mt-2 bg-light_gray`}>
                             <div className='h-75'>
                                 <div className='p-2'>
-                                    <h6 className='opacity-75 m-0'>REMAINING COST</h6>
-                                    <div className='fs-3 fw-medium'>{reportData?.remainingCost || 0}</div>
-                                    <div className='fs-6 fw-light'>({(reportData?.remainingCost / reportData?.actualCost * 100 || 0).toFixed(2)}% of actual cost)</div>
+                                    <h6 className='opacity-75 m-0'>REMAINING EFFORT</h6>
+                                    <div className='fs-3 fw-medium'>{reportData?.remainingEffort || 0}</div>
+                                    <div className='fs-6 fw-light'>({(reportData?.remainingEffort / reportData?.actualEffort * 100 || 0).toFixed(2)}% of actual effort)</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </Col>
                 <Col md={7}>
-                    <div className='text-primary mb-1 mt-3 fw-medium'>RESOURCE COST VARIANCE</div>
-                    {reportData?.resourceWithCost
+                    <div className='text-primary mb-1 mt-3 fw-medium'>RESOURCE EFFORT VARIANCE</div>
+                    {reportData?.resourceWithEffort
                     ?
                     <ResponsiveContainer width="95%" height={350}>
                         <BarChart
-                            data={reportData?.resourceWithCost}
+                            data={reportData?.resourceWithEffort}
                             margin={{ bottom: 10, top: 20 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
@@ -71,20 +71,18 @@ const CostOverview = ({api, projectId, projectInfo}) => {
                                 tick={{ fontSize: 12 }}
                             />
                             <YAxis/>
-                            <Tooltip 
-                                formatter={(value, name) => [`${value} ${name}`]} />
+                            <Tooltip />
                             <Legend 
                                 verticalAlign="top"
                                 wrapperStyle={{ top: 0 }}
                             />
                             <Bar
-                                dataKey="cost" 
+                                dataKey="effort" 
                                 fill="#768accff"
-                                name={projectInfo?.current.currency.name}
                                 maxBarSize={40}
                             >
-                                <LabelList 
-                                    dataKey="cost" 
+                                <LabelList
+                                    dataKey="effort" 
                                     position="top"
                                     style={{ fontSize: "12px" }}
                                 />
@@ -97,4 +95,4 @@ const CostOverview = ({api, projectId, projectInfo}) => {
         </>
     );
 }
-export default CostOverview;
+export default WorkOverview;

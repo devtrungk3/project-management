@@ -67,7 +67,7 @@ const SortableTask = ({ activeColumns, task, taskAbove, predecessorIndex, isPare
         activeColumns.get("owners") === true &&
         <td className={`${style.cell}`}>
           <div className='d-flex gap-2'>
-            {task.resourceAllocations?.map((resource) => 
+            {(Array.isArray(task.resourceAllocations) ? task.resourceAllocations : []).map((resource) => 
               <span key={resource.resourceId} className={`${style['resource-item']} px-2 rounded-3`}>{`${resource.username}`}</span>
             )}
           </div>
