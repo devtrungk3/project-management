@@ -77,7 +77,6 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new BadCredentialsException("Username  " + userCredentialRequest.getUsername() + " not found"));
         String newAccessToken = jwtService.generateAccessToken(userInDB.getId(), userInDB.getUsername(), userInDB.getRole().getName());
         String newRefreshToken = jwtService.generateRefreshToken(userInDB.getId(), userInDB.getUsername(), userInDB.getRole().getName());
-        jwtService.saveRefreshToken(userInDB.getId(), newRefreshToken);
         return Arrays.asList(newAccessToken, newRefreshToken);
     }
 

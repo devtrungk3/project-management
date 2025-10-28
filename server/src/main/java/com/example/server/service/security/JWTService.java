@@ -1,9 +1,11 @@
 package com.example.server.service.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JWTService {
     @Value("${jwt.secret}")
     private String secretKey;
-    private final Map<Integer, String> refreshTokenStore = new HashMap<>();  // In-memory (RAM) store
+    private final RefreshTokenService refreshTokenService;
 
     public String generateAccessToken(int userId, String username, String userRole) {
         int minutes = 15;
@@ -44,7 +47,7 @@ public class JWTService {
         claims.put("username", username);
         claims.put("role", userRole);
 
-        return Jwts.builder()
+        String newRefreshToken = Jwts.builder()
                 .claims()
                 .add(claims)
                 .subject(String.valueOf(userId))
@@ -53,12 +56,11 @@ public class JWTService {
                 .and()
                 .signWith(getKey())
                 .compact();
-    }
-    public void saveRefreshToken(int userId, String refreshToken) {
-        refreshTokenStore.put(userId, refreshToken);
+        refreshTokenService.storeToken(userId, newRefreshToken);
+        return newRefreshToken;
     }
     public void revokeRefreshToken(int userId) {
-        refreshTokenStore.remove(userId);
+        refreshTokenService.removeToken(userId);
     }
     private SecretKey getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -94,8 +96,13 @@ public class JWTService {
         return (username.equals(userDetails.getUsername()));
     }
     public boolean isValidRefreshToken(String token) {
-        int userId = extractUserId(token);
-        String tokenType = extractTokenType(token);
-        return refreshTokenStore.get(userId) != null && refreshTokenStore.get(userId).equals(token) && tokenType.equals("refresh");
+        try {
+            int userId = extractUserId(token);
+            String tokenType = extractTokenType(token);
+            return refreshTokenService.hasToken(userId) && refreshTokenService.getToken(userId).equals(token) && tokenType.equals("refresh");
+        } catch (ExpiredJwtException e) {
+            System.out.println("ExpiredJwtException - " + e.getMessage());
+            return false;
+        }
     }
 }
