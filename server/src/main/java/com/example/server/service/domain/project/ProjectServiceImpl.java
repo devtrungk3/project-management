@@ -124,10 +124,10 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public Project cancelProject(int projectId, int ownerId) {
+    public Project closeProject(int projectId, int ownerId, ProjectStatus status) {
         Project oldProject = projectRepository.findByIdAndOwnerId(projectId, ownerId).orElseThrow(() -> new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId));
         ProjectStatusValidator.validateClosedProject(oldProject);
-        oldProject.setStatus(ProjectStatus.CANCELLED);
+        oldProject.setStatus(status);
         return projectRepository.save(oldProject);
     }
 

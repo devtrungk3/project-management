@@ -3,6 +3,7 @@ package com.example.server.service.domain.project;
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.entity.Project;
+import com.example.server.model.entity.ProjectStatus;
 import org.springframework.data.domain.Page;
 
 import java.util.Map;
@@ -18,7 +19,7 @@ public interface ProjectService {
     ProjectStatisticsDTO getJoinedProjectStatisticsForUser(int userId);
     Project addProject(Project newProject);
     Project updateProject(int projectId, int ownerId, Project updatedProject);
-    Project cancelProject(int projectId, int ownerId);
+    Project closeProject(int projectId, int ownerId, ProjectStatus status);
     void deleteProjectById(int id);
     void deleteProjectByOwner(int projectId, int ownerId);
 }

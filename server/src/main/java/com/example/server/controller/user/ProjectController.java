@@ -84,10 +84,26 @@ public class ProjectController {
         );
         return ResponseEntity.ok(projectDTO);
     }
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<?> completeProject(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
+        int userIdExtractedFromJWT = (int) request.getAttribute("userId");
+        Project cancelledProject = projectService.closeProject(projectId, userIdExtractedFromJWT, ProjectStatus.DONE);
+        ProjectDTO projectDTO = new ProjectDTO(
+                cancelledProject.getId(),
+                cancelledProject.getName(),
+                cancelledProject.getDescription(),
+                cancelledProject.getStatus(),
+                cancelledProject.getOwner().getUsername(),
+                cancelledProject.getCurrency(),
+                cancelledProject.getCreatedAt(),
+                cancelledProject.getUpdatedAt()
+        );
+        return ResponseEntity.ok(projectDTO);
+    }
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<?> cancelProject(@PathVariable(name = "id") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
-        Project cancelledProject = projectService.cancelProject(projectId, userIdExtractedFromJWT);
+        Project cancelledProject = projectService.closeProject(projectId, userIdExtractedFromJWT, ProjectStatus.CANCELLED);
         ProjectDTO projectDTO = new ProjectDTO(
                 cancelledProject.getId(),
                 cancelledProject.getName(),

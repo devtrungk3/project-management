@@ -211,10 +211,6 @@ public class TaskServiceImpl implements TaskService {
         }
         // insert new resource allocations and update old resource allocations
         resourceAllocationRepository.saveAll(savedResourceAllocations);
-        // check completed project
-        if (taskRepository.findAverageCompleteByProjectId(project.getId()).floatValue() == 100) {
-            project.setStatus(ProjectStatus.DONE);
-        }
     }
 
     @Override
@@ -245,9 +241,5 @@ public class TaskServiceImpl implements TaskService {
                 oldTask.setCompletedDate(calculateTaskCompleteDate(newTaskComplete, oldTask.getCompletedDate()));
             }
         });
-        // check completed project
-        if (taskRepository.findAverageCompleteByProjectId(project.getId()).floatValue() == 100) {
-            project.setStatus(ProjectStatus.DONE);
-        }
     }
 }

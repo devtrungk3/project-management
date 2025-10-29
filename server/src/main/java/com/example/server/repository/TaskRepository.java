@@ -88,10 +88,6 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             """)
     List<TaskDTO> getOverdueTasks(int userId, int projectId);
     @Query("""
-            SELECT AVG(t.complete) FROM Task t WHERE t.project.id = :projectId
-            """)
-    BigDecimal findAverageCompleteByProjectId(int projectId);
-    @Query("""
             SELECT new com.example.server.model.dto.TaskDTO(t.name, t.start, t.finish)
             FROM Task t
             WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.start >= :from AND t.start <= :to
