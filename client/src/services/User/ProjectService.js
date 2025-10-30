@@ -51,6 +51,15 @@ const updateProject = async (api, projectId, projectInfo) => {
         throw error;
     }
 }
+const completeProject = async (api, projectId) => {
+    try {
+        const response = await api.patch(`user/projects/${projectId}/complete`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to complete project: ', error);
+        throw error;
+    }
+}
 const cancelProject = async (api, projectId) => {
     try {
         const response = await api.patch(`user/projects/${projectId}/cancel`);
@@ -110,6 +119,7 @@ export default {
     addProject,
     updateProject,
     cancelProject,
+    completeProject,
     getProjectById,
     getMyProjectStatistics,
     getJoinedProjectStatistics,

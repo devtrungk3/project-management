@@ -12,29 +12,57 @@ const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo, delet
             } catch (error) {}
         }
     }
+    const completeProject = async () => {
+        if (confirm('Do you want to mark this project done?')) {
+            try {
+                const data = await ProjectService.completeProject(api, projectId);
+                projectInfo.current = data;
+                setTempProjectInfo(data);
+                toast.success("Mark project done successfully");
+            } catch (error) {}
+        }
+    }
     return (
         <>
             <div className="opacity-75 mt-3">Settings and options for your project</div>
+                        <Row>
+                <Col xl={7}>
+                    <div className="fs-3 mt-3">Project closure</div>
+                    <Card className="">
+                        <div>
+                            <Row className="px-4 py-3">
+                                <Col md={8}>
+                                    <div className="fw-bold">Mark this project done</div>
+                                    <div className="text-secondary">Please note: once done, updates will no longer be possible.</div>                            
+                                </Col>
+                                <Col md={4} className="d-flex justify-content-end align-items-center">
+                                <span className="">
+                                    <Button disabled={projectInfo.current?.status === "CANCELLED" || projectInfo.current?.status === "DONE"} className="btn btn-primary" onClick={completeProject}>DONE</Button>
+                                </span>
+                                </Col>
+                            </Row>                              
+                        </div>
+                    </Card>
+                </Col>
+            </Row>
             <Row>
                 <Col xl={7}>
                     <div className="fs-3 mt-3">Danger zone</div>
                     <Card>
-                        { projectInfo.status != "CANCELLED" && (
-                            <div>
-                                <Row className="px-4 py-3">
-                                    <Col md={8}>
-                                        <div className="fw-bold">Cancel this project</div>
-                                        <div className="text-secondary">Cancelling this project will stop all ongoing activities and cannot be undone.</div>                            
-                                    </Col>
-                                    <Col md={4} className="d-flex justify-content-end align-items-center">
-                                    <span className="">
-                                        <Button className="btn btn-danger" onClick={cancelProject}>Cancel project</Button>
-                                    </span>
-                                    </Col>
-                                </Row>
-                                <hr className="p-0 m-0"/>                                
-                            </div>
-                        )}
+                        <div>
+                            <Row className="px-4 py-3">
+                                <Col md={8}>
+                                    <div className="fw-bold">Cancel this project</div>
+                                    <div className="text-secondary">Cancelling this project will stop all ongoing activities and cannot be undone.</div>                            
+                                </Col>
+                                <Col md={4} className="d-flex justify-content-end align-items-center">
+                                <span className="">
+                                    <Button disabled={projectInfo.current?.status === "CANCELLED" || projectInfo.current?.status === "DONE"} className="btn btn-danger" onClick={cancelProject}>Cancel project</Button>
+                                </span>
+                                </Col>
+                            </Row>
+                            <hr className="p-0 m-0"/>                                
+                        </div>
                         <Row className="px-4 py-3">
                             <Col md={8}>
                                 <div className="fw-bold">Delete this project</div>
