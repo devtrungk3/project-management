@@ -60,8 +60,8 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     @Query("""
             SELECT new com.example.server.model.dto.admin.ProjectStatisticsDTO(
                 COUNT(*),
-                SUM(CASE WHEN p.status = com.example.server.model.entity.ProjectStatus.DONE THEN 1 ELSE 0 END),
-                SUM(CASE WHEN p.status = com.example.server.model.entity.ProjectStatus.CANCELLED THEN 1 ELSE 0 END)
+                SUM(CASE WHEN p.status = com.example.server.model.enums.ProjectStatus.DONE THEN 1 ELSE 0 END),
+                SUM(CASE WHEN p.status = com.example.server.model.enums.ProjectStatus.CANCELLED THEN 1 ELSE 0 END)
             )
             FROM Project p
             """)

@@ -18,8 +18,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("""
             SELECT new com.example.server.model.dto.admin.UserStatisticsDTO(
                 COUNT(*),
-                SUM(CASE WHEN u.status = com.example.server.model.entity.UserStatus.ACTIVE THEN 1 ELSE 0 END),
-                SUM(CASE WHEN u.status != com.example.server.model.entity.UserStatus.ACTIVE THEN 1 ELSE 0 END)
+                SUM(CASE WHEN u.status = com.example.server.model.enums.UserStatus.ACTIVE THEN 1 ELSE 0 END),
+                SUM(CASE WHEN u.status != com.example.server.model.enums.UserStatus.ACTIVE THEN 1 ELSE 0 END)
             )
             FROM User u
             """)
