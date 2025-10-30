@@ -2,7 +2,7 @@ package com.example.server;
 
 import com.example.server.model.entity.Role;
 import com.example.server.model.entity.User;
-import com.example.server.model.entity.UserStatus;
+import com.example.server.model.enums.UserStatus;
 import com.example.server.repository.RoleRepository;
 import com.example.server.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;

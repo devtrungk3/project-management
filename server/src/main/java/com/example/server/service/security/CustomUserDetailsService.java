@@ -3,7 +3,7 @@ package com.example.server.service.security;
 import com.example.server.exception.InactiveUserException;
 import com.example.server.model.entity.User;
 import com.example.server.model.entity.UserPrincipal;
-import com.example.server.model.entity.UserStatus;
+import com.example.server.model.enums.UserStatus;
 import com.example.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

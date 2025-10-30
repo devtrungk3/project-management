@@ -1,5 +1,6 @@
 package com.example.server.model.entity;
 
+import com.example.server.model.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

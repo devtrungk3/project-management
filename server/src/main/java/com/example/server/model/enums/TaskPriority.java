@@ -1,4 +1,4 @@
-package com.example.server.model.entity;
+package com.example.server.model.enums;
 
 public enum TaskPriority {
     LOW,

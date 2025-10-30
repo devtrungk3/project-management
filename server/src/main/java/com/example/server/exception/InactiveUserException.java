@@ -1,6 +1,6 @@
 package com.example.server.exception;
 
-import com.example.server.model.entity.UserStatus;
+import com.example.server.model.enums.UserStatus;
 import lombok.Getter;
 import lombok.Setter;
 

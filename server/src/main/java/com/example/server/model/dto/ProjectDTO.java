@@ -1,7 +1,7 @@
 package com.example.server.model.dto;
 
 import com.example.server.model.entity.Currency;
-import com.example.server.model.entity.ProjectStatus;
+import com.example.server.model.enums.ProjectStatus;
 import lombok.Getter;
 import lombok.Setter;
 

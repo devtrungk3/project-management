@@ -1,7 +1,7 @@
 package com.example.server.model.dto;
 
-import com.example.server.model.entity.DependencyType;
-import com.example.server.model.entity.TaskPriority;
+import com.example.server.model.enums.DependencyType;
+import com.example.server.model.enums.TaskPriority;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

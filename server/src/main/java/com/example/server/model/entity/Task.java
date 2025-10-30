@@ -1,5 +1,7 @@
 package com.example.server.model.entity;
 
+import com.example.server.model.enums.DependencyType;
+import com.example.server.model.enums.TaskPriority;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

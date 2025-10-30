@@ -3,7 +3,7 @@ package com.example.server.service.domain.project;
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.entity.Project;
-import com.example.server.model.entity.ProjectStatus;
+import com.example.server.model.enums.ProjectStatus;
 import org.springframework.data.domain.Page;
 
 import java.util.Map;

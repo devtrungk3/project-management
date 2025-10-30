@@ -1,7 +1,7 @@
 package com.example.server.config;
 
 import com.example.server.exception.InactiveUserException;
-import com.example.server.model.entity.UserStatus;
+import com.example.server.model.enums.UserStatus;
 import com.example.server.service.security.CustomUserDetailsService;
 import com.example.server.service.security.JWTService;
 import com.fasterxml.jackson.databind.ObjectMapper;

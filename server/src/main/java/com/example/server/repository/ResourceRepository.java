@@ -3,7 +3,7 @@ package com.example.server.repository;
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.ResourceDTO;
 import com.example.server.model.dto.StatusCountDTO;
-import com.example.server.model.entity.ProjectStatus;
+import com.example.server.model.enums.ProjectStatus;
 import com.example.server.model.entity.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

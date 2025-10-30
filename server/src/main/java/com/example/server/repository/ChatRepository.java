@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ChatRepository extends MongoRepository<ChatMessage, String> {
     List<ChatMessage> findByProjectIdOrderBySentAtDesc(int projectId);
+    void deleteByProjectId(int projectId);
 }

@@ -6,7 +6,7 @@ import com.example.server.model.dto.admin.ProjectStatisticsDTO;
 import com.example.server.model.dto.admin.TopProjectManagerDTO;
 import com.example.server.model.dto.user.ProjectOverviewReportDTO;
 import com.example.server.model.entity.Project;
-import com.example.server.model.entity.ProjectStatus;
+import com.example.server.model.enums.ProjectStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;

@@ -2,7 +2,7 @@ package com.example.server.util;
 
 import com.example.server.exception.InvalidProjectStateException;
 import com.example.server.model.entity.Project;
-import com.example.server.model.entity.ProjectStatus;
+import com.example.server.model.enums.ProjectStatus;
 
 public final class ProjectStatusValidator {
     private ProjectStatusValidator() {}

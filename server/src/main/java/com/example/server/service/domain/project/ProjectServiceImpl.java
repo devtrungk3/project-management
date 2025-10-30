@@ -6,10 +6,8 @@ import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.dto.StatusCountDTO;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.model.entity.*;
-import com.example.server.repository.ProjectRepository;
-import com.example.server.repository.ResourceRepository;
-import com.example.server.repository.TagRateRepository;
-import com.example.server.repository.UserRepository;
+import com.example.server.model.enums.ProjectStatus;
+import com.example.server.repository.*;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +25,7 @@ public class ProjectServiceImpl implements ProjectService{
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
     private final TagRateRepository tagRateRepository;
+    private final ChatRepository chatRepository;
     @Override
     public Page<Project> getAllProjects(int pageNumber, int pageSize) {
         return projectRepository.findAll(PageRequest.of(pageNumber, pageSize));
@@ -132,16 +131,22 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
+    @Transactional
     public void deleteProjectById(int id) {
-        if (projectRepository.existsById(id))
+        if (projectRepository.existsById(id)) {
             projectRepository.deleteById(id);
+            chatRepository.deleteByProjectId(id);
+        }
         else
             throw new IdNotFoundException("ProjectId " + id + " not found");
     }
     @Override
+    @Transactional
     public void deleteProjectByOwner(int projectId, int ownerId) {
-        if (projectRepository.existsByIdAndOwnerId(projectId, ownerId))
+        if (projectRepository.existsByIdAndOwnerId(projectId, ownerId)) {
             projectRepository.deleteById(projectId);
+            chatRepository.deleteByProjectId(projectId);
+        }
         else
             throw new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId);
     }

@@ -1,6 +1,6 @@
 package com.example.server.exception;
 
-import com.example.server.model.entity.UserStatus;
+import com.example.server.model.enums.UserStatus;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

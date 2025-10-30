@@ -1,7 +1,6 @@
 package com.example.server.model.dto;
 
-import com.example.server.model.entity.Role;
-import com.example.server.model.entity.UserStatus;
+import com.example.server.model.enums.UserStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

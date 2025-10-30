@@ -6,6 +6,7 @@ import com.example.server.model.dto.ResourceAllocationDTO;
 import com.example.server.model.dto.TaskDTO;
 import com.example.server.exception.ProjectNotInProgressException;
 import com.example.server.model.entity.*;
+import com.example.server.model.enums.ProjectStatus;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceAllocationRepository;
 import com.example.server.repository.ResourceRepository;
