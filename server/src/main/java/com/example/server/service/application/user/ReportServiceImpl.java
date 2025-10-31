@@ -6,6 +6,8 @@ import com.example.server.model.dto.user.ProjectOverviewReportDTO;
 import com.example.server.model.dto.user.WorkOverviewReportDTO;
 import com.example.server.model.entity.ResourceAllocation;
 import com.example.server.model.entity.Task;
+import com.example.server.model.enums.ExtraCostStatus;
+import com.example.server.repository.ExtraCostRepository;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class ReportServiceImpl implements ReportService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final ExtraCostRepository extraCostRepository;
     @Override
     public ProjectOverviewReportDTO getProjectOverviewReport(int userId, int projectId) {
         ProjectOverviewReportDTO report = projectRepository.getProjectStartAndFinish(userId, projectId);
@@ -50,6 +53,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public CostOverviewReportDTO getCostOverviewReport(int userId, int projectId) {
         CostOverviewReportDTO costOverview = taskRepository.getCostSummary(projectId, userId);
+        double extraCost = extraCostRepository.findSumOfCostByProjectIdAndOwner(projectId, userId);
+        double unpaidExtraCost = extraCostRepository.findSumOfCostByProjectIdAndOwnerAndStatus(projectId, userId, ExtraCostStatus.UNPAID);
+        // add extra cost to cost overview
+        costOverview.setPlannedCost(costOverview.getPlannedCost()+extraCost);
+        costOverview.setActualCost(costOverview.getActualCost()+extraCost);
+        costOverview.setRemainingCost(costOverview.getRemainingCost()+unpaidExtraCost);
+
         List<Task> tasks = taskRepository.findTaskLeavesByProjectAndOwnerFetchResourcesAndTagRates(projectId, userId);
         Map<String, Double> resourceWithCost = new HashMap<>();
         for (Task task : tasks) {
