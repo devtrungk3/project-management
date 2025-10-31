@@ -24,9 +24,9 @@ const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo, delet
     }
     return (
         <>
-            <div className="opacity-75 mt-3">Settings and options for your project</div>
-                        <Row>
-                <Col xl={7}>
+            <Col xl={7}>
+                <div className="opacity-75 mt-3">Settings and options for your project</div>
+                <Row>
                     <div className="fs-3 mt-3">Project closure</div>
                     <Card className="">
                         <div>
@@ -43,10 +43,8 @@ const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo, delet
                             </Row>                              
                         </div>
                     </Card>
-                </Col>
-            </Row>
-            <Row>
-                <Col xl={7}>
+                </Row>
+                <Row>
                     <div className="fs-3 mt-3">Danger zone</div>
                     <Card>
                         <div>
@@ -75,8 +73,8 @@ const ProjectSettings = ({api, projectId, setTempProjectInfo, projectInfo, delet
                             </Col>
                         </Row>
                     </Card>
-                </Col>
-            </Row>
+                </Row>
+            </Col>
         </>
     );
 }

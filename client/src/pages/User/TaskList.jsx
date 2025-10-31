@@ -25,6 +25,7 @@ import { calculateTaskCost } from "../../utils/calculateTaskCost";
 import { PiTextIndentBold, PiTextOutdentBold } from "react-icons/pi";
 import Task from '../../models/Task';
 import { businessDuration } from "../../utils/businessDays";
+import { formatDate } from "../../utils/format";
 const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
     useBlocker(() => {
       if (isDirty) {
@@ -499,13 +500,55 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
             return newMap;
         });
     }
+    const exportTasks = () => {
+        try {
+            const columns = Array.from(activeColumns.entries())
+                .filter(([key, value]) => value === true)
+                .map(([key]) => key);
+            const csvContent = [
+                ['#', 'name', ...columns],
+                ...tasks.map((task, index) => {
+                    const predecessorIndex = tasks.findIndex(t => t.id === task.predecessor?.id)+1;
+                    const taskData = {
+                        'WBS': task.wbs.join('.'),
+                        'priority': task.priority,
+                        'owners': task.resourceAllocations.map(resource => resource.username).join('; '),
+                        'duration': task.duration,
+                        'start': formatDate(task.start, 'vi-VN'),
+                        'finish': formatDate(task.finish, 'vi-VN'),
+                        'complete': `${task.complete}%`,
+                        'predecessor': `${predecessorIndex > 0 ? predecessorIndex : ''} ${predecessorIndex > 0 ? `(${task.dependencyType})` : ''}`.trim(),
+                        'effort': task.effort,
+                        'total cost': task.cost
+                    };
+                    return [
+                        index+1,
+                        task.name,
+                        ...columns.map(col => taskData[col])
+                    ];
+                })
+            ].map(e => e.join(",")).join("\n");
+            const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            const now = new Date();
+            link.setAttribute("download", `tasks_${now.getDate()}_${now.getMonth() + 1}_${now.getFullYear()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.log(error);
+            toast.error("Export failed");
+        }
+    }
     return (
         <>
             <div>
-                <div className="d-flex justify-content-between">
+                <div className="d-flex flex-wrap justify-content-between gap-3">
                     {isMyProject === true 
                     ?
-                    <div className="d-flex gap-3">
+                    <div className="d-flex flex-wrap gap-3">
                         <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-2 border rounded-3 shadow-sm bg-secondary text-white`} onClick={outdent}>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="fs-4">
@@ -536,7 +579,11 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                     :
                     <div></div>
                     }
-                    <Button onClick={saveAllTasks} className="border rounded-3 shadow-sm px-3 py-2">Save all tasks</Button>
+                    <div className="gap-3 d-flex flex-wrap">
+                        <Button onClick={saveAllTasks} className="border rounded-3 shadow-sm px-3 py-2">Save all tasks</Button>
+                        <Button onClick={exportTasks} className="border rounded-3 shadow-sm px-3 py-2 bg-success">Export</Button>                
+                    </div>
+
                 </div>
             </div>
             <Row className="mt-4" style={{ height: '500px', overflowY: 'scroll'}}>
