@@ -16,6 +16,9 @@ table {
 .min_width_100 {
   min-width: 100px;
 }
+.max_width_1200 {
+  max-width: 1200px;
+}
 .width_15 {
   width: 15%;
 }

@@ -125,9 +125,10 @@ const Resources = ({api, projectId}) => {
     }
     return (
         <>
-            <div className="pt-4">
+            <div className="pt-2">
                 <Row>
                     <Col md={6} className="overflow-auto">
+                        <div className="fs-4 mb-3">Resource management</div>
                         <div className="d-flex gap-5">
                             <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-danger text-white`} onClick={deleteResource}>
                                 <div className="d-flex align-items-center gap-2">
@@ -154,6 +155,7 @@ const Resources = ({api, projectId}) => {
                         </table>                    
                     </Col>
                     <Col md={6} className="overflow-auto">
+                        <div className="fs-4 mb-3">Resource tag management</div>
                         <div className="d-flex gap-4">
                             <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-white`} onClick={() => handleOpenTagRateDialog(true)}>
                                 <div className="d-flex align-items-center gap-2">

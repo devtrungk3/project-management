@@ -19,7 +19,9 @@ import ProjectSettings from "./ProjectSettings";
 import { toast } from "react-toastify";
 import { FiUsers } from "react-icons/fi";
 import { HiOutlineChatAlt } from "react-icons/hi";
+import { TbAdjustmentsDollar } from "react-icons/tb";
 import ChatRoom from "./ChatRoom";
+import ExtraCost from "./ExtraCost";
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
@@ -206,6 +208,11 @@ const DetailProject = ({isMyProject}) => {
                             <FiUsers className="fs-2"/>
                         </Link>
                     </Card>}
+                    {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('extra-costs') === true && style.active}`}>
+                        <Link to={`/user/my-projects/${projectId}/extra-costs`} className="text-dark p-2">
+                            <TbAdjustmentsDollar className="fs-2"/>
+                        </Link>
+                    </Card>}
                     {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('reports') === true && style.active}`}>
                         <Link to={`/user/my-projects/${projectId}/reports/project-overview`} className="text-dark p-2">
                             <HiOutlineChartBar className="fs-2"/>
@@ -227,6 +234,9 @@ const DetailProject = ({isMyProject}) => {
                         <Route path="/" element={<TaskList api={api} isMyProject={isMyProject} projectId={projectId} projectInfo={projectInfo} />} />
                         {isMyProject === true &&
                         (<Route path="/resources" element={<Resources api={api} projectId={projectId} />} />)
+                        }
+                        {isMyProject === true &&
+                        (<Route path="/extra-costs" element={<ExtraCost api={api} projectId={projectId} />} />)
                         }
                         {isMyProject === true &&
                         (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} projectInfo={projectInfo} />} />)
