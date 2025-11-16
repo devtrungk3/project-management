@@ -1,0 +1,11 @@
+body {
+    background-color: #022c45;
+}
+main {
+    height: auto;
+    flex: 1;
+    padding: 0;
+}
+.label {
+    color: #72cae9;
+}

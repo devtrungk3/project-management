@@ -1,0 +1,70 @@
+{% extends "base_home.html" %}
+{% block styles %}
+  {{ block.super }}
+{% endblock %}
+{% block title %}AI model management{% endblock %}
+
+{% block content %}
+<div class="py-2">
+  <h2>Task_risk model</h2>
+</div>
+<div>Uploaded Models</div>
+
+{% if ai_model_list %}
+<div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered text-white">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Model Name</th>
+                    <th>Uploaded At</th>
+                    <th></th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in ai_model_list %}
+                <tr>
+                    <td class="text-white">{{ file.id }}</td>
+                    <td class="text-white">{{ file.name }}</td>
+                    <td class="text-white">{{ file.uploaded_at|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                      <form method="post" action="{% url 'delete_model' file.id %}" style="display:inline;">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger btn-sm" 
+                              onclick="return confirm('Are you sure you want to delete model: {{ file.name }}?')">
+                              Delete
+                          </button>
+                      </form>
+                    </td>
+                    <td>
+                      {% if file.is_active %}
+                          <span class="badge bg-success">CURRENTLY ACTIVE</span>
+                      {% else %}
+                          <form method="post" action="{% url 'activate_model' file.id %}" style="display:inline;">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-primary btn-sm">Set Active</button>
+                          </form>
+                      {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p>No models have been uploaded yet.</p>
+{% endif %}
+<form method="post" enctype="multipart/form-data" class="mb-4 d-inline-block">
+  {% csrf_token %}
+  <div>Upload your model file ( .joblib extension )</div>
+  <div class="input-group mb-3">
+    {{ form.file }}
+    <button type="submit" class="btn btn-info text-dark">Upload</button>
+  </div>
+  {% if error %}
+    <p class="alert alert-danger d-inline-block p-2" role="alert">
+      {{ error }} 
+    </p>
+  {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,8 @@
+<div class="sidebar">
+    <h4 class="text-center my-4">AI model</h4>
+    <ul class="sidebar-list">
+        <li class="sidebar-item {% if request.resolver_match.url_name == 'model_management' %}active{% endif %}">
+            <a class="sidebar-link" href="/model-management">Model management</a>
+        </li>
+    </ul>
+</div>
