@@ -25,6 +25,7 @@ public class ProjectServiceImpl implements ProjectService{
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
     private final TagRateRepository tagRateRepository;
+    private final TaskRepository taskRepository;
     private final ChatRepository chatRepository;
     @Override
     public Page<Project> getAllProjects(int pageNumber, int pageSize) {
@@ -149,5 +150,11 @@ public class ProjectServiceImpl implements ProjectService{
         }
         else
             throw new EntityNotFoundException("No project found with projectId " + projectId + " and ownerId " + ownerId);
+    }
+    @Override
+    public Double getOverdueRate(int projectId, int ownerId) {
+        Double overdueRate = taskRepository.getOverdueRateByProjectAndProjectOwner(projectId, ownerId);
+        if (overdueRate == null) return 0.0;
+        return overdueRate;
     }
 }

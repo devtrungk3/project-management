@@ -1,6 +1,7 @@
 package com.example.server.controller.user;
 
 import com.example.server.model.dto.ResourceDTO;
+import com.example.server.model.entity.Resource;
 import com.example.server.service.domain.resource.ResourceService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +26,11 @@ public class ResourceController {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
         resourceService.deleteResourceByOwner(resourceId, userIdExtractedFromJWT);
         return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/overdue-rate")
+    public ResponseEntity<Double> getAverageResourceOverdueRate(
+            @RequestBody List<Resource> resources, HttpServletRequest request) {
+        int userIdExtractedFromJWT = (int) request.getAttribute("userId");
+        return ResponseEntity.ok(resourceService.getAvgResourceOverdueRate(resources, userIdExtractedFromJWT));
     }
 }

@@ -7,6 +7,7 @@ import com.example.server.exception.ResourceExistsException;
 import com.example.server.model.entity.Resource;
 import com.example.server.repository.ProjectRepository;
 import com.example.server.repository.ResourceRepository;
+import com.example.server.repository.TaskRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.util.ProjectStatusValidator;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -23,6 +26,7 @@ public class ResourceServiceImpl implements ResourceService{
     private final ResourceRepository resourceRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
     private final CacheManager cacheManager;
     @Override
     @CacheEvict(value = "resourceInProject", key = "{#result.project.id, #result.project.owner.id}")
@@ -58,5 +62,25 @@ public class ResourceServiceImpl implements ResourceService{
                 resource.getProject().getId(),
                 resource.getProject().getOwner().getId()
         });
+    }
+    @Override
+    @Transactional
+    public Double getAvgResourceOverdueRate(List<Resource> resources, int userId) {
+        if (resources.size() == 0) return null;
+        double sumOfOverdueRate = 0;
+        for (Resource resource : resources) {
+            Resource resourceInDB = resourceRepository.findByIdAndProject_Owner_Id(resource.getId(), userId).orElse(null);
+            if (resourceInDB == null) {
+                return null;
+            }
+            Double overdueRate = taskRepository.getOverdueRateByUserAfter(
+                    resourceInDB.getUser().getId(),
+                    LocalDate.now().minusDays(30)
+            );
+            if (overdueRate != null) {
+                sumOfOverdueRate += overdueRate;
+            }
+        }
+        return sumOfOverdueRate/resources.size();
     }
 }

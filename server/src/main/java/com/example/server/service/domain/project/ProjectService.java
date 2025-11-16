@@ -22,4 +22,5 @@ public interface ProjectService {
     Project closeProject(int projectId, int ownerId, ProjectStatus status);
     void deleteProjectById(int id);
     void deleteProjectByOwner(int projectId, int ownerId);
+    Double getOverdueRate(int projectId, int ownerId);
 }

@@ -146,4 +146,10 @@ public class ProjectController {
         projectService.deleteProjectByOwner(projectId, userIdExtractedFromJWT);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/{id}/overdue-rate")
+    public ResponseEntity<Double> getAverageResourceOverdueRate(
+            @PathVariable(name = "id") int projectId, HttpServletRequest request) {
+        int userIdExtractedFromJWT = (int) request.getAttribute("userId");
+        return ResponseEntity.ok(projectService.getOverdueRate(projectId, userIdExtractedFromJWT));
+    }
 }

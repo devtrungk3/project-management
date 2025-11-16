@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -154,4 +153,20 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.isLeaf = true
             """)
     WorkOverviewReportDTO getWorkSummary(int projectId, int ownerId);
+    @Query("""
+            SELECT CAST(SUM(CASE WHEN t.completedDate > t.finish THEN 1 ELSE 0 END) AS double) / COUNT(*)
+            FROM Task t
+            JOIN t.resourceAllocations ra
+            JOIN ra.resource r
+            WHERE r.user.id = :userId
+                AND t.completedDate IS NOT NULL
+                AND t.completedDate >= :date
+            """)
+    Double getOverdueRateByUserAfter(int userId, LocalDate date);
+    @Query("""
+            SELECT CAST(SUM(CASE WHEN CURRENT_DATE > t.finish AND (t.completedDate IS NULL OR t.completedDate > t.finish) THEN 1 ELSE 0 END) AS double) / COUNT(*)
+            FROM Task t
+            WHERE t.project.id = :projectId AND t.project.owner.id = :userId
+            """)
+    Double getOverdueRateByProjectAndProjectOwner(int projectId, int userId);
 }
