@@ -112,7 +112,15 @@ const deleteProjectById = async (api, id) => {
         throw error;
     }
 }
-
+const getOverdueRate = async (api, id) => {
+    try {
+        const response = await api.get(`/user/projects/${id}/overdue-rate`);
+        return response.data;
+    } catch (error) {
+        console.log('Get project overdue rate failed: ', error);
+        return 0;
+    }
+}
 export default {
     getAllMyProjects,
     getAllJoinedProjects,
@@ -123,5 +131,6 @@ export default {
     getProjectById,
     getMyProjectStatistics,
     getJoinedProjectStatistics,
-    deleteProjectById
+    deleteProjectById,
+    getOverdueRate
 }

@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { loginApi, logoutApi } from '../services/AuthService';
@@ -15,10 +14,6 @@ export default function useAuth() {
   } = useContext(AuthContext);
 
   const navigate = useNavigate();
-  const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true,
-  });
 
   const login = async (formData) => {
     try {

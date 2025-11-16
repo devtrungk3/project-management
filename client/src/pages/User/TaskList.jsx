@@ -26,18 +26,23 @@ import { PiTextIndentBold, PiTextOutdentBold } from "react-icons/pi";
 import Task from '../../models/Task';
 import { businessDuration } from "../../utils/businessDays";
 import { formatDate } from "../../utils/format";
+import { FaBrain } from "react-icons/fa";
+import AIService from "../../services/User/AIService";
+import Swal from 'sweetalert2';
+
 const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
     useBlocker(() => {
-      if (isDirty) {
-        const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
-        if (leave) {
-            setIsDirty(false);
+        if (isDirty) {
+            const leave = confirm('You have unsaved changes. Are you sure you want to leave?');
+            if (leave) {
+                setIsDirty(false);
+            }
+            return !leave;
         }
-        return !leave;
-      }
-      return false;
-    }
-  );
+        return false;
+        }
+    );
+    const [predictionWaiting, setPredictionWaiting] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [resources, setResources] = useState(null);
@@ -542,6 +547,23 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
             toast.error("Export failed");
         }
     }
+    const predictDelayTask = async () => {
+        if (selectedTaskIndex < 0) {
+            toast.warn("Please select task to predict");
+            return;
+        }
+        setPredictionWaiting(true);
+        try {
+            const result = await AIService.predictDelayTask(api, tasks[selectedTaskIndex], projectId);
+            Swal.fire({
+                title: result['task_delay_risk'],
+                html: `Task [${tasks[selectedTaskIndex].name}] with <b>${result['task_delay_risk']}</b> risk of delay`,
+                icon: result['task_delay_risk'] === 'LOW' ? 'success' : 'warning',
+                confirmButtonText: 'Close'
+            });
+        } catch (error) {}
+        setPredictionWaiting(false);
+    }    
     return (
         <>
             <div>
@@ -573,6 +595,12 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                             <div className="d-flex align-items-center gap-2">
                                 <FaTrash />
                                 <span className="fw-semibold">Delete task</span>
+                            </div>
+                        </div>
+                        <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-secondary text-white`} onClick={predictDelayTask}>
+                            <div className="d-flex align-items-center gap-2">
+                                {predictionWaiting === true ? <span className='spinner-border spinner-border-sm'/> : <FaBrain />}
+                                <span className="fw-semibold">Predict delay</span>
                             </div>
                         </div>
                     </div>

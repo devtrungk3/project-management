@@ -15,7 +15,17 @@ const deleteResource = async (api, resourceId) => {
         throw error;
     }
 }
+const getAverageResourceOverdueRate = async (api, resources) => {
+    try {
+        const response = await api.post(`/user/resources/overdue-rate`, resources);
+        return response.data;
+    } catch (error) {
+        console.log("Get resource overdue rate failed: ", error);
+        return 0;
+    }
+}
 export default {
     getAllResources,
-    deleteResource
+    deleteResource,
+    getAverageResourceOverdueRate
 }
