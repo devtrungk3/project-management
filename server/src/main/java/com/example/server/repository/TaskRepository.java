@@ -96,7 +96,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     @Query("""
             SELECT new com.example.server.model.dto.TaskDTO(t.name, t.complete)
             FROM Task t
-            WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.finish >= :from AND t.finish <= :to AND t.complete < 100
+            WHERE t.project.owner.id = :ownerId AND t.project.id = :projectId AND t.isLeaf = true AND t.finish >= :from AND t.finish <= :to AND t.complete < 100
             ORDER BY t.finish ASC
             """)
     List<TaskDTO> getTasksDueIn(int projectId, int ownerId, LocalDate from, LocalDate to);
