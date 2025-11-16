@@ -1,8 +1,9 @@
 # Project management website
 
 ## Environment preparaion
-- **JDK** 17+ (check with ``java -version`` and ``javac -version``)
-- **NodeJs** 18+ (check with ``node -version``)
+- **JDK** 17+ (check with ``java --version`` and ``javac --version``)
+- **NodeJs** 18+ (check with ``node --version``)
+- **Python** 3.11.x (check with ``python --version``)
 - Already installed **Docker engine** and **Docker Compose**
 - Running Docker engine before starting web server
 ## Setup
@@ -15,14 +16,14 @@ Initialize your environment variables
 ```bash
 cp .env.example .env
 ```
-Customize your own env file (if needed)
+Customize your own env file
 
 Install dependencies
 ```bash
 npm install
 ```
 ### Server-side
-Access server folder
+Main server
 ```bash
 cd server
 ```
@@ -30,12 +31,36 @@ Initialize your environment variables
 ```bash
 cp application.properties.example application.properties
 ```
-Customize your own application.properties file (if needed)
+Customize your own application.properties file
+
+Machine learning server
+```bash
+cd ml_server
+```
+Install requirement libraries
+```bash
+pip install -r requirements.txt
+```
+Initialize your environment variables
+```bash
+cp .env.example .env
+```
+Customize your own env file
+
+Migration (after running Docker compose)
+```bash
+python manage.py migrate
+```
 ## Quick experience
-Start server
+Start main server
 ```bash
 cd server
 ./mvnw spring-boot:run
+```
+Start machine learning server
+```bash
+cd ml_server
+py manage.py runserver
 ```
 Start client
 ```bash
