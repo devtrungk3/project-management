@@ -9,22 +9,23 @@ const ai_api = axios.create({
 //   withCredentials: true,
 });
 const predictDelayTask = async (api, taskInfo, projectId) => {
-    if (dayjs(new Date()).isBefore(dayjs(taskInfo.start), "day")) {
-        toast.warn("Can only predict the task has begun");
+    if (taskInfo.duration === 0) {
         return null;
-    }
+    };
     if (taskInfo.complete === 100) {
         toast.warn("This task has been completed");
         return null;
     }
     if (dayjs(new Date()).isAfter(dayjs(taskInfo.finish), "day") && taskInfo.complete < 100) {
-        toast.warn("This task is overdue");
+        toast.warn("This task is already overdue");
         return null;
     }
     const payload = {}
-    payload['day_since_start'] = businessDuration(taskInfo.start, new Date())-1;
-    if (payload['day_since_start'] < 0) {
-        payload['day_since_start'] = 0;
+    const currentDate = dayjs(new Date());
+    if (dayjs(taskInfo.start).isAfter(currentDate, "day")) {
+        payload['day_since_start'] = -1*(businessDuration(currentDate, taskInfo.start)-1);
+    } else {
+        payload['day_since_start'] = businessDuration(taskInfo.start, currentDate)-1;
     }
     payload['deadline_day_of_week'] = dayjs(taskInfo.finish).format('dddd');
     payload['days_until_deadline'] = businessDuration(new Date(), taskInfo.finish)-1;
@@ -47,7 +48,11 @@ const predictDelayTask = async (api, taskInfo, projectId) => {
         payload['assignee_overdue_rate'] = 0;
     }
     payload['project_overdue_rate'] = await ProjectService.getOverdueRate(api, projectId);
-    payload['progress_gap'] = taskInfo.complete - ((payload['day_since_start']+1)*(100/taskInfo.duration));
+    if (payload['day_since_start'] < 0) {
+        payload['progress_gap'] = 0;
+    } else {
+        payload['progress_gap'] = taskInfo.complete - ((payload['day_since_start']+1)*(100/taskInfo.duration));
+    }
     try {
         const response = await ai_api.post(`/delay-predict`, payload);
         return response.data;
