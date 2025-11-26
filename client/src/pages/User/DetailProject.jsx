@@ -22,6 +22,9 @@ import { HiOutlineChatAlt } from "react-icons/hi";
 import { TbAdjustmentsDollar } from "react-icons/tb";
 import ChatRoom from "./ChatRoom";
 import ExtraCost from "./ExtraCost";
+import { GoIssueTracks } from "react-icons/go";
+import Issues from "./Issues";
+import IssueDetail from "./IssueDetail";
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
@@ -208,6 +211,11 @@ const DetailProject = ({isMyProject}) => {
                             <FiUsers className="fs-2"/>
                         </Link>
                     </Card>}
+                    <Card className={`justify-content-center border border-none ${style.nav} ${isActive('issues') === true && style.active}`}>
+                        <Link to={`/user/my-projects/${projectId}/issues`} className="text-dark p-2">
+                            <GoIssueTracks className="fs-2"/>
+                        </Link>
+                    </Card>
                     {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('extra-costs') === true && style.active}`}>
                         <Link to={`/user/my-projects/${projectId}/extra-costs`} className="text-dark p-2">
                             <TbAdjustmentsDollar className="fs-2"/>
@@ -235,6 +243,8 @@ const DetailProject = ({isMyProject}) => {
                         {isMyProject === true &&
                         (<Route path="/resources" element={<Resources api={api} projectId={projectId} />} />)
                         }
+                        <Route path="/issues" element={<Issues api={api} projectId={projectId} />} />
+                        <Route path="/issues/:issueId" element={<IssueDetail api={api} projectId={projectId} />}/>
                         {isMyProject === true &&
                         (<Route path="/extra-costs" element={<ExtraCost api={api} projectId={projectId} />} />)
                         }
