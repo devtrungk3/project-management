@@ -60,4 +60,5 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
             SELECT r.id FROM Resource r WHERE r.project.id = :projectId
             """)
     Set<Integer> findIdsByProjectId(int projectId);
+    boolean existsByProject_IdAndUser_Id(int projectId, int userId);
 }

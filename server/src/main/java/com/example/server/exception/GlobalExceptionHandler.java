@@ -108,4 +108,9 @@ public class GlobalExceptionHandler {
         System.out.println("InvalidProjectStateException - " + e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "This project has been closed"));
     }
+    @ExceptionHandler(UserNotInProjectException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotInProject(UserNotInProjectException e) {
+        System.out.println("UserNotInProjectException - " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "User is not a member of this project"));
+    }
 }
