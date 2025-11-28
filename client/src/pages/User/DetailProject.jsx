@@ -25,6 +25,8 @@ import ExtraCost from "./ExtraCost";
 import { GoIssueTracks } from "react-icons/go";
 import Issues from "./Issues";
 import IssueDetail from "./IssueDetail";
+import { RiFileHistoryLine } from "react-icons/ri";
+import ProjectLog from "./ProjectLog";
 
 const DetailProject = ({isMyProject}) => {
     const {projectId} = useParams();
@@ -212,7 +214,7 @@ const DetailProject = ({isMyProject}) => {
                         </Link>
                     </Card>}
                     <Card className={`justify-content-center border border-none ${style.nav} ${isActive('issues') === true && style.active}`}>
-                        <Link to={`/user/my-projects/${projectId}/issues`} className="text-dark p-2">
+                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/issues`} className="text-dark p-2">
                             <GoIssueTracks className="fs-2"/>
                         </Link>
                     </Card>
@@ -221,6 +223,11 @@ const DetailProject = ({isMyProject}) => {
                             <TbAdjustmentsDollar className="fs-2"/>
                         </Link>
                     </Card>}
+                    <Card className={`justify-content-center border border-none ${style.nav} ${isActive('log') === true && style.active}`}>
+                        <Link to={`/user/${isMyProject ? 'my-projects' : 'joined-projects'}/${projectId}/log`} className="text-dark p-2">
+                            <RiFileHistoryLine className="fs-2"/>
+                        </Link>
+                    </Card>
                     {isMyProject === true && <Card className={`justify-content-center border border-none ${style.nav} ${isActive('reports') === true && style.active}`}>
                         <Link to={`/user/my-projects/${projectId}/reports/project-overview`} className="text-dark p-2">
                             <HiOutlineChartBar className="fs-2"/>
@@ -248,6 +255,7 @@ const DetailProject = ({isMyProject}) => {
                         {isMyProject === true &&
                         (<Route path="/extra-costs" element={<ExtraCost api={api} projectId={projectId} />} />)
                         }
+                        <Route path="/log" element={<ProjectLog api={api} projectId={projectId} />} />
                         {isMyProject === true &&
                         (<Route path="/reports/*" element={<Reports api={api} projectId={projectId} projectInfo={projectInfo} />} />)
                         }

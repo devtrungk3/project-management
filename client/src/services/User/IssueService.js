@@ -4,6 +4,7 @@ const getAllIssues = async (api, projectId) => {
         return response.data;
     } catch (error) {
         console.log('Failed to load issues: ', error);
+        throw error;
     }
 }
 const getIssue = async (api, projectId, issueId) => {
@@ -12,6 +13,7 @@ const getIssue = async (api, projectId, issueId) => {
         return response.data;
     } catch (error) {
         console.log('Failed to load issue: ', error);
+        throw error;
     }
 }
 const addIssue = async (api, projectId, issue) => {
@@ -20,6 +22,7 @@ const addIssue = async (api, projectId, issue) => {
         return response.data;
     } catch (error) {
         console.log('Failed to add a new issue: ', error);
+        throw error;
     }
 }
 const changeIssueStatus = async (api, projectId, issueId, status) => {
@@ -29,6 +32,7 @@ const changeIssueStatus = async (api, projectId, issueId, status) => {
         );
     } catch (error) {
         console.log('Failed to change issue status: ', error);
+        throw error;
     }
 }
 const deleteIssue = async (api, projectId, issueId) => {
@@ -36,6 +40,7 @@ const deleteIssue = async (api, projectId, issueId) => {
         await api.delete(`/user/projects/${projectId}/issues/${issueId}`);
     } catch (error) {
         console.log('Failed to delete issue: ', error);
+        throw error;
     }
 }
 export default {

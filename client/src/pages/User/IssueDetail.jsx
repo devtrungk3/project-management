@@ -110,14 +110,14 @@ const IssueDetail = ({ api, projectId }) => {
             <h3 className="mb-2 fw-normal">
               {issue?.title} <span className="text-secondary">#{issue?.id}</span>
             </h3>
-            <div className='ms-auto'>
+            {issue?.author === username && <div className='ms-auto'>
               <Button variant="light" className='border border-dark me-3' size="sm" onClick={() => changeIssueStatus(issue?.issueStatus === "OPEN" ? "CLOSED" : "OPEN")}>
                 {issue?.issueStatus === "OPEN" ? 'Close issue' : 'Reopen issue'}
               </Button>
               <Button variant="danger" className='border border-dark sm-mt-3' size="sm" onClick={deleteIssue}>
                 Delete issue
               </Button>
-            </div>
+            </div>}
           </div>
           <p>{issue?.description}</p>
           <div className="d-flex align-items-center gap-2">

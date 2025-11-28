@@ -1,0 +1,19 @@
+.button {
+    background: #c8e0fa;
+    font-weight: 700;
+    color: #000;
+    width: 100%;
+    border-radius: 7;
+}
+.pagination .page-item.active .page-link {
+  background-color: #87CEEB;
+  border-color: #87CEEB;
+  color: black;
+}
+
+.pagination .page-link {
+  color: black;
+}
+.unactive-arrow {
+  border: none;
+}

@@ -1,7 +1,7 @@
 import { Container, Row, Col, Card, Button, Table } from 'react-bootstrap';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { FaArrowLeft, FaArrowRight, FaTrash } from "react-icons/fa";
-import style from './MyProjects.module.css';
+import style from './Projects.module.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
