@@ -1,5 +1,6 @@
 package com.example.server.service.domain.task;
 
+import com.example.server.annotation.LogAction;
 import com.example.server.exception.EntityNotFoundException;
 import com.example.server.exception.IdNotFoundException;
 import com.example.server.model.dto.ResourceAllocationDTO;
@@ -216,6 +217,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @LogAction(actionType = "task_progress_updated", description = "Update task progress")
     public void updateTaskCompleteForUser(List<TaskDTO> newTaskDTOs, int projectId, int userId) {
         if (newTaskDTOs.size() == 0) {
             return;

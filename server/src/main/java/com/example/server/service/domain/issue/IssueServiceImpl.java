@@ -1,5 +1,6 @@
 package com.example.server.service.domain.issue;
 
+import com.example.server.annotation.LogAction;
 import com.example.server.exception.EntityNotFoundException;
 import com.example.server.exception.UserNotInProjectException;
 import com.example.server.model.dto.IssueCommentDTO;
@@ -57,6 +58,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @LogAction(actionType = "issue_added")
     public Issue addIssue(Issue issue) {
         if (!resourceRepository.existsByProject_IdAndUser_Id(issue.getProject().getId(), issue.getAuthor().getId())) {
             throw new UserNotInProjectException("User with ID" + issue.getAuthor().getId() + " is not a member of project with ID " + issue.getProject().getId() +". User must be a member to add issue.");
@@ -67,6 +69,17 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @LogAction(actionType = "issue_closed")
+    public Issue closeIssue(Issue issue) {
+        return changeStatus(issue, IssueStatus.CLOSED);
+    }
+
+    @Override
+    @LogAction(actionType = "issue_reopened")
+    public Issue openIssue(Issue issue) {
+        return changeStatus(issue, IssueStatus.OPEN);
+    }
+
     public Issue changeStatus(Issue updatedIssue, IssueStatus issueStatus) {
         Issue issue = issueRepository.findByIdAndAuthor_Id(updatedIssue.getId(), updatedIssue.getAuthor().getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("No issue found with ID " + updatedIssue.getId() + " and author ID " + updatedIssue.getAuthor().getId());
@@ -76,11 +89,13 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public void deleteIssue(Issue issue) {
-        if (!issueRepository.existsByIdAndAuthor_Id(issue.getId(), issue.getAuthor().getId())) {
-            throw new EntityNotFoundException("No issue found with ID " + issue.getId() + " and author ID " + issue.getAuthor().getId());
-        }
-        issueRepository.deleteById(issue.getId());
+    @LogAction(actionType = "issue_deleted")
+    public Issue deleteIssue(Issue issue) {
+        Issue deletedIssue = issueRepository.findByIdAndAuthor_Id(issue.getId(), issue.getAuthor().getId()).orElseThrow(() ->
+            new EntityNotFoundException("No issue found with ID " + issue.getId() + " and author ID " + issue.getAuthor().getId())
+        );
+        issueRepository.deleteById(deletedIssue.getId());
+        return deletedIssue;
     }
 
 }

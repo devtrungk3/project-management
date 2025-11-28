@@ -6,7 +6,6 @@ import com.example.server.model.entity.ExtraCost;
 import com.example.server.model.entity.Issue;
 import com.example.server.model.entity.Project;
 import com.example.server.model.entity.User;
-import com.example.server.model.enums.IssueStatus;
 import com.example.server.service.domain.issue.IssueService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -53,37 +52,49 @@ public class IssueController {
     @PatchMapping("/{id}/open")
     public ResponseEntity<Issue> openIssue(
             @PathVariable(name = "id") int issueId,
+            @PathVariable(name = "projectId") int projectId,
             HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
         User user = new User();
         user.setId(userIdExtractedFromJWT);
+        Project project = new Project();
+        project.setId(projectId);
         Issue issue = new Issue();
         issue.setId(issueId);
         issue.setAuthor(user);
-        return ResponseEntity.ok(issueService.changeStatus(issue, IssueStatus.OPEN));
+        issue.setProject(project);
+        return ResponseEntity.ok(issueService.openIssue(issue));
     }
     @PatchMapping("/{id}/closed")
     public ResponseEntity<Issue> closeIssue(
             @PathVariable(name = "id") int issueId,
+            @PathVariable(name = "projectId") int projectId,
             HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
         User user = new User();
         user.setId(userIdExtractedFromJWT);
+        Project project = new Project();
+        project.setId(projectId);
         Issue issue = new Issue();
         issue.setId(issueId);
         issue.setAuthor(user);
-        return ResponseEntity.ok(issueService.changeStatus(issue, IssueStatus.CLOSED));
+        issue.setProject(project);
+        return ResponseEntity.ok(issueService.closeIssue(issue));
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<ExtraCost> deleteIssue(
             @PathVariable(name = "id") int issueId,
+            @PathVariable(name = "projectId") int projectId,
             HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
         User user = new User();
         user.setId(userIdExtractedFromJWT);
+        Project project = new Project();
+        project.setId(projectId);
         Issue issue = new Issue();
         issue.setId(issueId);
         issue.setAuthor(user);
+        issue.setProject(project);
         issueService.deleteIssue(issue);
         return ResponseEntity.noContent().build();
     }

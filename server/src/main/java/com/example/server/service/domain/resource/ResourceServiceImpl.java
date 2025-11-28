@@ -1,5 +1,6 @@
 package com.example.server.service.domain.resource;
 
+import com.example.server.annotation.LogAction;
 import com.example.server.exception.EntityNotFoundException;
 import com.example.server.model.dto.ResourceDTO;
 import com.example.server.exception.IdNotFoundException;
@@ -30,6 +31,7 @@ public class ResourceServiceImpl implements ResourceService{
     private final CacheManager cacheManager;
     @Override
     @CacheEvict(value = "resourceInProject", key = "{#result.project.id, #result.project.owner.id}")
+    @LogAction(actionType = "member_added")
     public Resource addResource(Resource newResource) {
         if (!userRepository.existsById(newResource.getUser().getId())) {
             throw new IdNotFoundException("UserId " + newResource.getUser().getId() + " not found");
@@ -50,7 +52,8 @@ public class ResourceServiceImpl implements ResourceService{
     }
 
     @Override
-    public void deleteResourceByOwner(int resourceId, int ownerId) {
+    @LogAction(actionType = "member_removed")
+    public Resource deleteResourceByOwner(int resourceId, int ownerId) {
         Resource resource = resourceRepository.findByIdAndProject_Owner_Id(resourceId, ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("No resource found with id " + resourceId + " and project owner id " + ownerId));
         if (resource.getUser().getId() == ownerId) {
@@ -62,6 +65,7 @@ public class ResourceServiceImpl implements ResourceService{
                 resource.getProject().getId(),
                 resource.getProject().getOwner().getId()
         });
+        return resource;
     }
     @Override
     @Transactional

@@ -10,10 +10,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 @EnableCaching
+@EnableAspectJAutoProxy
 public class ServerApplication {
 
 	public static void main(String[] args) {
@@ -47,26 +49,6 @@ public class ServerApplication {
 				user.setStatus(UserStatus.ACTIVE);
 				user.setRole(userRole);
 				userRepository.save(user);
-			}
-
-			if (!userRepository.existsByUsername("devtrungg")) {
-				User user2 = new User();
-				user2.setUsername("devtrungg");
-				user2.setPassword(encoder.encode("dev"));
-				user2.setFullname("Regular User");
-				user2.setStatus(UserStatus.ACTIVE);
-				user2.setRole(userRole);
-				userRepository.save(user2);
-			}
-
-			if (!userRepository.existsByUsername("dev")) {
-				User user3 = new User();
-				user3.setUsername("dev");
-				user3.setPassword(encoder.encode("dev"));
-				user3.setFullname("Regular User");
-				user3.setStatus(UserStatus.ACTIVE);
-				user3.setRole(userRole);
-				userRepository.save(user3);
 			}
 		};
 	}
