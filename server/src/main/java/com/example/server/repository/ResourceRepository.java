@@ -16,6 +16,7 @@ import java.util.Set;
 
 public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     boolean existsByUserIdAndProjectId(int userId, int projectId);
+    long countByProjectId(int projectId);
     @Query("""
             SELECT new com.example.server.model.dto.StatusCountDTO(r.project.status, COUNT(DISTINCT r.project.id))
             FROM Resource r

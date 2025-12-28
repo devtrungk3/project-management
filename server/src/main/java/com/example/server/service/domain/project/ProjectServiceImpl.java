@@ -2,6 +2,7 @@ package com.example.server.service.domain.project;
 
 import com.example.server.exception.EntityNotFoundException;
 import com.example.server.model.dto.ProjectDTO;
+import com.example.server.model.dto.admin.ProjectDTOForAdmin;
 import com.example.server.model.dto.user.ProjectStatisticsDTO;
 import com.example.server.model.dto.StatusCountDTO;
 import com.example.server.exception.IdNotFoundException;
@@ -28,8 +29,13 @@ public class ProjectServiceImpl implements ProjectService{
     private final TaskRepository taskRepository;
     private final ChatRepository chatRepository;
     @Override
-    public Page<Project> getAllProjects(int pageNumber, int pageSize) {
-        return projectRepository.findAll(PageRequest.of(pageNumber, pageSize));
+    public Page<ProjectDTOForAdmin> getProjectsForAdmin(int pageNumber, int pageSize) {
+        Page<ProjectDTOForAdmin> result = projectRepository.getProjectsForAdmin(PageRequest.of(pageNumber, pageSize));
+        result.getContent().forEach(project -> {
+            project.setTaskCount(taskRepository.countByProjectId(project.getId()));
+            project.setResourceCount(resourceRepository.countByProjectId(project.getId()));
+        });
+        return result;
     }
     @Override
     public Page<ProjectDTO> getAllOwnProjects(int ownerId, int pageNumber, int pageSize, Map<String, Object> filters) {

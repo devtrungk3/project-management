@@ -2,6 +2,7 @@ package com.example.server.repository;
 
 import com.example.server.model.dto.ProjectDTO;
 import com.example.server.model.dto.StatusCountDTO;
+import com.example.server.model.dto.admin.ProjectDTOForAdmin;
 import com.example.server.model.dto.admin.ProjectStatisticsDTO;
 import com.example.server.model.dto.admin.TopProjectManagerDTO;
 import com.example.server.model.dto.user.ProjectOverviewReportDTO;
@@ -18,6 +19,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Integer> {
+   @Query("""
+           SELECT new com.example.server.model.dto.admin.ProjectDTOForAdmin(
+                p.id,
+                p.owner.username,
+                p.status,
+                c.name,
+                p.createdAt,
+                p.updatedAt
+           )
+           FROM Project p
+           LEFT JOIN p.currency c
+           ORDER BY p.updatedAt DESC, p.createdAt DESC
+           """)
+    Page<ProjectDTOForAdmin> getProjectsForAdmin(Pageable pageable);
     @Query("""
             SELECT new com.example.server.model.dto.ProjectDTO(p.id, p.name, p.status, p.owner.username, p.createdAt, p.updatedAt)
             FROM Project p

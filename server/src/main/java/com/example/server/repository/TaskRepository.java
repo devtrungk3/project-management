@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface TaskRepository extends JpaRepository<Task, Integer> {
+    long countByProjectId(int projectId);
     @Query("""
             SELECT t FROM Task t
             WHERE t.project.id = :projectId AND t.project.owner.id = :ownerId
