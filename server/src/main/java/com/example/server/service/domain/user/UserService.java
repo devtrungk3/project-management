@@ -16,4 +16,5 @@ public interface UserService {
     UserDTO activeUser(int userId);
     UserDTO suspendUser(int userId);
     UserDTO banUser(int userId);
+    void changePassword(int userId, String currentPassword, String newPassword);
 }

@@ -144,4 +144,17 @@ public class UserServiceImpl implements UserService{
             );
         } else throw new IdNotFoundException("UserId " + userId + " not found");
     }
+
+    @Override
+    public void changePassword(int userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+            new EntityNotFoundException("UserId " + userId + " not found")
+        );
+        if (encoder.matches(currentPassword, user.getPassword())) {
+            user.setPassword(encoder.encode(newPassword));
+        } else {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        userRepository.save(user);
+    }
 }

@@ -7,6 +7,7 @@ import style from './UserHome.module.css';
 import { Link, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import JoinRequests from './JoinRequests';
 import { jwtDecode } from 'jwt-decode';
+import Profile from './Profile';
 
 function UserHome() {
 
@@ -70,7 +71,7 @@ function UserHome() {
                 aria-labelledby="userDropdown"
               >
                 <li>
-                  <a className="dropdown-item" href=''>
+                  <a className="dropdown-item" href='/user/profile'>
                     Profile
                   </a>
                 </li>
@@ -90,6 +91,7 @@ function UserHome() {
           <Route path="/my-projects" element={<Projects api={api} isMyProject={true} />}/>
           <Route path="/joined-projects" element={<Projects api={api} isMyProject={false} />}/>
           <Route path="/join-requests" element={<JoinRequests api={api} />} />
+          <Route path="/profile" element={<Profile api={api} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
