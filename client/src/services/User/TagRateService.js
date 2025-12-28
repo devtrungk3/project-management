@@ -1,7 +1,6 @@
-const mainAPI = "/user/tag-rates"
 const getAllTagRates = async (api, projectId) => {
     try {
-        const response = await api.get(`${mainAPI}/${projectId}`);
+        const response = await api.get(`/user/projects/${projectId}/tag-rates`);
         return response.data;
     } catch (error) {
         console.log('Failed to get tag rates');
@@ -16,7 +15,7 @@ const addTagRate = async (api, newTagRate, projectId) => {
         }
     }
     try {
-        const response = await api.post(mainAPI, payload);
+        const response = await api.post(`/user/projects/${projectId}/tag-rates`, payload);
         return response.data;
     } catch (error) {
         console.log('Failed to add tag rate');
@@ -31,16 +30,16 @@ const updateTagRate = async (api, updatedTagRate, projectId) => {
         }
     }
     try {
-        const response = await api.put(`${mainAPI}`, payload);
+        const response = await api.put(`/user/projects/${projectId}/tag-rates`, payload);
         return response.data;
     } catch (error) {
         console.log('Failed to update tag rate');
         throw error;
     }
 }
-const deleteTagRate = async (api, tagRateId) => {
+const deleteTagRate = async (api, projectId, tagRateId) => {
     try {
-        await api.delete(`${mainAPI}/${tagRateId}`);
+        await api.delete(`/user/projects/${projectId}/tag-rates/${tagRateId}`);
     } catch (error) {
         console.log('Failed to delete tag rate');
         throw error;

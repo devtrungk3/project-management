@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/user/tag-rates")
+@RequestMapping("/api/v1/user/projects/{projectId}/tag-rates")
 @RequiredArgsConstructor
 public class TagRateController {
     private final TagRateService tagRateService;
-    @GetMapping("/{projectId}")
+    @GetMapping
     public ResponseEntity<List<TagRate>> getAllTagRates(@PathVariable(name = "projectId") int projectId, HttpServletRequest request) {
         int userIdExtractedFromJWT = (int) request.getAttribute("userId");
         return ResponseEntity.ok(tagRateService.getTagRatesByProjectAndOwner(projectId, userIdExtractedFromJWT));
