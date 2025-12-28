@@ -115,7 +115,7 @@ const Resources = ({api, projectId}) => {
         if (selectedTagRateIndex != -1) {
             if (confirm(`Do you want to delete tag [${tagRates[selectedTagRateIndex]?.tagName}] ?`)) {
                 try {
-                    await tagRateService.deleteTagRate(api, tagRates[selectedTagRateIndex]?.id);
+                    await tagRateService.deleteTagRate(api, projectId, tagRates[selectedTagRateIndex]?.id);
                     setTagRates(prev => prev.filter(tag => tag.id !== tagRates[selectedTagRateIndex]?.id));
                     toast.success("Delete tag rate successfully");
                 } catch (error) {}   

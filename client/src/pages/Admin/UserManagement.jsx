@@ -21,8 +21,8 @@ const UserManagement = ({api}) => {
         let data = null;
         try {
             data = await userService.getAllUsers(api, usersPageNumber);
-            if (goPrev !== !data.first) setGoPrev(!data.first);
-            if (goNext !== !data.last) setGoNext(!data.last);
+            setGoPrev(!data.first);
+            setGoNext(!data.last);
         } catch (error) {
             setUsersPageNumber(0);
         }
@@ -91,12 +91,12 @@ const UserManagement = ({api}) => {
     }
     const goToPrevPage = useCallback(() => {
         if (goPrev) {
-            setUsersPageNumber(usersPageNumber-1);
+            setUsersPageNumber(prev => prev-1);
         }
     }, [goPrev]);
     const goToNextPage = useCallback(() => {
         if (goNext) {
-            setUsersPageNumber(usersPageNumber+1);
+            setUsersPageNumber(prev => prev+1);
         }
     }, [goNext]);
     return (

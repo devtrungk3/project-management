@@ -11,20 +11,24 @@ const JoinRequests = ({api}) => {
     const [goPrev, setGoPrev] = useState(false);
     const [goNext, setGoNext] = useState(false);
     useEffect(() => {
-        loadJoinRequestTable();
-    }, [pageNumber, statisticsOption]);
-    const loadJoinRequestTable = () => {
+        loadJoinRequestTable(pageNumber);
+    }, [pageNumber]);
+    useEffect(() => {
+        setPageNumber(0);
+        loadJoinRequestTable(0);
+    }, [statisticsOption])
+    const loadJoinRequestTable = (page) => {
         (async () => {
             try {
                 let data = null;
                 if (statisticsOption) {
-                    data = await joinRequestService.getAllOutgoingJoinRequests(api, pageNumber);
+                    data = await joinRequestService.getAllOutgoingJoinRequests(api, page);
                 } else {
-                    data = await joinRequestService.getAllIncomingJoinRequests(api, pageNumber);
+                    data = await joinRequestService.getAllIncomingJoinRequests(api, page);
                 }
                 setJoinRequestData(data);
-                if (goPrev !== !data.first) setGoPrev(!data.first);
-                if (goNext !== !data.last) setGoNext(!data.last);
+                setGoPrev(!data.first);
+                setGoNext(!data.last);
             } catch(error) {
                 setPageNumber(0);
             }
@@ -32,10 +36,10 @@ const JoinRequests = ({api}) => {
     }
 
     const goToPrevPage = useCallback(() => {
-        if (goPrev) setPageNumber(pageNumber-1)
+        if (goPrev) setPageNumber(prev => prev-1)
     }, [goPrev]);
     const goToNextPage = useCallback(() => {
-        if (goNext) setPageNumber(pageNumber+1)
+        if (goNext) setPageNumber(prev => prev+1)
     }, [goNext]);
     const changeJoinRequestStatus = (joinRequestId, isAccepted) => {
         (async () => {
