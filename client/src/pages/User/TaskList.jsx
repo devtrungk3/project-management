@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core';
+import dayjs from 'dayjs';
 import {
   SortableContext,
   verticalListSortingStrategy
@@ -188,6 +189,8 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
             let latestFinish = null;
             let sumEffort = 0;
             let sumCost = 0;
+            let progress = 0;
+            let sumDuration = 0;
             const unspecifiedChildren = [];
             // find children
             let hasChild = false;
@@ -203,6 +206,9 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                         unspecifiedChildren.push(taskBelow);
                         continue;
                     }
+                    // progress
+                    progress += taskBelow.duration * taskBelow.complete;
+                    sumDuration += taskBelow.duration;
                     // start date
                     if (earlestStart == null || earlestStart > taskBelow.start) {
                         earlestStart = taskBelow.start;
@@ -231,6 +237,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                 sumCost += unspecifiedTask.cost;
             })
             if (hasChild === true) {
+                currentTask.complete = Math.round(progress/sumDuration);
                 currentTask.cost = sumCost;
                 currentTask.effort = sumEffort;
                 if (earlestStart != null) {
@@ -403,10 +410,50 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                     : "FS"
                 : null
         );
+        let taskConflict = resourceScheduleConflict(updatedTask);
+        if (taskConflict >= 0) {
+            toast.warn(`Assignee already has been assigned task [${taskConflict+1}] during this period`);
+        }
         validateDependency(tasks, updatedTask);
         refreshSummaryTasks([...tasks]);
         setIsDirty(true);
         handleCloseTaskDialog();
+    }
+    const resourceScheduleConflict = (currentTask) => {
+        for (let i=0; i<tasks.length; i++) {
+            let task = tasks[i];
+            let currentTaskStart = dayjs(currentTask.start)
+            let currentTaskFinish = dayjs(currentTask.finish)
+            let taskInListStart = dayjs(task.start)
+            let taskInListFinish = dayjs(task.finish)
+            if (currentTaskStart.isSame(taskInListStart)
+                && resourceConflict(currentTask, task)
+            ) {
+                return i;
+            }
+            else if (currentTaskStart.isBefore(taskInListStart)
+                && !currentTaskFinish.isBefore(taskInListStart)
+                && resourceConflict(currentTask, task)
+            ) {
+                return i;
+            } else if (currentTaskStart.isAfter(taskInListStart)
+                && !currentTaskStart.isAfter(taskInListFinish)
+                && resourceConflict(currentTask, task)
+            ) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    const resourceConflict = (task1, task2) => {
+        for (let i=0; i<task1.resourceAllocations.length; i++) {
+            for (let j=0; j<task2.resourceAllocations.length; j++) {
+                if (task1.resourceAllocations[i].username == task2.resourceAllocations[j].username) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     const addNewTaskInfo = (e) => {
         e.preventDefault();
@@ -429,6 +476,10 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                     : "FS"
                 : null
         );
+        let taskConflict = resourceScheduleConflict(newTask);
+        if (taskConflict >= 0) {
+            toast.warn(`Assignee already has been assigned task [${taskConflict+1}] during this period`);
+        }
         reCalculateTaskParent(tasks, newTask, selectedTaskIndex-1, selectedTaskIndex);
         validateDependency(tasks, newTask);
         const tasksAfterAdding = selectedTaskIndex > -1
