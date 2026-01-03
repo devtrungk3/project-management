@@ -6,7 +6,7 @@ export const addBusinessDays = (date, numberOfDays) => {
     let result = dayjs(date).clone();
     let added = 0;
 
-    while (added < numberOfDays) {
+    while (added < numberOfDays || result.day() == 0 || result.day() == 6) {
         if (result.day() !== 0 && result.day() !== 6) {
             added++;
         }
@@ -19,7 +19,7 @@ export const subtractBusinessDays = (date, numberOfDays) => {
     let result = dayjs(date).clone();
     let subtracted = 0;
 
-    while (subtracted < numberOfDays) {
+    while (subtracted < numberOfDays || result.day() == 0 || result.day() == 6) {
         if (result.day() !== 0 && result.day() !== 6) {
             subtracted++;
         }

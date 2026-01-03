@@ -33,7 +33,7 @@ const ProjectOverview = ({api, projectId}) => {
                         <div className='h-75'>
                             <div className='p-2'>
                                 <h6 className='opacity-50'>% COMPLETE</h6>
-                                <div className='fs-1 fw-medium'>{overviewData?.projectComplete.toFixed(1)}%</div>
+                                <div className='fs-1 fw-medium'>{Math.round(overviewData?.projectComplete)}%</div>
                             </div>
                         </div>
                     </div>

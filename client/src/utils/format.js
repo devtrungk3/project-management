@@ -8,5 +8,9 @@ export const formatDate = (isoString, tagLocale='en-US') => {
     if (!isoString) {
         return "";
     }
-    return (new Date(isoString)).toLocaleDateString(tagLocale);
+    return (new Date(isoString)).toLocaleDateString(tagLocale, {
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit'
+    });
 }
