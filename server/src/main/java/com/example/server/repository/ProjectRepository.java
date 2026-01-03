@@ -115,10 +115,10 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             """)
     ProjectOverviewReportDTO getProjectStartAndFinish(int userId, int projectId);
     @Query("""
-            SELECT SUM(t.duration * t.complete)*100/SUM(t.duration * 100)
+            SELECT SUM(t.duration * t.complete)*1.0/SUM(t.duration)
             FROM Project p
             JOIN p.tasks t
-            WHERE p.owner.id = :userId AND p.id = :projectId
+            WHERE p.owner.id = :userId AND p.id = :projectId AND t.isLeaf = true
             """)
     Double getProjectComplete(int userId, int projectId);
 }

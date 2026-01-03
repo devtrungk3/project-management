@@ -130,6 +130,8 @@ export default class Task {
         return this._start;
     }
     get start() {
+        // move to business day
+        this._start = addBusinessDays(this._start, 0);
         if (this._predecessor && this._dependencyType) {
             switch (this._dependencyType) {
                 case "SS":
@@ -146,7 +148,6 @@ export default class Task {
                     if (this._start == null || this._start <= this._predecessor.finish) {
                         this._start = addBusinessDays(this._predecessor.finish, 1); 
                     }
-                    if (this._id < 0) console.log(this._start);
                     break;
                 case "FF":
                     if (this._start == null || this.finish < this._predecessor.finish) {
