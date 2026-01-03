@@ -129,8 +129,6 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                         newTasks.push(task);
                     });
                     refreshSummaryTasks([...newTasks]);
-                } else {
-                    setTasks([]);
                 }
             } catch(error) {}
         })();
@@ -182,6 +180,12 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
         newTasks.forEach(t => {
             t.start
         })
+        const priorityDict = {
+            "LOW": 1,
+            "MEDIUM": 2,
+            "HIGH": 3
+        }
+        const sumDuration = new Array(newTasks.length).fill(0);
         // bottom to top
         for (let i=newTasks.length-2; i>=0; i--) {
             const currentTask = newTasks[i];
@@ -190,7 +194,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
             let sumEffort = 0;
             let sumCost = 0;
             let progress = 0;
-            let sumDuration = 0;
+            let highestPriority = "LOW";
             const unspecifiedChildren = [];
             // find children
             let hasChild = false;
@@ -202,13 +206,22 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                 // this is a child
                 if (taskBelow.level === currentTask.level+1) {
                     hasChild = true;
+                    sumDuration[i] += sumDuration[y];
+                    // ignore milestone
+                    if (taskBelow.duration == 0) {
+                        continue;
+                    }
+                    // unspecified children
                     if (taskBelow.start == null) {
                         unspecifiedChildren.push(taskBelow);
                         continue;
                     }
+                    // highest priority
+                    if (priorityDict[taskBelow.priority] > priorityDict[highestPriority]) {
+                        highestPriority = taskBelow.priority;
+                    }
                     // progress
-                    progress += taskBelow.duration * taskBelow.complete;
-                    sumDuration += taskBelow.duration;
+                    progress += sumDuration[y] * taskBelow.complete;
                     // start date
                     if (earlestStart == null || earlestStart > taskBelow.start) {
                         earlestStart = taskBelow.start;
@@ -225,7 +238,9 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
             }
             unspecifiedChildren.forEach(unspecifiedTask => {
                 // reassigned child based on summary task
-                unspecifiedTask.start = earlestStart;
+                if (unspecifiedTask.duration > 0) {
+                    unspecifiedTask.start = earlestStart;
+                }
                 unspecifiedTask.cost = calculateTaskCost(unspecifiedTask.resourceAllocations, unspecifiedTask.effort, tagRates);
                 // finish date for summary task
                 if (latestFinish == null || latestFinish < unspecifiedTask.finish) {
@@ -237,13 +252,16 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                 sumCost += unspecifiedTask.cost;
             })
             if (hasChild === true) {
-                currentTask.complete = Math.round(progress/sumDuration);
+                currentTask.priority = highestPriority;
+                currentTask.complete = Math.round(progress/sumDuration[i]);
                 currentTask.cost = sumCost;
                 currentTask.effort = sumEffort;
                 if (earlestStart != null) {
                     currentTask.duration = businessDuration(earlestStart, latestFinish);
                 }
                 currentTask.start = earlestStart;
+            } else {
+                sumDuration[i] = currentTask.duration;
             }
         }
         setTasks(newTasks);
@@ -410,7 +428,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                     : "FS"
                 : null
         );
-        let taskConflict = resourceScheduleConflict(updatedTask);
+        let taskConflict = resourceScheduleConflict(updatedTask, tasks.findIndex(t => t.id == updatedTask.id));
         if (taskConflict >= 0) {
             toast.warn(`Assignee already has been assigned task [${taskConflict+1}] during this period`);
         }
@@ -419,9 +437,12 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
         setIsDirty(true);
         handleCloseTaskDialog();
     }
-    const resourceScheduleConflict = (currentTask) => {
+    const resourceScheduleConflict = (currentTask, updatedIndex=null) => {
         for (let i=0; i<tasks.length; i++) {
             let task = tasks[i];
+            if (updatedIndex != null && i == updatedIndex) {
+                continue;
+            }
             let currentTaskStart = dayjs(currentTask.start)
             let currentTaskFinish = dayjs(currentTask.finish)
             let taskInListStart = dayjs(task.start)
@@ -616,7 +637,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
         setPredictionWaiting(false);
     }    
     return (
-        <>
+        <div className="d-flex flex-column" style={{height: '78vh'}}>
             <div>
                 <div className="d-flex flex-wrap justify-content-between gap-3">
                     {isMyProject === true 
@@ -639,19 +660,19 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                         <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-info text-white`} onClick={() => handleOpenTaskDialog(tasks.length+1, true)}>
                             <div className="d-flex align-items-center gap-2">
                                 <FaPlus />
-                                <span className="fw-semibold">New task</span>
+                                <span className="fw-semibold user-select-none">New task</span>
                             </div>
                         </div>
                         <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-danger text-white`} onClick={deleteTaskInfo}>
                             <div className="d-flex align-items-center gap-2">
                                 <FaTrash />
-                                <span className="fw-semibold">Delete task</span>
+                                <span className="fw-semibold user-select-none">Delete task</span>
                             </div>
                         </div>
                         <div className={`${style['toolbar-item']} d-inline-flex align-items-center gap-4 px-3 py-2 border rounded-3 shadow-sm bg-secondary text-white`} onClick={predictDelayTask}>
                             <div className="d-flex align-items-center gap-2">
                                 {predictionWaiting === true ? <span className='spinner-border spinner-border-sm'/> : <FaBrain />}
-                                <span className="fw-semibold">Predict delay</span>
+                                <span className="fw-semibold user-select-none">Predict delay</span>
                             </div>
                         </div>
                     </div>
@@ -665,7 +686,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
 
                 </div>
             </div>
-            <Row className="mt-4" style={{ height: '500px', overflowY: 'scroll'}}>
+            <Row className="mt-4 flex-fill overflow-auto">
                 <Col md={7} className="overflow-auto">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
@@ -673,7 +694,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                             <div className="d-flex">
                                 <div className="dropdown ms-3">
                                     <a
-                                        className="nav-link dropdown-toggle"
+                                        className="nav-link dropdown-toggle user-select-none"
                                         href="#"
                                         id="hideColumnDropdown"
                                         role="button"
@@ -772,7 +793,7 @@ const TaskList = ({api, projectId, isMyProject, projectInfo}) => {
                 resources={resources}
                 tagRates={tagRates}
                 onSubmit={isAddDialog === true ? addNewTaskInfo : isAddDialog === false ? changeTaskInfo : (e)=>{e.preventDefault();}} />
-        </>
+        </div>
     )
 }
 export default TaskList;
