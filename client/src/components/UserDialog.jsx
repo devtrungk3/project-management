@@ -22,7 +22,7 @@ const UserDialog = ({ openUserDialog, handleCloseUserDialog, onSubmit, userInfo,
                         if (userInfo.password != confirmPassword) {
                             setError("Password and confirm password do not match")
                         } else {
-                            setError('');
+                            setError(null);
                             setConfirmPassword('');
                             onSubmit();
                         }

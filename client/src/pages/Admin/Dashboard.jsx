@@ -182,7 +182,7 @@ const Dashboard = ({api}) => {
             <Row>
                 <Col lg={8}>
                     <div className="w-100 h-100 text-center shadow shadow-1 px-5 py-3 rounded-3 border border-1">
-                        <h5 className="text-primary">NEW PROJECT TREND IN 2025</h5>
+                        <h5 className="text-primary">NEW PROJECT TREND IN {new Date().getFullYear()}</h5>
                         <Line data={chartData} options={lineChartOptions} />
                     </div>
                 </Col>

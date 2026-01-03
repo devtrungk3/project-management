@@ -52,7 +52,7 @@ const TagRateDialog = ({ openTagRateDialog, handleCloseTagRateDialog, onSubmit, 
                         label="Rate"
                         type="number"
                         inputProps={{ min: 0, step: 0.01 }}
-                        value={tempTagRate?.rate || ''}
+                        value={tempTagRate?.rate || 0}
                         onChange={(e) => setTempTagRate({...tempTagRate, rate: Number(e.target.value)})}
                     />
                 </DialogContent>

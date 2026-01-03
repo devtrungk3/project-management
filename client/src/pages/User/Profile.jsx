@@ -63,7 +63,7 @@ const Profile = ({api}) => {
                     <Form.Group className="form-outline mb-4">
                         <Form.Label>Confirm new password</Form.Label>
                         <Form.Control 
-                        value={passwordForm.cofirmPassword} 
+                        value={passwordForm.confirmPassword} 
                         onChange={handleChange} 
                         type="password" name="confirmPassword"
                         className="form-control-lg" 
@@ -71,7 +71,7 @@ const Profile = ({api}) => {
                     </Form.Group>
                     <div className="pt-1 mb-4">
                         <Button className="btn btn-secondary" type="submit">
-                        {waiting ? <span><span className='spinner-border spinner-border-sm'/> Waiting</span> : 'Login'}
+                        {waiting ? <span><span className='spinner-border spinner-border-sm'/> Waiting</span> : 'Change password'}
                         </Button>
                     </div>
                 </Form>

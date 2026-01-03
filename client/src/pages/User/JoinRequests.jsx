@@ -45,7 +45,7 @@ const JoinRequests = ({api}) => {
         (async () => {
             try {
                 await joinRequestService.updateJoinRequest(api, joinRequestId, isAccepted);
-                loadJoinRequestTable();
+                loadJoinRequestTable(pageNumber);
             } catch(error) {}
         })();
     }

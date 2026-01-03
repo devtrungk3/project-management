@@ -80,7 +80,7 @@ const CostOverview = ({api, projectId, projectInfo}) => {
                             <Bar
                                 dataKey="cost" 
                                 fill="#768accff"
-                                name={projectInfo?.current.currency.name}
+                                name={projectInfo?.current.currency?.name}
                                 maxBarSize={40}
                             >
                                 <LabelList 
