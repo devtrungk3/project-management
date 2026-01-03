@@ -15,11 +15,11 @@ public interface ExtraCostRepository extends JpaRepository<ExtraCost, Integer> {
             FROM ExtraCost ec
             WHERE ec.project.id = :projectId AND ec.project.owner.id = :ownerId
             """)
-    double findSumOfCostByProjectIdAndOwner(int projectId, int ownerId);
+    Double findSumOfCostByProjectIdAndOwner(int projectId, int ownerId);
     @Query("""
             SELECT ROUND(SUM(ec.cost), 2)
             FROM ExtraCost ec
             WHERE ec.project.id = :projectId AND ec.project.owner.id = :ownerId AND ec.status = :status
             """)
-    double findSumOfCostByProjectIdAndOwnerAndStatus(int projectId, int ownerId, ExtraCostStatus status);
+    Double findSumOfCostByProjectIdAndOwnerAndStatus(int projectId, int ownerId, ExtraCostStatus status);
 }

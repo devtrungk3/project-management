@@ -19,6 +19,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,8 +54,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public CostOverviewReportDTO getCostOverviewReport(int userId, int projectId) {
         CostOverviewReportDTO costOverview = taskRepository.getCostSummary(projectId, userId);
-        double extraCost = extraCostRepository.findSumOfCostByProjectIdAndOwner(projectId, userId);
-        double unpaidExtraCost = extraCostRepository.findSumOfCostByProjectIdAndOwnerAndStatus(projectId, userId, ExtraCostStatus.UNPAID);
+        double extraCost = Optional.ofNullable(extraCostRepository.findSumOfCostByProjectIdAndOwner(projectId, userId)).orElse(0.0);
+        double unpaidExtraCost = Optional.ofNullable(extraCostRepository.findSumOfCostByProjectIdAndOwnerAndStatus(projectId, userId, ExtraCostStatus.UNPAID)).orElse(0.0);
         // add extra cost to cost overview
         costOverview.setPlannedCost(costOverview.getPlannedCost()+extraCost);
         costOverview.setActualCost(costOverview.getActualCost()+extraCost);
