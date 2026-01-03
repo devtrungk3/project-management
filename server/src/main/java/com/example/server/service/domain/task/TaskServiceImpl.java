@@ -58,27 +58,24 @@ public class TaskServiceImpl implements TaskService {
         Map<Integer, List<ResourceAllocationDTO>> allocationMap = resourceAllocations.stream()
                 .collect(Collectors.groupingBy(ResourceAllocationDTO::getTaskId));
         return tasks.stream()
-                .map(task -> {
-                    TaskDTO taskDTO = new TaskDTO(
-                        task.getId(),
-                        task.getName(),
-                        task.getDescription(),
-                        forOwner ? task.getEffort() : 0,
-                        task.getDuration(),
-                        forOwner ? task.getActualCost() : 0,
-                        task.getStart(),
-                        task.getFinish(),
-                        forOwner ? task.getBaseStart() : null,
-                        forOwner ? task.getBaseFinish() : null,
-                        task.getPriority(),
-                        task.getParentId(),
-                        forOwner ? task.getPredecessor() : null,
-                        forOwner ? task.getDependencyType() : null,
-                        task.getComplete(),
-                        allocationMap.getOrDefault(task.getId(), List.of())
-                    );
-                    return taskDTO;
-                }).toList();
+                .map(task -> new TaskDTO(
+                    task.getId(),
+                    task.getName(),
+                    task.getDescription(),
+                    forOwner ? task.getEffort() : 0,
+                    task.getDuration(),
+                    forOwner ? task.getActualCost() : 0,
+                    task.getStart(),
+                    task.getFinish(),
+                    forOwner ? task.getBaseStart() : null,
+                    forOwner ? task.getBaseFinish() : null,
+                    task.getPriority(),
+                    task.getParentId(),
+                    forOwner ? task.getPredecessor() : null,
+                    forOwner ? task.getDependencyType() : null,
+                    task.getComplete(),
+                    allocationMap.getOrDefault(task.getId(), List.of())
+                )).toList();
     }
     private LocalDate calculateTaskCompleteDate(int complete, LocalDate oldCompleteDate) {
         if (complete == 100) {
@@ -96,11 +93,20 @@ public class TaskServiceImpl implements TaskService {
         List<Task> availableTasksInDB = taskRepository.findByProject_Id(project.getId());
         Map<Integer, Task> preservedTasksChecker = availableTasksInDB.stream()
                 .collect(Collectors.toMap(Task::getId, task -> task));
-
+        // save parentId and predecessor because undefine task ID (new task)
+        Map<Integer, Integer> parentIds = new HashMap<>();
+        Map<Integer, Integer> predecessors = new HashMap<>();
         // map task dto to entity list
         List<Task> savedTasks = new ArrayList<>();
         for (int i=0; i<newTaskDTOs.size(); i++) {
             TaskDTO taskDTO = newTaskDTOs.get(i);
+            // save undefine parentID and predecessor
+            if (taskDTO.getParentId() != null && taskDTO.getParentId() < 0) {
+                parentIds.put(taskDTO.getArrangement(), -taskDTO.getParentId());
+            }
+            if (taskDTO.getPredecessor() != null && taskDTO.getPredecessor() < 0) {
+                predecessors.put(taskDTO.getArrangement(), -taskDTO.getPredecessor());
+            }
             if (i > 0 && i < newTaskDTOs.size()-1) {
                 // check task leaf
                 if (taskDTO.getParentId() != null && taskDTO.getParentId() == newTaskDTOs.get(i-1).getId()) {
@@ -172,7 +178,18 @@ public class TaskServiceImpl implements TaskService {
         }
         // insert new tasks and update old tasks
         savedTasks = taskRepository.saveAll(savedTasks);
-
+        // update parentID and predecessor
+        for (Map.Entry<Integer, Integer> entry : parentIds.entrySet()) {
+            Integer arrangement = entry.getKey();
+            Integer parentArrangement = entry.getValue();
+            savedTasks.get(arrangement-1).setParentId(savedTasks.get(parentArrangement-1).getId());
+        }
+        for (Map.Entry<Integer, Integer> entry : predecessors.entrySet()) {
+            Integer arrangement = entry.getKey();
+            Integer predecessorsArrangement = entry.getValue();
+            savedTasks.get(arrangement-1).setPredecessor(savedTasks.get(predecessorsArrangement-1).getId());
+        }
+        savedTasks = taskRepository.saveAll(savedTasks);
         List<ResourceAllocationPK> preservedResourceAllocationIds = new ArrayList<>();
         // map resource allocation dto to entity list
         List<ResourceAllocation> savedResourceAllocations = new ArrayList<>();

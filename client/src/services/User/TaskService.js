@@ -20,6 +20,14 @@ const syncTasks = async (api, projectId, tasks) => {
     const copiedTasks = JSON.parse(JSON.stringify(tasks));
     copiedTasks.forEach((task, index) => {
         task.arrangement = index+1;
+        if (task.parentId < 0) {
+            task.parentId = -(tasks.findIndex(t => t.id == task.parentId)+1)
+        }
+        if (task.predecessor < 0) {
+            task.predecessor = -(tasks.findIndex(t => t.id == task.predecessor)+1)
+        }
+    });
+    copiedTasks.forEach((task, index) => {
         if (task.id < 1) {
             task.id = null;
         }
