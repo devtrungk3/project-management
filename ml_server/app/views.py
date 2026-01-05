@@ -99,6 +99,15 @@ def logout(request):
 
 @csrf_exempt
 def predict_api(request):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return JsonResponse({'error': 'Missing token'}, status=401)
+    
+    token = auth_header.split(' ')[1]
+    is_valid, result = helpers.validate_jwt(token)
+    
+    if not is_valid:
+        return JsonResponse({'error': result}, status=401)
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
 

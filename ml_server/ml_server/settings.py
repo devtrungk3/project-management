@@ -28,6 +28,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# JWT
+JWT_SECRET_KEY = config('JWT_SECRET_KEY')
+JWT_ALGORITHM = config('JWT_ALGORITHM')
+
 # Application definition
 
 INSTALLED_APPS = [

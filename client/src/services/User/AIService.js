@@ -54,7 +54,11 @@ const predictDelayTask = async (api, taskInfo, projectId) => {
         payload['progress_gap'] = taskInfo.complete - ((payload['day_since_start']+1)*(100/taskInfo.duration));
     }
     try {
-        const response = await ai_api.post(`/delay-predict`, payload);
+        const response = await ai_api.post(`/delay-predict`, payload, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+            }
+        });
         return response.data;
     } catch (error) {
         console.log('Failed to predict task delay risk', error);
